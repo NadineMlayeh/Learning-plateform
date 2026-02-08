@@ -1,134 +1,106 @@
 🚀 Innova Learn Platform
 
-A full-stack educational platform for kids to learn robotics, soft skills, and coding interactively.
+A full-stack educational platform for teaching kids robotics, soft skills, and development through interactive courses and bootcamps.
 
-📚 Table of Contents
+📚 Overview
 
-Overview
-
-Features
-
-Users & Roles
-
-Tech Stack
-
-Project Structure
-
-Getting Started
-
-Future Improvements
-
-🔍 Overview
-
-Innova Learn Platform is a modern, interactive learning platform where students can enroll in courses, complete lessons, and earn badges.
-Formateurs create content and track progress, while admins manage the entire system.
-
-It’s perfect for structured learning and gamified progression.
+Innova Learn Platform provides an interactive and organized learning experience for children of different ages.
+Formateurs (teachers) can create and manage courses, while students learn, complete exercises, and earn badges and certificates.
+Admins oversee the system, validate payments, and monitor progress.
 
 ✨ Features
 🧑‍🎓 Student
 
-Enroll in formations & courses
+Enroll in formations and courses
 
-Access lessons (videos & PDFs)
+Access lesson content (videos, PDFs)
 
-Complete QCM exercises ✅
+Complete QCM exercises and unlock roadmap levels
 
-Unlock roadmap levels & earn badges 🏅
+Earn badges 🏅 and certificates 🎓
 
-Receive certificates 🎓
+👩‍🏫 Formateur
 
-👨‍🏫 Formateur
+Create & manage formations and courses
 
-Create & manage formations/courses
+Upload lesson content (video/PDF)
 
-Upload lesson content (video/PDF) 📄
-
-Add QCM exercises for courses
+Add QCM exercises
 
 Track student progress 📊
 
-🛡️ Admin
+🛠️ Admin
 
 Manage users (students & formateurs)
 
 Validate payments 💰
 
-View platform statistics & dashboards 📈
+View platform statistics 📈
 
-🧩 Users & Roles
+👥 Users & Roles
 Role	Permissions
-🛡️ Admin	Full access to manage users, validate payments, monitor stats
-👨‍🏫 Formateur	Create/manage courses, upload content, add exercises
-🧑‍🎓 Student	Enroll in courses, complete lessons/exercises, earn badges & certificates
-🛠️ Tech Stack
+Admin	Full access to manage users, validate payments, monitor stats
+Formateur	Create/manage courses, upload content, add exercises
+Student	Enroll in courses, complete lessons & exercises, earn badges & certificates
+🖥️ Tech Stack
 
 Frontend: React (Vite) ⚛️
 
-Backend: NestJS 🔥
+Backend: NestJS 🏗️
 
 Database: PostgreSQL / MySQL 🗄️
 
-Authentication: JWT 🔐
+Authentication: JWT 🔒
 
 Deployment: Vercel (frontend) + Render (backend) 🌐
 
+CI/CD: GitHub Actions 🤖
+
 Optional: Docker 🐳
 
-CI/CD: GitHub Actions ⚙️
-
-🗂️ Project Structure
+📂 Project Structure
 innova/
-├─ frontend/          # React application
-├─ innovabackend/     # NestJS backend with API endpoints
-├─ prisma/            # Database schema & migrations
-├─ scripts/           # Utility scripts
+├─ frontend/           # React application
+├─ innovabackend/      # NestJS backend with API endpoints
+├─ prisma/             # Database schema & migrations
+├─ scripts/            # Utility scripts
 └─ README.md
 
 
-Entities & Flow:
+Roles: Admin, Formateur, Student
 
-Users → Students, Formateurs, Admin
+Entities: Users, Formations, Courses, Lessons, QCM Exercises, Payments, Badges, Certificates
 
-Formations → Courses → Lessons → QCM → Badges & Certificates
+Flow: Students enroll → complete courses → progress tracked → badges/certificates awarded
 
-Students enroll → complete lessons → progress tracked → achievements awarded 🎖️
-
-🚀 Getting Started
-
-Clone the repo
-
+⚡ Getting Started
+1️⃣ Clone the repo
 git clone https://github.com/NadineMlayeh/Learning-plateform.git
 cd Learning-plateform
 
-
-Backend setup
-
+2️⃣ Backend setup
 cd innovabackend
 npm install
 # configure .env for DB connection
 npm run start:dev
 
-
-Frontend setup
-
+3️⃣ Frontend setup
 cd frontend
 npm install
 npm run dev
 
-
-Access platform
+4️⃣ Access platform
 
 Frontend: http://localhost:5173
 
-Backend: http://localhost:3000
+Backend API: http://localhost:3000
 
-🌟 Future Improvements
+🚀 Future Improvements
 
 Integrate online payment gateway for automatic validation 💳
 
-Add advanced dashboards for admins & formateurs 📊
+Add analytics dashboards for admin & formateurs 📊
 
-Attendance tracking & notifications 🔔
+Implement attendance tracking & notifications 🔔
 
-More gamification elements for students 🎮
+Add more gamification elements for students 🎮
