@@ -27,4 +27,34 @@ model User {
   role            Role             @default(STUDENT)
   formateurStatus FormateurStatus?
   createdAt       DateTime         @default(now())
+  formations      Formation[]
+}
+
+enum FormationType {
+  ONLINE
+  PRESENTIEL
+}
+
+model Formation {
+  id          Int           @id @default(autoincrement())
+  title       String
+  description String
+  price       Float
+  published   Boolean       @default(false)
+  type        FormationType
+  location    String?
+  startDate   DateTime?
+  endDate     DateTime?
+  formateurId Int
+  formateur   User          @relation(fields: [formateurId], references: [id])
+  courses     Course[]  
+  createdAt   DateTime      @default(now())
+}
+
+model Course {
+  id           Int       @id @default(autoincrement())
+  title        String
+  published    Boolean   @default(false)
+  formationId  Int
+  formation    Formation @relation(fields: [formationId], references: [id])
 }
