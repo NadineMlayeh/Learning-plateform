@@ -28,6 +28,7 @@ model User {
   formateurStatus FormateurStatus?
   createdAt       DateTime         @default(now())
   formations      Formation[]
+  enrollments     Enrollment[] 
 }
 
 enum FormationType {
@@ -48,6 +49,7 @@ model Formation {
   formateurId Int
   formateur   User          @relation(fields: [formateurId], references: [id])
   courses     Course[]  
+  enrollments     Enrollment[] 
   createdAt   DateTime      @default(now())
 }
 
@@ -57,4 +59,46 @@ model Course {
   published    Boolean   @default(false)
   formationId  Int
   formation    Formation @relation(fields: [formationId], references: [id])
+  lessons Lesson[]
+  quizzes      Quiz[]
+}
+model Lesson {
+  id        Int      @id @default(autoincrement())
+  title     String
+  pdfUrl    String
+  courseId  Int
+  course    Course   @relation(fields: [courseId], references: [id])
+}
+model Quiz {
+  id        Int       @id @default(autoincrement())
+  title     String
+  courseId  Int
+  course    Course    @relation(fields: [courseId], references: [id])
+  questions Question[]
+}
+
+model Question {
+  id      Int      @id @default(autoincrement())
+  text    String
+  quizId  Int
+  quiz    Quiz     @relation(fields: [quizId], references: [id])
+  choices Choice[]
+}
+
+model Choice {
+  id         Int      @id @default(autoincrement())
+  text       String
+  isCorrect  Boolean
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id])
+}
+model Enrollment {
+  id           Int       @id @default(autoincrement())
+  studentId    Int
+  student      User      @relation(fields: [studentId], references: [id])
+  formationId  Int
+  formation    Formation @relation(fields: [formationId], references: [id])
+  createdAt    DateTime  @default(now())
+
+  @@unique([studentId, formationId]) // prevent double enrollment
 }

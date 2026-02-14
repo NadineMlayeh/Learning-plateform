@@ -14,13 +14,27 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (user && await bcrypt.compare(password, user.password)) {
-      return user;
-    }
-    return null;
+async validateUser(email: string, password: string) {
+  const user = await this.prisma.user.findUnique({ where: { email } });
+
+  if (!user) return null;
+
+  const passwordValid = await bcrypt.compare(password, user.password);
+  if (!passwordValid) return null;
+
+  // 🔒 BLOCK unapproved formateurs
+  if (
+    user.role === Role.FORMATEUR &&
+    user.formateurStatus !== 'APPROVED'
+  ) {
+    throw new UnauthorizedException(
+      'Your formateur account is not approved by admin'
+    );
   }
+
+  return user;
+}
+
 
   async login(user: any) {
     const payload = { sub: user.id, role: user.role };

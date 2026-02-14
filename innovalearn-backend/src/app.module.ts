@@ -8,6 +8,10 @@ import { AuthModule } from './auth/auth.module';
 import { TestController } from './test/test.controller';
 import { FormationModule } from './formation/formation.module';
 import { AdminModule } from './admin/admin.module';
+import { CourseModule } from './course/course.module';
+import { LessonModule } from './lesson/lesson.module';
+import { QuizModule } from './quiz/quiz.module';
+import { EnrollmentModule } from './enrollment/enrollment.module';
 
 @Module({
   imports: [
@@ -19,6 +23,10 @@ import { AdminModule } from './admin/admin.module';
     AuthModule,
     FormationModule,
     AdminModule,
+    CourseModule,
+    LessonModule,
+    QuizModule,
+    EnrollmentModule,
   ],
   controllers: [TestController],
   providers: [AppService],

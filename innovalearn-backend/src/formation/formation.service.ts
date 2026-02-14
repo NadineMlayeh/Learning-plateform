@@ -11,7 +11,12 @@ export class FormationService {
   constructor(private prisma: PrismaService) {}
 
   // 1️⃣ Create formation (DRAFT)
-  create(dto: CreateFormationDto, formateurId: number) {
+  async create(dto: CreateFormationDto, formateurId: number) {
+      const formateur = await this.prisma.user.findUnique({ where: { id: formateurId } });
+
+  if (!formateur || formateur.role !== 'FORMATEUR' || formateur.formateurStatus !== 'APPROVED') {
+    throw new ForbiddenException("You are not an approved formateur");
+  }
     return this.prisma.formation.create({
       data: {
         title: dto.title,
