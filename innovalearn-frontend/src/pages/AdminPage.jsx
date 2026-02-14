@@ -2,35 +2,37 @@ import { useEffect, useState } from 'react';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
 
-export default function AdminPage() {
+export default function AdminPage({ pushToast }) {
   const user = getCurrentUser();
   const [formateurs, setFormateurs] = useState([]);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [approvingId, setApprovingId] = useState(null);
 
   async function loadFormateurs() {
-    setError('');
+    setIsLoading(true);
     try {
       const users = await apiRequest('/users', { token: user.token });
-      const list = users.filter((u) => u.role === 'FORMATEUR');
-      setFormateurs(list);
+      setFormateurs(users.filter((entry) => entry.role === 'FORMATEUR'));
     } catch (err) {
-      setError(err.message);
+      pushToast(err.message, 'error');
+    } finally {
+      setIsLoading(false);
     }
   }
 
   async function approve(id) {
-    setMessage('');
-    setError('');
+    setApprovingId(id);
     try {
       await apiRequest(`/admin/formateur/${id}/approve`, {
         method: 'PATCH',
         token: user.token,
       });
-      setMessage(`Formateur #${id} approved.`);
+      pushToast(`Formateur #${id} approved.`, 'success');
       await loadFormateurs();
     } catch (err) {
-      setError(err.message);
+      pushToast(err.message, 'error');
+    } finally {
+      setApprovingId(null);
     }
   }
 
@@ -40,10 +42,10 @@ export default function AdminPage() {
 
   return (
     <section className="card">
-      <h1>Admin - Formateur Approvals</h1>
-      <button onClick={loadFormateurs}>Refresh list</button>
-      {message && <p className="ok">{message}</p>}
-      {error && <p className="error">{error}</p>}
+      <h1>Formateur Approvals</h1>
+      <button type="button" onClick={loadFormateurs} disabled={isLoading}>
+        {isLoading ? 'Refreshing...' : 'Refresh List'}
+      </button>
 
       <div className="table-wrap">
         <table>
@@ -57,18 +59,19 @@ export default function AdminPage() {
             </tr>
           </thead>
           <tbody>
-            {formateurs.map((f) => (
-              <tr key={f.id}>
-                <td>{f.id}</td>
-                <td>{f.name}</td>
-                <td>{f.email}</td>
-                <td>{f.formateurStatus || '-'}</td>
+            {formateurs.map((entry) => (
+              <tr key={entry.id}>
+                <td>{entry.id}</td>
+                <td>{entry.name}</td>
+                <td>{entry.email}</td>
+                <td>{entry.formateurStatus || '-'}</td>
                 <td>
                   <button
-                    disabled={f.formateurStatus === 'APPROVED'}
-                    onClick={() => approve(f.id)}
+                    type="button"
+                    disabled={entry.formateurStatus === 'APPROVED' || approvingId === entry.id}
+                    onClick={() => approve(entry.id)}
                   >
-                    Approve
+                    {approvingId === entry.id ? 'Approving...' : 'Approve'}
                   </button>
                 </td>
               </tr>

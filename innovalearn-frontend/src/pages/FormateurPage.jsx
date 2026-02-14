@@ -171,7 +171,7 @@ export default function FormateurPage() {
     <section className="stack">
       <div className="card">
         <h1>Formateur Workspace</h1>
-        <p className="hint">Flow: create formation -> create course -> add lesson + 3 quizzes -> publish course -> publish formation.</p>
+        <p className="hint">Flow: create formation -&gt; create course -&gt; add lesson + 3 quizzes -&gt; publish course -&gt; publish formation.</p>
       </div>
 
       <form className="card grid" onSubmit={createFormation}>
@@ -216,7 +216,7 @@ export default function FormateurPage() {
         <input placeholder="Quiz ID" value={quizIdForQuestion} onChange={(e) => setQuizIdForQuestion(e.target.value)} required />
         <input placeholder="Question text" value={questionText} onChange={(e) => setQuestionText(e.target.value)} required />
         <textarea value={choicesText} onChange={(e) => setChoicesText(e.target.value)} rows={4} />
-        <p className="hint">Choices format: one line per choice -> <code>Choice text|true/false</code></p>
+        <p className="hint">Choices format: one line per choice -&gt; <code>Choice text|true/false</code></p>
         <button type="submit">Add question</button>
       </form>
 

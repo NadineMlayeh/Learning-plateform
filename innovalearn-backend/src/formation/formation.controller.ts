@@ -19,7 +19,6 @@ import { Role } from '@prisma/client';
 export class FormationController {
   constructor(private formationService: FormationService) {}
 
-  // FORMATEUR ONLY
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.FORMATEUR)
   @Post()
@@ -27,14 +26,31 @@ export class FormationController {
     return this.formationService.create(dto, req.user.userId);
   }
 
-  // STUDENTS (published only)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.FORMATEUR)
+  @Get('manage')
+  getManageFormations(@Req() req) {
+    return this.formationService.findManageFormations(
+      req.user.userId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.FORMATEUR)
+  @Get(':id/manage')
+  getManageFormationById(@Param('id') id: string, @Req() req) {
+    return this.formationService.findManageFormationById(
+      Number(id),
+      req.user.userId,
+    );
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get()
   getFormations() {
     return this.formationService.findAll();
   }
 
-  // FORMATEUR publishes formation
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.FORMATEUR)
   @Patch(':id/publish')

@@ -2,21 +2,31 @@ import {
   Injectable,
   ForbiddenException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFormationDto } from './dto/create-formation.dto';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class FormationService {
   constructor(private prisma: PrismaService) {}
 
-  // 1️⃣ Create formation (DRAFT)
   async create(dto: CreateFormationDto, formateurId: number) {
-      const formateur = await this.prisma.user.findUnique({ where: { id: formateurId } });
+    const formateur = await this.prisma.user.findUnique({
+      where: { id: formateurId },
+    });
 
-  if (!formateur || formateur.role !== 'FORMATEUR' || formateur.formateurStatus !== 'APPROVED') {
-    throw new ForbiddenException("You are not an approved formateur");
-  }
+    if (
+      !formateur ||
+      formateur.role !== Role.FORMATEUR ||
+      formateur.formateurStatus !== 'APPROVED'
+    ) {
+      throw new ForbiddenException(
+        'You are not an approved formateur',
+      );
+    }
+
     return this.prisma.formation.create({
       data: {
         title: dto.title,
@@ -27,12 +37,11 @@ export class FormationService {
         startDate: dto.startDate ? new Date(dto.startDate) : undefined,
         endDate: dto.endDate ? new Date(dto.endDate) : undefined,
         formateurId,
-        published: false, // explicit & clear
+        published: false,
       },
     });
   }
 
-  // 2️⃣ Students see ONLY published formations
   findAll() {
     return this.prisma.formation.findMany({
       where: { published: true },
@@ -44,22 +53,88 @@ export class FormationService {
     });
   }
 
-  // 3️⃣ Explicit publish formation (IMPORTANT RULE)
+  async findManageFormations(formateurId: number) {
+    return this.prisma.formation.findMany({
+      where: { formateurId },
+      include: {
+        courses: {
+          include: {
+            lessons: true,
+            quizzes: {
+              include: {
+                questions: {
+                  include: {
+                    choices: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findManageFormationById(
+    formationId: number,
+    formateurId: number,
+  ) {
+    const formation = await this.prisma.formation.findFirst({
+      where: { id: formationId, formateurId },
+      include: {
+        courses: {
+          include: {
+            lessons: true,
+            quizzes: {
+              include: {
+                questions: {
+                  include: {
+                    choices: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!formation) {
+      throw new NotFoundException(
+        'Formation not found or not accessible',
+      );
+    }
+
+    return formation;
+  }
+
   async publishFormation(formationId: number, formateurId: number) {
     const formation = await this.prisma.formation.findUnique({
       where: { id: formationId },
       include: { courses: true },
     });
 
-    if (!formation || formation.formateurId !== formateurId) {
+    if (!formation) {
+      throw new NotFoundException('Formation not found');
+    }
+
+    if (formation.formateurId !== formateurId) {
       throw new ForbiddenException(
         'You cannot publish this formation',
       );
     }
 
+    if (formation.type === 'PRESENTIEL') {
+      return this.prisma.formation.update({
+        where: { id: formationId },
+        data: { published: true },
+      });
+    }
+
     if (!formation.courses || formation.courses.length === 0) {
       throw new BadRequestException(
-        'Formation must contain at least one course',
+        'Online formation must contain at least one course',
       );
     }
 

@@ -18,7 +18,6 @@ import { Role } from '@prisma/client';
 export class CourseController {
   constructor(private courseService: CourseService) {}
 
-  // Create course inside a formation
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.FORMATEUR)
   @Post('formations/:formationId/courses')
@@ -34,7 +33,6 @@ export class CourseController {
     );
   }
 
-  // Publish course
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.FORMATEUR)
   @Patch('courses/:id/publish')
