@@ -153,4 +153,42 @@ export class FormationService {
       data: { published: true },
     });
   }
+async findFormationDetails(formationId: number, studentId: number) {
+  // 1️⃣ Check enrollment exists
+  const enrollment = await this.prisma.enrollment.findUnique({
+    where: { studentId_formationId: { studentId, formationId } },
+  });
+
+  if (!enrollment) {
+    throw new ForbiddenException(
+      'You are not enrolled in this formation'
+    );
+  }
+
+  // 2️⃣ Check enrollment is approved
+  if (enrollment.status !== 'APPROVED') {
+    throw new ForbiddenException(
+      'Your enrollment is not approved yet'
+    );
+  }
+
+  // 3️⃣ Return formation with courses, lessons, quizzes
+  return this.prisma.formation.findUnique({
+    where: { id: formationId },
+    include: {
+      courses: {
+        where: { published: true },
+        include: {
+          lessons: true,
+          quizzes: {
+            include: { questions: { include: { choices: true } } },
+          },
+        },
+      },
+    },
+  });
+}
+
+
+
 }

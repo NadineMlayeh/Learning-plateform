@@ -14,6 +14,7 @@ import AdminAddCoursePage from './pages/AdminAddCoursePage';
 import AdminAddLessonPage from './pages/AdminAddLessonPage';
 import AdminAddQuizPage from './pages/AdminAddQuizPage';
 import StudentPage from './pages/StudentPage';
+import StudentFormationDetailsPage from './pages/StudentFormationDetailsPage';
 import ForbiddenPage from './pages/ForbiddenPage';
 
 export default function App() {
@@ -107,7 +108,15 @@ export default function App() {
             path="/student"
             element={
               <ProtectedRoute allowedRoles={['STUDENT']}>
-                <StudentPage />
+                <StudentPage pushToast={pushToast} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student/formations/:formationId"
+            element={
+              <ProtectedRoute allowedRoles={['STUDENT']}>
+                <StudentFormationDetailsPage pushToast={pushToast} />
               </ProtectedRoute>
             }
           />

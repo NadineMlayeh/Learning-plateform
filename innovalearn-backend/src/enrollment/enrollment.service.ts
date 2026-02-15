@@ -32,4 +32,31 @@ export class EnrollmentService {
       include: { formation: true },
     });
   }
+  async getAllEnrollments() {
+  return this.prisma.enrollment.findMany({
+    include: {
+      student: {
+        select: { id: true, name: true, email: true },
+      },
+      formation: {
+        select: { id: true, title: true, price: true },
+      },
+    },
+  });
+}
+
+async updateEnrollmentStatus(enrollmentId: number, status: 'APPROVED' | 'REJECTED') {
+  const enrollment = await this.prisma.enrollment.findUnique({
+    where: { id: enrollmentId },
+  });
+
+  if (!enrollment)
+    throw new NotFoundException('Enrollment not found');
+
+  return this.prisma.enrollment.update({
+    where: { id: enrollmentId },
+    data: { status },
+  });
+}
+
 }

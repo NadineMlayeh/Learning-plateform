@@ -22,4 +22,25 @@ export class EnrollmentController {
   getMyEnrollments(@Req() req) {
     return this.enrollmentService.getEnrollments(req.user.userId);
   }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+@Get('admin/all')
+getAll() {
+  return this.enrollmentService.getAllEnrollments();
+}
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+@Post('admin/:id/approve')
+approve(@Param('id') id: string) {
+  return this.enrollmentService.updateEnrollmentStatus(Number(id), 'APPROVED');
+}
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+@Post('admin/:id/reject')
+reject(@Param('id') id: string) {
+  return this.enrollmentService.updateEnrollmentStatus(Number(id), 'REJECTED');
+}
+
 }

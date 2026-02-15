@@ -60,4 +60,15 @@ export class FormationController {
       req.user.userId,
     );
   }
+  // STUDENTS ONLY — view formation details if enrolled & approved
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.STUDENT)
+@Get(':id/details')
+async getFormationDetails(@Param('id') id: string, @Req() req) {
+  return this.formationService.findFormationDetails(
+    Number(id),
+    req.user.userId,
+  );
+}
+
 }

@@ -36,6 +36,12 @@ enum FormationType {
   PRESENTIEL
 }
 
+enum EnrollmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Formation {
   id          Int           @id @default(autoincrement())
   title       String
@@ -92,13 +98,15 @@ model Choice {
   questionId Int
   question   Question @relation(fields: [questionId], references: [id])
 }
-model Enrollment {
-  id           Int       @id @default(autoincrement())
-  studentId    Int
-  student      User      @relation(fields: [studentId], references: [id])
-  formationId  Int
-  formation    Formation @relation(fields: [formationId], references: [id])
-  createdAt    DateTime  @default(now())
 
-  @@unique([studentId, formationId]) // prevent double enrollment
+model Enrollment {
+  id           Int               @id @default(autoincrement())
+  studentId    Int
+  student      User              @relation(fields: [studentId], references: [id])
+  formationId  Int
+  formation    Formation         @relation(fields: [formationId], references: [id])
+  status       EnrollmentStatus  @default(PENDING)
+  createdAt    DateTime          @default(now())
+
+  @@unique([studentId, formationId])
 }
