@@ -70,4 +70,39 @@ export class QuizController {
   countQuizzes(@Param('courseId') courseId: string) {
     return this.quizService.countQuizzes(Number(courseId));
   }
+  // STUDENT: submit answer
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.STUDENT)
+  @Post('quizzes/:quizId/answer/:questionId')
+  submitAnswer(
+    @Param('quizId') quizId: string,
+    @Param('questionId') questionId: string,
+    @Body('choiceId') choiceId: number,
+    @Req() req,
+  ) {
+    return this.quizService.submitAnswer(
+      req.user.userId,
+      Number(quizId),
+      Number(questionId),
+      choiceId,
+    );
+  }
+
+  // STUDENT: get their answers (optional)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.STUDENT)
+  @Get('quizzes/:quizId/my-answers')
+  getMyAnswers(@Param('quizId') quizId: string, @Req() req) {
+    return this.quizService.getStudentAnswers(req.user.userId, Number(quizId));
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.STUDENT)
+  @Post('quizzes/:quizId/finalize')
+  finalizeQuiz(@Param('quizId') quizId: string, @Req() req) {
+    return this.quizService.finalizeQuiz(
+      req.user.userId,
+      Number(quizId),
+    );
+  }
+
 }

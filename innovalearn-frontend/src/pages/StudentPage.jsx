@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiRequest } from '../api';
+import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
+import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 
 function IconSpark() {
@@ -62,6 +63,15 @@ function IconPlay() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M8 6l10 6-10 6V6z" />
+    </svg>
+  );
+}
+
+function IconAward() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="8" r="4.2" />
+      <path d="M8.4 12.2L7 21l5-2.2L17 21l-1.4-8.8" />
     </svg>
   );
 }
@@ -201,10 +211,15 @@ export default function StudentPage({ pushToast }) {
     [formations, enrollmentByFormation],
   );
 
-  const approvedEnrollments = useMemo(
-    () => enrollments.filter((entry) => entry.status === 'APPROVED'),
-    [enrollments],
-  );
+  const approvedEnrollments = useMemo(() => {
+    return enrollments
+      .filter((entry) => entry.status === 'APPROVED')
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime(),
+      );
+  }, [enrollments]);
 
   const pendingEnrollments = useMemo(
     () => enrollments.filter((entry) => entry.status === 'PENDING'),
@@ -232,6 +247,8 @@ export default function StudentPage({ pushToast }) {
 
   return (
     <section className="student-dashboard stack">
+      <ProfileSidebar user={user} />
+
       <div className="card student-hero">
         <div className="student-hero-main">
           <span className="student-hero-icon">
@@ -319,6 +336,21 @@ export default function StudentPage({ pushToast }) {
         renderCard={(entry) => {
           const formation = entry.formation;
           const canOpenOnline = formation?.type === 'ONLINE';
+          const isOnline = formation?.type === 'ONLINE';
+          const formationResult = formation?.results?.[0] || null;
+          const publishedCourses = formation?.courses || [];
+          const finalizedCourses = publishedCourses.filter(
+            (course) => course.results?.[0],
+          ).length;
+          const passedCourses = publishedCourses.filter(
+            (course) => course.results?.[0]?.passed,
+          ).length;
+          const earnedBadges = publishedCourses
+            .map((course) => ({
+              courseTitle: course.title,
+              badgeUrl: course.results?.[0]?.badgeUrl || null,
+            }))
+            .filter((entryBadge) => entryBadge.badgeUrl);
 
           return (
             <article key={entry.id} className="student-card student-card-approved">
@@ -346,6 +378,41 @@ export default function StudentPage({ pushToast }) {
                   Location: {formation.location}
                 </p>
               )}
+              {isOnline && (
+                <div className="row">
+                  {formationResult ? (
+                    <StatusBadge
+                      label={
+                        formationResult.completed
+                          ? 'Completed (Success)'
+                          : 'Completed (Fail)'
+                      }
+                      tone={formationResult.completed ? 'green' : 'gray'}
+                    />
+                  ) : (
+                    <StatusBadge
+                      label={`Progress ${finalizedCourses}/${publishedCourses.length || 0}`}
+                      tone={finalizedCourses > 0 ? 'blue' : 'neutral'}
+                    />
+                  )}
+                  <StatusBadge
+                    label={`Passed Courses ${passedCourses}/${publishedCourses.length || 0}`}
+                    tone={passedCourses > 0 ? 'green' : 'gray'}
+                  />
+                </div>
+              )}
+
+              {formationResult?.certificateUrl && (
+                <a
+                  className="student-doc-link"
+                  href={resolveApiAssetUrl(formationResult.certificateUrl)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Download Certificate
+                </a>
+              )}
+
               {canOpenOnline ? (
                 <button
                   type="button"
@@ -360,12 +427,35 @@ export default function StudentPage({ pushToast }) {
                   Open Online Content
                 </button>
               ) : (
-                <p className="hint">Presentiel formation. No online lessons to open.</p>
+                <p className="hint"></p>
               )}
             </article>
           );
         }}
       />
+
+      <article
+        className="card student-achievements-link"
+        role="button"
+        tabIndex={0}
+        onClick={() => navigate('/student/achievements')}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            navigate('/student/achievements');
+          }
+        }}
+      >
+        <div className="student-achievements-icon">
+          <IconAward />
+        </div>
+        <div>
+          <h2>My Certificates and Badges</h2>
+          <p className="hint">
+            Open your achievement center with filters, grouped history, and direct downloads.
+          </p>
+        </div>
+      </article>
 
       <StudentCarouselSection
         sectionKey="pending"

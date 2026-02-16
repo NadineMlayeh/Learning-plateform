@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
+import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 import LoadingButton from '../components/LoadingButton';
 
@@ -125,6 +126,8 @@ export default function AdminDashboardPage({ pushToast }) {
 
   return (
     <section className="stack">
+      <ProfileSidebar user={user} />
+
       <div className="card panel-head">
         <div>
           <h1>Formateur Dashboard</h1>

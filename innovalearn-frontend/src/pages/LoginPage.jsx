@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { apiRequest } from '../api';
-import { setToken } from '../auth';
+import { getCurrentUser, setToken } from '../auth';
+
+function roleHomePath(role) {
+  if (role === 'ADMIN') return '/admin';
+  if (role === 'FORMATEUR') return '/formateur';
+  if (role === 'STUDENT') return '/student';
+  return '/';
+}
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -20,7 +27,9 @@ export default function LoginPage() {
         body: { email, password },
       });
       setToken(data.access_token);
-      const redirectTo = location.state?.from?.pathname || '/';
+      const currentUser = getCurrentUser();
+      const roleHome = roleHomePath(currentUser?.role);
+      const redirectTo = location.state?.from?.pathname || roleHome;
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(err.message);

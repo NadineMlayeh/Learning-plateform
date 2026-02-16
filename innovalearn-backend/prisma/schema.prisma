@@ -29,6 +29,9 @@ model User {
   createdAt       DateTime         @default(now())
   formations      Formation[]
   enrollments     Enrollment[] 
+  quizSubmissions QuizSubmission[] 
+  courseResults     CourseResult[]
+  formationResults  FormationResult[]
 }
 
 enum FormationType {
@@ -57,6 +60,8 @@ model Formation {
   courses     Course[]  
   enrollments     Enrollment[] 
   createdAt   DateTime      @default(now())
+  results FormationResult[]
+  
 }
 
 model Course {
@@ -67,6 +72,7 @@ model Course {
   formation    Formation @relation(fields: [formationId], references: [id])
   lessons Lesson[]
   quizzes      Quiz[]
+  results CourseResult[]
 }
 model Lesson {
   id        Int      @id @default(autoincrement())
@@ -81,6 +87,7 @@ model Quiz {
   courseId  Int
   course    Course    @relation(fields: [courseId], references: [id])
   questions Question[]
+  submissions QuizSubmission[]
 }
 
 model Question {
@@ -89,6 +96,7 @@ model Question {
   quizId  Int
   quiz    Quiz     @relation(fields: [quizId], references: [id])
   choices Choice[]
+  submissions QuizSubmission[]
 }
 
 model Choice {
@@ -97,6 +105,7 @@ model Choice {
   isCorrect  Boolean
   questionId Int
   question   Question @relation(fields: [questionId], references: [id])
+  submissions QuizSubmission[]
 }
 
 model Enrollment {
@@ -107,6 +116,47 @@ model Enrollment {
   formation    Formation         @relation(fields: [formationId], references: [id])
   status       EnrollmentStatus  @default(PENDING)
   createdAt    DateTime          @default(now())
+
+  @@unique([studentId, formationId])
+}
+model QuizSubmission {
+  id         Int      @id @default(autoincrement())
+  studentId  Int
+  student    User     @relation(fields: [studentId], references: [id])
+  quizId     Int
+  quiz       Quiz     @relation(fields: [quizId], references: [id])
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id])
+  choiceId   Int
+  choice     Choice   @relation(fields: [choiceId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([studentId, questionId])
+}
+model CourseResult {
+  id         Int      @id @default(autoincrement())
+  studentId  Int
+  courseId   Int
+  score      Float
+  passed     Boolean
+  badgeUrl   String?
+  createdAt  DateTime @default(now())
+
+  student    User     @relation(fields: [studentId], references: [id])
+  course     Course   @relation(fields: [courseId], references: [id])
+
+  @@unique([studentId, courseId])
+}
+model FormationResult {
+  id             Int      @id @default(autoincrement())
+  studentId      Int
+  formationId    Int
+  completed      Boolean
+  certificateUrl String?
+  createdAt      DateTime @default(now())
+
+  student        User      @relation(fields: [studentId], references: [id])
+  formation      Formation @relation(fields: [formationId], references: [id])
 
   @@unique([studentId, formationId])
 }

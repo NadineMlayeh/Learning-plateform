@@ -15,6 +15,7 @@ import AdminAddLessonPage from './pages/AdminAddLessonPage';
 import AdminAddQuizPage from './pages/AdminAddQuizPage';
 import StudentPage from './pages/StudentPage';
 import StudentFormationDetailsPage from './pages/StudentFormationDetailsPage';
+import StudentAchievementsPage from './pages/StudentAchievementsPage';
 import ForbiddenPage from './pages/ForbiddenPage';
 
 export default function App() {
@@ -22,7 +23,7 @@ export default function App() {
   const { toasts, pushToast, removeToast } = useToast();
 
   function roleHome() {
-    if (!user) return '/login';
+    if (!user) return '/';
     if (user.role === 'ADMIN') return '/admin';
     if (user.role === 'FORMATEUR') return '/formateur';
     if (user.role === 'STUDENT') return '/student';
@@ -117,6 +118,14 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={['STUDENT']}>
                 <StudentFormationDetailsPage pushToast={pushToast} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student/achievements"
+            element={
+              <ProtectedRoute allowedRoles={['STUDENT']}>
+                <StudentAchievementsPage pushToast={pushToast} />
               </ProtectedRoute>
             }
           />

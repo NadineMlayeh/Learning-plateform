@@ -22,9 +22,7 @@ export class FormationService {
       formateur.role !== Role.FORMATEUR ||
       formateur.formateurStatus !== 'APPROVED'
     ) {
-      throw new ForbiddenException(
-        'You are not an approved formateur',
-      );
+      throw new ForbiddenException('You are not an approved formateur');
     }
 
     return this.prisma.formation.create({
@@ -120,9 +118,7 @@ export class FormationService {
     }
 
     if (formation.formateurId !== formateurId) {
-      throw new ForbiddenException(
-        'You cannot publish this formation',
-      );
+      throw new ForbiddenException('You cannot publish this formation');
     }
 
     if (formation.type === 'PRESENTIEL') {
@@ -153,42 +149,60 @@ export class FormationService {
       data: { published: true },
     });
   }
-async findFormationDetails(formationId: number, studentId: number) {
-  // 1️⃣ Check enrollment exists
-  const enrollment = await this.prisma.enrollment.findUnique({
-    where: { studentId_formationId: { studentId, formationId } },
-  });
 
-  if (!enrollment) {
-    throw new ForbiddenException(
-      'You are not enrolled in this formation'
-    );
-  }
+  async findFormationDetails(formationId: number, studentId: number) {
+    const enrollment = await this.prisma.enrollment.findUnique({
+      where: { studentId_formationId: { studentId, formationId } },
+    });
 
-  // 2️⃣ Check enrollment is approved
-  if (enrollment.status !== 'APPROVED') {
-    throw new ForbiddenException(
-      'Your enrollment is not approved yet'
-    );
-  }
+    if (!enrollment) {
+      throw new ForbiddenException(
+        'You are not enrolled in this formation',
+      );
+    }
 
-  // 3️⃣ Return formation with courses, lessons, quizzes
-  return this.prisma.formation.findUnique({
-    where: { id: formationId },
-    include: {
-      courses: {
-        where: { published: true },
-        include: {
-          lessons: true,
-          quizzes: {
-            include: { questions: { include: { choices: true } } },
+    if (enrollment.status !== 'APPROVED') {
+      throw new ForbiddenException(
+        'Your enrollment is not approved yet',
+      );
+    }
+
+    return this.prisma.formation.findUnique({
+      where: { id: formationId },
+      include: {
+        results: {
+          where: { studentId },
+          select: {
+            id: true,
+            completed: true,
+            certificateUrl: true,
+            createdAt: true,
+          },
+        },
+        courses: {
+          where: { published: true },
+          include: {
+            results: {
+              where: { studentId },
+              select: {
+                id: true,
+                score: true,
+                passed: true,
+                badgeUrl: true,
+                createdAt: true,
+              },
+            },
+            lessons: true,
+            quizzes: {
+              include: {
+                questions: {
+                  include: { choices: true },
+                },
+              },
+            },
           },
         },
       },
-    },
-  });
-}
-
-
-
+    });
+  }
 }

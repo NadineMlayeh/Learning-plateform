@@ -29,7 +29,36 @@ export class EnrollmentService {
   async getEnrollments(studentId: number) {
     return this.prisma.enrollment.findMany({
       where: { studentId },
-      include: { formation: true },
+      include: {
+        formation: {
+          include: {
+            results: {
+              where: { studentId },
+              select: {
+                completed: true,
+                certificateUrl: true,
+                createdAt: true,
+              },
+            },
+            courses: {
+              where: { published: true },
+              select: {
+                id: true,
+                title: true,
+                results: {
+                  where: { studentId },
+                  select: {
+                    passed: true,
+                    score: true,
+                    badgeUrl: true,
+                    createdAt: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
   }
   async getAllEnrollments() {

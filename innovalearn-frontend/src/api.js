@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000';
+export const API_BASE_URL = 'http://localhost:3000';
 
 function getAuthHeaders(token) {
   return token
@@ -32,6 +32,13 @@ export async function apiRequest(path, options = {}) {
   }
 
   return data;
+}
+
+export function resolveApiAssetUrl(path) {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path)) return path;
+
+  return `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
 function safeJsonParse(value) {

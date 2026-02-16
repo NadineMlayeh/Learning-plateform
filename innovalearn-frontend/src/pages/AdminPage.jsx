@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
+import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 
 const PAGE_SIZE = 3;
@@ -212,6 +213,8 @@ export default function AdminPage({ pushToast }) {
 
   return (
     <section className="stack">
+      <ProfileSidebar user={user} />
+
       <div className="card panel-head">
         <div>
           <h1>Admin Dashboard</h1>
