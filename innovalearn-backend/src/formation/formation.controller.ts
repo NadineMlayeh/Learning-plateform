@@ -28,6 +28,15 @@ export class FormationController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.FORMATEUR)
+  @Get('manage/analytics')
+  getManageAnalytics(@Req() req) {
+    return this.formationService.getFormateurAnalytics(
+      req.user.userId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.FORMATEUR)
   @Get('manage')
   getManageFormations(@Req() req) {
     return this.formationService.findManageFormations(

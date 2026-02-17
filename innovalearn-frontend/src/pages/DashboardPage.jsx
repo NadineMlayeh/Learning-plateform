@@ -1,25 +1,32 @@
 import { Link } from 'react-router-dom';
 import { getCurrentUser } from '../auth';
 
-const PROGRAMS = [
+const FEATURES = [
   {
-    title: 'Robotique & Coding',
-    text: 'Des ateliers concrets pour apprendre la logique, coder des robots et créer des mini projets fun.',
+    title: 'Programmation Robotique',
+    description: 'Ateliers concrets avec projets amusants pour apprendre en construisant.',
     tone: 'is-blue',
   },
   {
-    title: 'Soft Skills & Communication',
-    text: 'Presentations, creativite, confiance en soi et travail d equipe dans un cadre bienveillant.',
+    title: 'Soft Skills et Creativite',
+    description: 'Communication, confiance et prise de parole dans un cadre positif.',
     tone: 'is-red',
   },
   {
-    title: 'Parcours Progressif',
-    text: 'Le student suit des formations, reussit ses quizzes et debloque badges et certificats.',
+    title: 'Competitions Ludiques',
+    description: 'Challenges en equipe pour progresser et celebrer chaque victoire.',
     tone: 'is-yellow',
   },
 ];
 
-function getRolePath(role) {
+const PATHS = [
+  { age: '6-8 ans', label: 'Petits explorateurs' },
+  { age: '9-11 ans', label: 'Inventeurs en herbe' },
+  { age: '12-14 ans', label: 'Genies en devenir' },
+  { age: '15-18 ans', label: 'Experts du futur' },
+];
+
+function roleHomePath(role) {
   if (role === 'ADMIN') return '/admin';
   if (role === 'FORMATEUR') return '/formateur';
   if (role === 'STUDENT') return '/student';
@@ -30,66 +37,98 @@ export default function DashboardPage() {
   const user = getCurrentUser();
 
   return (
-    <section className="landing-page stack">
-      <article className="landing-hero card">
-        <div className="landing-hero-copy">
-          <p className="landing-eyebrow">InnovaLearn Platform</p>
-          <h1>Apprends, cree et progresse avec une experience moderne</h1>
-          <p>
-            Une plateforme claire pour les etudiants, formateurs et administrateurs,
-            avec un suivi complet des formations, cours, quizzes, badges et certificats.
-          </p>
+    <div className="showcase-page">
+      <header className="showcase-nav glass-nav">
+        <div className="showcase-nav-inner">
+          <div className="showcase-logo">
+            <span className="logo-innova">Innova</span>
+            <span className="logo-learn">Learn</span>
+          </div>
 
-          {user ? (
-            <div className="row landing-actions">
-              <Link className="landing-btn landing-btn-primary" to={getRolePath(user.role)}>
-                Open my dashboard
+          <nav className="showcase-links">
+            <a href="#avis" className="nav-link">
+              Avis Parents
+            </a>
+            <a href="#why" className="nav-link">
+              Pourquoi nous
+            </a>
+            <a href="#competitions" className="nav-link">
+              Competitions
+            </a>
+            <Link className="kid-button" to="/login">
+              Login
+            </Link>
+            <Link className="kid-button kid-button-outline" to="/signup">
+              Sign up
+            </Link>
+            {user && (
+              <Link className="kid-button kid-button-strong" to={roleHomePath(user.role)}>
+                Open dashboard
               </Link>
-              <span className="landing-role-pill">Role: {user.role}</span>
-            </div>
-          ) : (
-            <div className="row landing-actions">
-              <Link className="landing-btn landing-btn-primary" to="/login">
-                Login
-              </Link>
-              <Link className="landing-btn landing-btn-secondary" to="/signup">
-                Create account
-              </Link>
-            </div>
-          )}
+            )}
+          </nav>
         </div>
+      </header>
 
-        <div className="landing-hero-badges">
-          <article>
-            <strong>Interactive</strong>
-            <span>Lessons, quizzes, score review</span>
-          </article>
-          <article>
-            <strong>Structured</strong>
-            <span>Role-based access and approval flow</span>
-          </article>
-          <article>
-            <strong>Rewarding</strong>
-            <span>Badges and final certificates</span>
-          </article>
-        </div>
-      </article>
+      <section className="showcase-hero sparkle-bg hero-glow">
+        <h1><span className="gradient-text">
+          Developpement </span><span className="gradient-text">Robotique</span> et{' '}
+          <span className="gradient-text">Soft Skills</span>
+        </h1>
+        <p className="showcase-tagline">
+          <span>Apprends</span>
+          <span className="dot">.</span>
+          <span>Cree</span>
+          <span className="dot">.</span>
+          <span>Innove</span>
+        </p>
+      </section>
 
-      <article className="landing-programs card">
-        <div className="landing-programs-head">
-          <h2>Why students like it</h2>
-          <p>Simple to navigate, colorful, and focused on progression.</p>
-        </div>
-
-        <div className="landing-program-grid">
-          {PROGRAMS.map((item) => (
-            <section key={item.title} className={`landing-program-card ${item.tone}`}>
+      <section id="why" className="showcase-features">
+        <div className="showcase-shell feature-grid">
+          {FEATURES.map((item) => (
+            <article key={item.title} className={`kid-card feature-card ${item.tone}`}>
               <h3>{item.title}</h3>
-              <p>{item.text}</p>
-            </section>
+              <p>{item.description}</p>
+            </article>
           ))}
         </div>
-      </article>
-    </section>
+      </section>
+
+      <section className="showcase-paths">
+        <div className="showcase-shell">
+          <h2>Parcours d Apprentissage</h2>
+          <p>Choisis ton chemin.</p>
+          <div className="path-grid">
+            {PATHS.map((item) => (
+              <article key={item.age} className="kid-card path-card">
+                <h3>{item.age}</h3>
+                <p>{item.label}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="avis" className="showcase-testimonials">
+        <div className="showcase-shell">
+          <h2>Avis des Parents</h2>
+          <div className="testimonial-grid">
+            <article className="kid-card testimonial-card">
+              <p className="stars">*****</p>
+              <p>Mon enfant adore InnovaLearn.</p>
+            </article>
+            <article className="kid-card testimonial-card">
+              <p className="stars">*****</p>
+              <p>Apprentissage serieux et amusant.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <footer id="competitions" className="showcase-footer">
+        <p>InnovaLearn 2026</p>
+      </footer>
+    </div>
   );
 }

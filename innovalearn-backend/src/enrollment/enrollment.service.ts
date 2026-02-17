@@ -1,9 +1,11 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { InvoiceService } from '../invoice/invoice.service';
 
 @Injectable()
 export class EnrollmentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService,
+  private invoiceService: InvoiceService,) {}
 
   async enroll(studentId: number, formationId: number) {
     // 1️⃣ Check formation exists & is published
@@ -29,6 +31,7 @@ export class EnrollmentService {
   async getEnrollments(studentId: number) {
     return this.prisma.enrollment.findMany({
       where: { studentId },
+      orderBy: { createdAt: 'desc' },
       include: {
         formation: {
           include: {
@@ -68,13 +71,25 @@ export class EnrollmentService {
         select: { id: true, name: true, email: true },
       },
       formation: {
-        select: { id: true, title: true, price: true },
+        select: { id: true, title: true, price: true, type: true },
+      },
+      invoice: {
+        select: {
+          id: true,
+          amount: true,
+          pdfUrl: true,
+          createdAt: true,
+        },
       },
     },
+    orderBy: { createdAt: 'desc' },
   });
 }
 
-async updateEnrollmentStatus(enrollmentId: number, status: 'APPROVED' | 'REJECTED') {
+async updateEnrollmentStatus(
+  enrollmentId: number,
+  status: 'APPROVED' | 'REJECTED',
+) {
   const enrollment = await this.prisma.enrollment.findUnique({
     where: { id: enrollmentId },
   });
@@ -82,10 +97,17 @@ async updateEnrollmentStatus(enrollmentId: number, status: 'APPROVED' | 'REJECTE
   if (!enrollment)
     throw new NotFoundException('Enrollment not found');
 
-  return this.prisma.enrollment.update({
+  const updated = await this.prisma.enrollment.update({
     where: { id: enrollmentId },
     data: { status },
   });
+
+  if (status === 'APPROVED') {
+    await this.invoiceService.generateInvoice(enrollmentId);
+  }
+
+  return updated;
 }
+
 
 }

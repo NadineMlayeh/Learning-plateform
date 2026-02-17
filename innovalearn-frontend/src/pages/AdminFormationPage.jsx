@@ -267,10 +267,7 @@ export default function AdminFormationPage({ pushToast }) {
     formation?.type === 'ONLINE' && !formation?.published;
 
   const sortedCourses = useMemo(() => {
-    return [...courses].sort((a, b) => {
-      if (a.published === b.published) return b.id - a.id;
-      return Number(a.published) - Number(b.published);
-    });
+    return [...courses].sort((a, b) => b.id - a.id);
   }, [courses]);
 
   if (isLoading || !formation) {

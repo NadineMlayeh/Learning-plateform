@@ -20,6 +20,8 @@ async create(dto: CreateUserDto) {
 }
 
   async findAll() {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }

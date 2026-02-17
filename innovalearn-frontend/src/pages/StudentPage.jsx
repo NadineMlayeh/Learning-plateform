@@ -5,6 +5,8 @@ import { getCurrentUser } from '../auth';
 import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 
+const INVOICE_PAGE_SIZE = 3;
+
 function IconSpark() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -76,6 +78,15 @@ function IconAward() {
   );
 }
 
+function IconInvoice() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 3h10v18l-2.5-1.5L12 21l-2.5-1.5L7 21V3z" />
+      <path d="M9 8h6M9 12h6M9 16h4" />
+    </svg>
+  );
+}
+
 function StudentCarouselSection({
   sectionKey,
   title,
@@ -140,6 +151,9 @@ export default function StudentPage({ pushToast }) {
 
   const [formations, setFormations] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [loadingInvoices, setLoadingInvoices] = useState(false);
+  const [invoicePage, setInvoicePage] = useState(1);
   const [enrollingFormationId, setEnrollingFormationId] = useState(null);
 
   const railRefs = useRef({});
@@ -159,6 +173,18 @@ export default function StudentPage({ pushToast }) {
       setEnrollments(data);
     } catch (err) {
       pushToast(err.message, 'error');
+    }
+  }
+
+  async function loadInvoices() {
+    setLoadingInvoices(true);
+    try {
+      const data = await apiRequest('/invoices/my', { token: user.token });
+      setInvoices(data || []);
+    } catch (err) {
+      pushToast(err.message, 'error');
+    } finally {
+      setLoadingInvoices(false);
     }
   }
 
@@ -205,9 +231,13 @@ export default function StudentPage({ pushToast }) {
 
   const unenrolledFormations = useMemo(
     () =>
-      formations.filter(
-        (formation) => !enrollmentByFormation.has(formation.id),
-      ),
+      formations
+        .filter((formation) => !enrollmentByFormation.has(formation.id))
+        .sort((a, b) => {
+          const left = a.createdAt ? new Date(a.createdAt).getTime() : a.id;
+          const right = b.createdAt ? new Date(b.createdAt).getTime() : b.id;
+          return right - left;
+        }),
     [formations, enrollmentByFormation],
   );
 
@@ -221,9 +251,30 @@ export default function StudentPage({ pushToast }) {
       );
   }, [enrollments]);
 
-  const pendingEnrollments = useMemo(
-    () => enrollments.filter((entry) => entry.status === 'PENDING'),
-    [enrollments],
+  const pendingEnrollments = useMemo(() => {
+    return enrollments
+      .filter((entry) => entry.status === 'PENDING')
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime(),
+      );
+  }, [enrollments]);
+
+  const sortedInvoices = useMemo(() => {
+    return [...invoices].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  }, [invoices]);
+
+  const invoiceTotalPages = Math.max(
+    1,
+    Math.ceil(sortedInvoices.length / INVOICE_PAGE_SIZE),
+  );
+  const invoicePageRows = sortedInvoices.slice(
+    (invoicePage - 1) * INVOICE_PAGE_SIZE,
+    invoicePage * INVOICE_PAGE_SIZE,
   );
 
   function setRailRef(sectionKey, node) {
@@ -243,7 +294,18 @@ export default function StudentPage({ pushToast }) {
   useEffect(() => {
     loadFormations();
     loadEnrollments();
+    loadInvoices();
   }, []);
+
+  useEffect(() => {
+    setInvoicePage(1);
+  }, [sortedInvoices.length]);
+
+  useEffect(() => {
+    if (invoicePage > invoiceTotalPages) {
+      setInvoicePage(invoiceTotalPages);
+    }
+  }, [invoicePage, invoiceTotalPages]);
 
   return (
     <section className="student-dashboard stack">
@@ -273,6 +335,10 @@ export default function StudentPage({ pushToast }) {
           <article>
             <strong>{pendingEnrollments.length}</strong>
             <span>Pending</span>
+          </article>
+          <article>
+            <strong>{invoices.length}</strong>
+            <span>Invoices</span>
           </article>
         </div>
       </div>
@@ -457,6 +523,84 @@ export default function StudentPage({ pushToast }) {
         </div>
       </article>
 
+      <article className="card student-invoices-card">
+        <div className="card-head-row">
+          <div className="student-section-title">
+            <span className="student-section-icon">
+              <IconInvoice />
+            </span>
+            <div>
+              <h2>My Invoices</h2>
+              <p className="hint">
+                Download your payment invoices any time. Latest approved invoices appear first.
+              </p>
+            </div>
+          </div>
+          <StatusBadge
+            label={`${sortedInvoices.length} total`}
+            tone={sortedInvoices.length > 0 ? 'blue' : 'gray'}
+          />
+        </div>
+
+        {loadingInvoices && <p className="hint">Loading invoices...</p>}
+
+        {!loadingInvoices && sortedInvoices.length === 0 && (
+          <p className="hint">No invoice available yet. It appears after admin approval.</p>
+        )}
+
+        {!loadingInvoices && sortedInvoices.length > 0 && (
+          <div className="student-invoice-list">
+            {invoicePageRows.map((invoice) => (
+              <article key={invoice.id} className="student-invoice-item">
+                <div>
+                  <strong>
+                    {invoice.enrollment?.formation?.title || `Formation #${invoice.enrollment?.formation?.id || '-'}`}
+                  </strong>
+                  <p className="hint">Amount: {Number(invoice.amount || 0).toFixed(2)} EUR</p>
+                  <p className="hint">Issued: {new Date(invoice.createdAt).toLocaleString()}</p>
+                </div>
+                <a
+                  className="student-doc-link"
+                  href={resolveApiAssetUrl(invoice.pdfUrl)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open Invoice
+                </a>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {!loadingInvoices && sortedInvoices.length > 0 && (
+          <div className="pagination-bar">
+            <button
+              type="button"
+              className="action-btn action-page"
+              onClick={() => setInvoicePage((prev) => Math.max(1, prev - 1))}
+              disabled={invoicePage === 1}
+            >
+              Prev
+            </button>
+            <span>
+              Page {invoicePage} / {invoiceTotalPages}
+            </span>
+            <button
+              type="button"
+              className="action-btn action-page"
+              onClick={() =>
+                setInvoicePage((prev) =>
+                  Math.min(invoiceTotalPages, prev + 1),
+                )
+              }
+              disabled={invoicePage === invoiceTotalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </article>
+
       <StudentCarouselSection
         sectionKey="pending"
         title="Pending Requests"
@@ -492,3 +636,4 @@ export default function StudentPage({ pushToast }) {
     </section>
   );
 }
+

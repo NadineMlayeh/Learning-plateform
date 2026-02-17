@@ -32,6 +32,7 @@ model User {
   quizSubmissions QuizSubmission[] 
   courseResults     CourseResult[]
   formationResults  FormationResult[]
+  invoices Invoice[]
 }
 
 enum FormationType {
@@ -116,6 +117,7 @@ model Enrollment {
   formation    Formation         @relation(fields: [formationId], references: [id])
   status       EnrollmentStatus  @default(PENDING)
   createdAt    DateTime          @default(now())
+  invoice Invoice?
 
   @@unique([studentId, formationId])
 }
@@ -159,4 +161,15 @@ model FormationResult {
   formation      Formation @relation(fields: [formationId], references: [id])
 
   @@unique([studentId, formationId])
+}
+model Invoice {
+  id            Int      @id @default(autoincrement())
+  studentId     Int
+  enrollmentId  Int      @unique
+  amount        Float
+  pdfUrl        String
+  createdAt     DateTime @default(now())
+
+  student       User        @relation(fields: [studentId], references: [id])
+  enrollment    Enrollment  @relation(fields: [enrollmentId], references: [id])
 }

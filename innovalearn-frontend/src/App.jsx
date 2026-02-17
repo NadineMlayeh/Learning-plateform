@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { getCurrentUser } from './auth';
 import NavBar from './components/NavBar';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -13,6 +14,10 @@ import AdminAddFormationPage from './pages/AdminAddFormationPage';
 import AdminAddCoursePage from './pages/AdminAddCoursePage';
 import AdminAddLessonPage from './pages/AdminAddLessonPage';
 import AdminAddQuizPage from './pages/AdminAddQuizPage';
+import AdminStudentsPage from './pages/AdminStudentsPage';
+import AdminFormateursPage from './pages/AdminFormateursPage';
+import AdminFormationsPage from './pages/AdminFormationsPage';
+import AdminRevenuePage from './pages/AdminRevenuePage';
 import StudentPage from './pages/StudentPage';
 import StudentFormationDetailsPage from './pages/StudentFormationDetailsPage';
 import StudentAchievementsPage from './pages/StudentAchievementsPage';
@@ -21,6 +26,17 @@ import ForbiddenPage from './pages/ForbiddenPage';
 export default function App() {
   const user = getCurrentUser();
   const { toasts, pushToast, removeToast } = useToast();
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/';
+  const isAuthPage =
+    location.pathname === '/login' || location.pathname === '/signup';
+
+  useEffect(() => {
+    document.body.classList.toggle('auth-wallpaper-active', isAuthPage);
+    return () => {
+      document.body.classList.remove('auth-wallpaper-active');
+    };
+  }, [isAuthPage]);
 
   function roleHome() {
     if (!user) return '/';
@@ -32,8 +48,16 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <NavBar />
-      <main className="container">
+      {!isLandingPage && <NavBar />}
+      <main
+        className={
+          isLandingPage
+            ? 'landing-main'
+            : isAuthPage
+              ? 'auth-main'
+              : 'container'
+        }
+      >
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -51,7 +75,31 @@ export default function App() {
             path="/admin/formateurs"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminPage pushToast={pushToast} />
+                <AdminFormateursPage pushToast={pushToast} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/students"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminStudentsPage pushToast={pushToast} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/formations"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminFormationsPage pushToast={pushToast} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/revenue"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminRevenuePage pushToast={pushToast} />
               </ProtectedRoute>
             }
           />

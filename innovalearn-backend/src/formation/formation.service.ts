@@ -43,12 +43,206 @@ export class FormationService {
   findAll() {
     return this.prisma.formation.findMany({
       where: { published: true },
+      orderBy: { createdAt: 'desc' },
       include: {
         formateur: {
           select: { id: true, email: true },
         },
       },
     });
+  }
+
+  async getFormateurAnalytics(formateurId: number) {
+    const formations = await this.prisma.formation.findMany({
+      where: { formateurId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        type: true,
+        price: true,
+        published: true,
+        createdAt: true,
+        enrollments: {
+          select: {
+            id: true,
+            status: true,
+            studentId: true,
+            createdAt: true,
+            student: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+        courses: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        results: {
+          select: {
+            studentId: true,
+            completed: true,
+            certificateUrl: true,
+          },
+        },
+      },
+    });
+
+    const allCourseIds = formations.flatMap((formation) =>
+      formation.courses.map((course) => course.id),
+    );
+
+    const courseResults =
+      allCourseIds.length === 0
+        ? []
+        : await this.prisma.courseResult.findMany({
+            where: {
+              courseId: { in: allCourseIds },
+            },
+            select: {
+              courseId: true,
+              studentId: true,
+              score: true,
+              passed: true,
+            },
+          });
+
+    const courseResultsByCourseId = new Map<
+      number,
+      { studentId: number; score: number; passed: boolean }[]
+    >();
+
+    for (const result of courseResults) {
+      const existing = courseResultsByCourseId.get(result.courseId) || [];
+      existing.push(result);
+      courseResultsByCourseId.set(result.courseId, existing);
+    }
+
+    function round2(value: number) {
+      return Math.round(value * 100) / 100;
+    }
+
+    const payload = formations.map((formation) => {
+      const totalStudentsEnrolled = formation.enrollments.length;
+      const approvedEnrollments = formation.enrollments
+        .filter((entry) => entry.status === 'APPROVED')
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() -
+            new Date(a.createdAt).getTime(),
+        );
+
+      const totalApprovedStudents = approvedEnrollments.length;
+      const approvedStudentIds = new Set(
+        approvedEnrollments.map((entry) => entry.studentId),
+      );
+
+      const formationResultByStudent = new Map(
+        formation.results.map((entry) => [entry.studentId, entry]),
+      );
+
+      const enrolledStudents = approvedEnrollments.map((entry) => {
+        const result = formationResultByStudent.get(entry.studentId);
+
+        let completionStatus = 'IN_PROGRESS';
+        if (result?.completed === true) completionStatus = 'COMPLETED_SUCCESS';
+        else if (result) completionStatus = 'COMPLETED_FAIL';
+
+        return {
+          id: entry.student.id,
+          name: entry.student.name,
+          email: entry.student.email,
+          completionStatus,
+          certificateIssued: Boolean(result?.certificateUrl),
+        };
+      });
+
+      const totalCompletedStudents = enrolledStudents.filter(
+        (entry) => entry.completionStatus !== 'IN_PROGRESS',
+      ).length;
+
+      const totalSuccessfulStudents = enrolledStudents.filter(
+        (entry) => entry.completionStatus === 'COMPLETED_SUCCESS',
+      ).length;
+
+      const completionRate =
+        totalApprovedStudents === 0
+          ? 0
+          : round2((totalCompletedStudents / totalApprovedStudents) * 100);
+
+      const successRate =
+        totalApprovedStudents === 0
+          ? 0
+          : round2((totalSuccessfulStudents / totalApprovedStudents) * 100);
+
+      const courses = formation.courses
+        .map((course) => {
+          const attempts = (
+            courseResultsByCourseId.get(course.id) || []
+          ).filter((result) => approvedStudentIds.has(result.studentId));
+
+          const totalAttempts = attempts.length;
+          const passedStudents = attempts.filter(
+            (attempt) => attempt.passed,
+          ).length;
+          const failedStudents = totalAttempts - passedStudents;
+          const averageScore =
+            totalAttempts === 0
+              ? 0
+              : round2(
+                  attempts.reduce((sum, attempt) => sum + attempt.score, 0) /
+                    totalAttempts,
+                );
+
+          return {
+            id: course.id,
+            title: course.title,
+            passedStudents,
+            failedStudents,
+            averageScore,
+            totalAttempts,
+          };
+        })
+        .sort((a, b) => b.id - a.id);
+
+      return {
+        formation: {
+          id: formation.id,
+          title: formation.title,
+          description: formation.description,
+          type: formation.type,
+          price: formation.price,
+          published: formation.published,
+          createdAt: formation.createdAt,
+        },
+        enrolledStudents,
+        statistics: {
+          totalStudentsEnrolled,
+          totalApprovedStudents,
+          totalCompletedStudents,
+          completionRate,
+          successRate,
+          averageScorePerCourse: courses.map((course) => ({
+            courseId: course.id,
+            title: course.title,
+            averageScore: course.averageScore,
+          })),
+        },
+        courseStatistics: courses,
+      };
+    });
+
+    return {
+      generatedAt: new Date().toISOString(),
+      formations: payload,
+    };
   }
 
   async findManageFormations(formateurId: number) {
