@@ -30,6 +30,9 @@ export default function App() {
   const isLandingPage = location.pathname === '/';
   const isAuthPage =
     location.pathname === '/login' || location.pathname === '/signup';
+  const isBackofficePage =
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/formateur');
 
   useEffect(() => {
     document.body.classList.toggle('auth-wallpaper-active', isAuthPage);
@@ -37,6 +40,16 @@ export default function App() {
       document.body.classList.remove('auth-wallpaper-active');
     };
   }, [isAuthPage]);
+
+  useEffect(() => {
+    document.body.classList.toggle(
+      'backoffice-palette-active',
+      isBackofficePage,
+    );
+    return () => {
+      document.body.classList.remove('backoffice-palette-active');
+    };
+  }, [isBackofficePage]);
 
   function roleHome() {
     if (!user) return '/';

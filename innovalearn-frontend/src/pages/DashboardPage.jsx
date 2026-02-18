@@ -41,8 +41,11 @@ export default function DashboardPage() {
       <header className="showcase-nav glass-nav">
         <div className="showcase-nav-inner">
           <div className="showcase-logo">
-            <span className="logo-innova">Innova</span>
-            <span className="logo-learn">Learn</span>
+            <img
+              src="/images/logo2.png"
+              alt="InnovaLearn"
+              className="showcase-logo-image"
+            />
           </div>
 
           <nav className="showcase-links">

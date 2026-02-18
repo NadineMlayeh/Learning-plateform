@@ -12,8 +12,15 @@ export default function NavBar() {
 
   return (
     <header className="topbar">
-      <div className="brand">InnovaLearn Dashboard</div>
+      <div className="brand">
+        <img
+          src="/images/logo2.png"
+          alt="InnovaLearn Dashboard"
+          className="brand-logo-wide"
+        />
+      </div>
       <nav>
+        {!user && <Link to="/">Home</Link>}
         {!user && <Link to="/login">Login</Link>}
         {!user && <Link to="/signup">Signup</Link>}
         {user && <Link to="/">Home</Link>}
