@@ -1,4 +1,10 @@
-import { IsEmail, IsString, IsEnum, IsOptional } from 'class-validator';
+import {
+  IsDateString,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Role } from '@prisma/client';
 
 export class RegisterDto {
@@ -14,4 +20,8 @@ export class RegisterDto {
   @IsOptional()
   @IsEnum(Role)
   role?: Role;
+
+  @IsOptional()
+  @IsDateString()
+  dateOfBirth?: string;
 }

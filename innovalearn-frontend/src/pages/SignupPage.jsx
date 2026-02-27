@@ -6,6 +6,7 @@ export default function SignupPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '',
+    dateOfBirth: '',
     email: '',
     password: '',
     role: 'STUDENT',
@@ -55,6 +56,23 @@ export default function SignupPage() {
               name="name"
               placeholder="Full name"
               value={form.name}
+              onChange={updateField}
+              required
+            />
+          </label>
+
+          <label className="auth-field">
+            <span className="auth-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <rect x="4" y="6" width="16" height="14" rx="2" />
+                <path d="M8 4v4M16 4v4M4 10h16" />
+              </svg>
+            </span>
+            <input
+              name="dateOfBirth"
+              type="date"
+              placeholder="Date of birth"
+              value={form.dateOfBirth}
               onChange={updateField}
               required
             />

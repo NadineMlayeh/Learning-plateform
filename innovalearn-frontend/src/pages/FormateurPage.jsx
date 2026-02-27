@@ -42,8 +42,13 @@ export default function FormateurPage() {
       };
 
       if (!payload.location) delete payload.location;
-      if (!payload.startDate) delete payload.startDate;
-      if (!payload.endDate) delete payload.endDate;
+      if (payload.type !== 'PRESENTIEL') {
+        delete payload.startDate;
+        delete payload.endDate;
+      } else {
+        if (!payload.startDate) delete payload.startDate;
+        if (!payload.endDate) delete payload.endDate;
+      }
 
       const data = await apiRequest('/formations', {
         method: 'POST',
@@ -179,13 +184,27 @@ export default function FormateurPage() {
         <input placeholder="Title" value={formation.title} onChange={(e) => setFormation({ ...formation, title: e.target.value })} required />
         <textarea placeholder="Description" value={formation.description} onChange={(e) => setFormation({ ...formation, description: e.target.value })} required />
         <input type="number" placeholder="Price" value={formation.price} onChange={(e) => setFormation({ ...formation, price: e.target.value })} required />
-        <select value={formation.type} onChange={(e) => setFormation({ ...formation, type: e.target.value })}>
+        <select
+          value={formation.type}
+          onChange={(e) =>
+            setFormation((prev) => ({
+              ...prev,
+              type: e.target.value,
+              startDate: e.target.value === 'PRESENTIEL' ? prev.startDate : '',
+              endDate: e.target.value === 'PRESENTIEL' ? prev.endDate : '',
+            }))
+          }
+        >
           <option value="ONLINE">ONLINE</option>
           <option value="PRESENTIEL">PRESENTIEL</option>
         </select>
         <input placeholder="Location (optional)" value={formation.location} onChange={(e) => setFormation({ ...formation, location: e.target.value })} />
-        <input type="date" value={formation.startDate} onChange={(e) => setFormation({ ...formation, startDate: e.target.value })} />
-        <input type="date" value={formation.endDate} onChange={(e) => setFormation({ ...formation, endDate: e.target.value })} />
+        {formation.type === 'PRESENTIEL' && (
+          <>
+            <input type="date" value={formation.startDate} onChange={(e) => setFormation({ ...formation, startDate: e.target.value })} />
+            <input type="date" value={formation.endDate} onChange={(e) => setFormation({ ...formation, endDate: e.target.value })} />
+          </>
+        )}
         <button type="submit">Create formation</button>
       </form>
 

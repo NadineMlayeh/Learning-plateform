@@ -19,7 +19,18 @@ export default function AdminAddFormationPage({ pushToast }) {
 
   function updateField(event) {
     const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      if (name === 'type') {
+        return {
+          ...prev,
+          type: value,
+          startDate: value === 'PRESENTIEL' ? prev.startDate : '',
+          endDate: value === 'PRESENTIEL' ? prev.endDate : '',
+        };
+      }
+
+      return { ...prev, [name]: value };
+    });
   }
 
   async function handleSubmit(event) {
@@ -35,8 +46,10 @@ export default function AdminAddFormationPage({ pushToast }) {
       };
 
       if (form.location) payload.location = form.location;
-      if (form.startDate) payload.startDate = form.startDate;
-      if (form.endDate) payload.endDate = form.endDate;
+      if (form.type === 'PRESENTIEL') {
+        if (form.startDate) payload.startDate = form.startDate;
+        if (form.endDate) payload.endDate = form.endDate;
+      }
 
       const created = await apiRequest('/formations', {
         method: 'POST',
@@ -65,8 +78,12 @@ export default function AdminAddFormationPage({ pushToast }) {
           <option value="PRESENTIEL">PRESENTIEL</option>
         </select>
         <input name="location" value={form.location} onChange={updateField} placeholder="Location (optional)" />
-        <input name="startDate" type="date" value={form.startDate} onChange={updateField} />
-        <input name="endDate" type="date" value={form.endDate} onChange={updateField} />
+        {form.type === 'PRESENTIEL' && (
+          <>
+            <input name="startDate" type="date" value={form.startDate} onChange={updateField} />
+            <input name="endDate" type="date" value={form.endDate} onChange={updateField} />
+          </>
+        )}
         <button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating...' : 'Create Formation'}</button>
       </form>
     </section>

@@ -4,4 +4,6 @@ export class CreateUserDto {
   password: string; // plain for now, will hash later
   role: 'ADMIN' | 'FORMATEUR' | 'STUDENT';
   formateurStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  bio?: string;
+  dateOfBirth?: string;
 }

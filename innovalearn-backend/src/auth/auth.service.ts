@@ -44,12 +44,14 @@ async validateUser(email: string, password: string) {
   }
 async register(dto: RegisterDto) {
   const hashedPassword = await bcrypt.hash(dto.password, 10);
+  const hasDateOfBirth = Boolean(dto.dateOfBirth);
 
   return this.prisma.user.create({
     data: {
       email: dto.email,
       password: hashedPassword,
       name: dto.name,
+      dateOfBirth: hasDateOfBirth ? new Date(dto.dateOfBirth as string) : null,
       role: dto.role ?? Role.STUDENT,
       formateurStatus:
         dto.role === Role.FORMATEUR ? 'PENDING' : null,

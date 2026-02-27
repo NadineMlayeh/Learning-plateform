@@ -24,6 +24,9 @@ model User {
   name            String
   email           String           @unique
   password        String
+  profileImageUrl String?
+  bio             String?
+  dateOfBirth     DateTime?
   role            Role             @default(STUDENT)
   formateurStatus FormateurStatus?
   createdAt       DateTime         @default(now())

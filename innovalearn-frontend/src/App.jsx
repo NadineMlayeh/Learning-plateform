@@ -20,7 +20,6 @@ import AdminFormationsPage from './pages/AdminFormationsPage';
 import AdminRevenuePage from './pages/AdminRevenuePage';
 import StudentPage from './pages/StudentPage';
 import StudentFormationDetailsPage from './pages/StudentFormationDetailsPage';
-import StudentAchievementsPage from './pages/StudentAchievementsPage';
 import ForbiddenPage from './pages/ForbiddenPage';
 
 export default function App() {
@@ -33,6 +32,9 @@ export default function App() {
   const isBackofficePage =
     location.pathname.startsWith('/admin') ||
     location.pathname.startsWith('/formateur');
+  const isStudentPage = location.pathname.startsWith('/student');
+  const isStudentFormationDetailsPage =
+    location.pathname.startsWith('/student/formations/');
 
   useEffect(() => {
     document.body.classList.toggle('auth-wallpaper-active', isAuthPage);
@@ -51,6 +53,16 @@ export default function App() {
     };
   }, [isBackofficePage]);
 
+  useEffect(() => {
+    document.body.classList.toggle(
+      'student-wallpaper-active',
+      isStudentPage,
+    );
+    return () => {
+      document.body.classList.remove('student-wallpaper-active');
+    };
+  }, [isStudentPage]);
+
   function roleHome() {
     if (!user) return '/';
     if (user.role === 'ADMIN') return '/admin';
@@ -68,7 +80,9 @@ export default function App() {
             ? 'landing-main'
             : isAuthPage
               ? 'auth-main'
-              : 'container'
+              : isStudentFormationDetailsPage
+                ? 'container container-wide'
+                : 'container'
         }
       >
         <Routes>
@@ -182,15 +196,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/student/achievements"
-            element={
-              <ProtectedRoute allowedRoles={['STUDENT']}>
-                <StudentAchievementsPage pushToast={pushToast} />
-              </ProtectedRoute>
-            }
-          />
-
           <Route path="/forbidden" element={<ForbiddenPage />} />
           <Route path="*" element={<Navigate to={roleHome()} replace />} />
         </Routes>

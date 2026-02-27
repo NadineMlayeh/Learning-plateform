@@ -467,15 +467,6 @@ export default function StudentFormationDetailsPage({ pushToast }) {
 
   return (
     <section className="stack student-details-page">
-      <button
-        type="button"
-        className="floating-back-link"
-        onClick={() => navigate('/student')}
-      >
-        <span aria-hidden="true">&lt;</span>
-        <span>Back to Student Dashboard</span>
-      </button>
-
       <div className="card student-details-hero">
         <div className="card-head-row">
           <h1>{formation.title}</h1>
@@ -491,7 +482,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
               formationResult
                 ? formationResult.completed
                   ? 'green'
-                  : 'gray'
+                  : 'red'
                 : 'orange'
             }
           />
@@ -617,6 +608,14 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                         )}
                       </div>
                       <div className="row">
+                        <button
+                          type="button"
+                          className="student-doc-link student-doc-link-placeholder"
+                          aria-hidden="true"
+                          tabIndex={-1}
+                        >
+                          Placeholder
+                        </button>
                         <a
                           className="student-doc-link"
                           href={getLessonPdfLinks(activeLesson.pdfUrl).downloadUrl}
@@ -624,14 +623,6 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                           rel="noreferrer"
                         >
                           Download PDF
-                        </a>
-                        <a
-                          className="student-doc-link is-ghost"
-                          href={resolveApiAssetUrl(activeLesson.pdfUrl)}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Open Source
                         </a>
                       </div>
                     </div>
@@ -765,11 +756,13 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                                   );
                                   const lockedCorrectHighlight =
                                     courseLocked && isCorrectChoice;
+                                  const lockedWrongHighlight =
+                                    courseLocked && selected && !isCorrectChoice;
 
                                   return (
                                     <label
                                       key={choice.id}
-                                      className={`student-choice-card ${selected ? 'is-selected' : ''} ${lockedCorrectHighlight ? 'is-correct-answer' : ''}`}
+                                      className={`student-choice-card ${selected ? 'is-selected' : ''} ${lockedCorrectHighlight ? 'is-correct-answer' : ''} ${lockedWrongHighlight ? 'is-wrong-answer' : ''}`}
                                     >
                                       <input
                                         type="radio"
@@ -828,11 +821,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                                   ? 'Final Submission Completed'
                                   : 'Submit Final Answers'}
                             </button>
-                            {courseLocked && (
-                              <p className="hint">
-                                Submitted answers are now view-only.
-                              </p>
-                            )}
+
                           </div>
                         )}
                       </article>
