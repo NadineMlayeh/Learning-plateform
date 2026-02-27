@@ -64,23 +64,6 @@ export default function SignupPage() {
           <label className="auth-field">
             <span className="auth-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
-                <rect x="4" y="6" width="16" height="14" rx="2" />
-                <path d="M8 4v4M16 4v4M4 10h16" />
-              </svg>
-            </span>
-            <input
-              name="dateOfBirth"
-              type="date"
-              placeholder="Date of birth"
-              value={form.dateOfBirth}
-              onChange={updateField}
-              required
-            />
-          </label>
-
-          <label className="auth-field">
-            <span className="auth-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
                 <path d="M4 6h16v12H4z" />
                 <path d="M4 7l8 6 8-6" />
               </svg>
@@ -98,15 +81,15 @@ export default function SignupPage() {
           <label className="auth-field">
             <span className="auth-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
-                <rect x="5" y="11" width="14" height="9" rx="2" />
-                <path d="M8 11V8a4 4 0 018 0v3" />
+                <rect x="4" y="6" width="16" height="14" rx="2" />
+                <path d="M8 4v4M16 4v4M4 10h16" />
               </svg>
             </span>
             <input
-              name="password"
-              type="password"
-              placeholder="Password"
-              value={form.password}
+              name="dateOfBirth"
+              type="date"
+              placeholder="Date of birth"
+              value={form.dateOfBirth}
               onChange={updateField}
               required
             />
@@ -125,6 +108,23 @@ export default function SignupPage() {
               <option value="FORMATEUR">Formateur</option>
               <option value="ADMIN">Admin</option>
             </select>
+          </label>
+
+          <label className="auth-field">
+            <span className="auth-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <rect x="5" y="11" width="14" height="9" rx="2" />
+                <path d="M8 11V8a4 4 0 018 0v3" />
+              </svg>
+            </span>
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={updateField}
+              required
+            />
           </label>
 
           <button type="submit" className="auth-submit-btn">
