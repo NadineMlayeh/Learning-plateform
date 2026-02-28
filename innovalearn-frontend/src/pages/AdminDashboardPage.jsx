@@ -60,9 +60,10 @@ export default function AdminDashboardPage({ pushToast }) {
 
   const [formations, setFormations] = useState([]);
   const [publishingId, setPublishingId] = useState(null);
-  const [filterMode, setFilterMode] = useState('latest_added');
   const [titleSearch, setTitleSearch] = useState('');
-  const [page, setPage] = useState(1);
+  const [createdSort, setCreatedSort] = useState('newest_first');
+  const [pendingPage, setPendingPage] = useState(1);
+  const [publishedPage, setPublishedPage] = useState(1);
 
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
@@ -122,62 +123,68 @@ export default function AdminDashboardPage({ pushToast }) {
     loadAnalytics();
   }, []);
 
-  const visibleFormations = useMemo(() => {
-    const list = formations
-      .filter((formation) =>
-        (formation.title || '')
+  const sortedFormations = useMemo(() => {
+    const list = [...formations];
+    if (createdSort === 'oldest_first') {
+      return list.sort((a, b) => createdTimestamp(a) - createdTimestamp(b));
+    }
+    return list.sort((a, b) => createdTimestamp(b) - createdTimestamp(a));
+  }, [formations, createdSort]);
+
+  const filteredFormations = useMemo(
+    () =>
+      sortedFormations.filter((formation) =>
+        String(formation.title || '')
           .toLowerCase()
           .includes(titleSearch.toLowerCase().trim()),
-      )
-      .sort((a, b) => createdTimestamp(b) - createdTimestamp(a));
+      ),
+    [sortedFormations, titleSearch],
+  );
 
-    if (filterMode === 'published_only') {
-      return list.filter((formation) => formation.published);
-    }
+  const pendingFormations = useMemo(
+    () => filteredFormations.filter((formation) => !formation.published),
+    [filteredFormations],
+  );
 
-    if (filterMode === 'draft_only') {
-      return list.filter((formation) => !formation.published);
-    }
+  const publishedFormations = useMemo(
+    () => filteredFormations.filter((formation) => formation.published),
+    [filteredFormations],
+  );
 
-    if (
-      filterMode === 'online_first' ||
-      filterMode === 'presentiel_first'
-    ) {
-      const onlineFirst = { ONLINE: 0, PRESENTIEL: 1 };
-      const presentielFirst = { PRESENTIEL: 0, ONLINE: 1 };
-      const priority =
-        filterMode === 'online_first'
-          ? onlineFirst
-          : presentielFirst;
-
-      return list.sort((a, b) => {
-        const typeDiff = priority[a.type] - priority[b.type];
-        if (typeDiff !== 0) return typeDiff;
-        return createdTimestamp(b) - createdTimestamp(a);
-      });
-    }
-
-    return list;
-  }, [formations, filterMode, titleSearch]);
-
-  const totalPages = Math.max(
+  const pendingTotalPages = Math.max(
     1,
-    Math.ceil(visibleFormations.length / PAGE_SIZE),
+    Math.ceil(pendingFormations.length / PAGE_SIZE),
   );
-  const pageRows = visibleFormations.slice(
-    (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE,
+  const publishedTotalPages = Math.max(
+    1,
+    Math.ceil(publishedFormations.length / PAGE_SIZE),
+  );
+
+  const pendingRows = pendingFormations.slice(
+    (pendingPage - 1) * PAGE_SIZE,
+    pendingPage * PAGE_SIZE,
+  );
+  const publishedRows = publishedFormations.slice(
+    (publishedPage - 1) * PAGE_SIZE,
+    publishedPage * PAGE_SIZE,
   );
 
   useEffect(() => {
-    setPage(1);
-  }, [filterMode, titleSearch]);
-
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages);
+    if (pendingPage > pendingTotalPages) {
+      setPendingPage(pendingTotalPages);
     }
-  }, [page, totalPages]);
+  }, [pendingPage, pendingTotalPages]);
+
+  useEffect(() => {
+    if (publishedPage > publishedTotalPages) {
+      setPublishedPage(publishedTotalPages);
+    }
+  }, [publishedPage, publishedTotalPages]);
+
+  useEffect(() => {
+    setPendingPage(1);
+    setPublishedPage(1);
+  }, [titleSearch]);
 
   const analyticsFormations = analyticsData?.formations || [];
 
@@ -208,7 +215,7 @@ export default function AdminDashboardPage({ pushToast }) {
   }
 
   return (
-    <section className="stack">
+    <section className="stack formateur-dashboard-page">
       <ProfileSidebar user={user} />
 
       <div className="card panel-head">
@@ -228,15 +235,14 @@ export default function AdminDashboardPage({ pushToast }) {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card formateur-formations-card">
         <div className="card-head-row">
-          <h2>Formations</h2>
+          <h2>Pending Formations</h2>
           <StatusBadge
-            label={`${visibleFormations.length} total`}
-            tone="neutral"
+            label={`${pendingFormations.length} drafts`}
+            tone={pendingFormations.length > 0 ? 'orange' : 'gray'}
           />
         </div>
-
         <div className="table-toolbar">
           <input
             type="text"
@@ -245,59 +251,51 @@ export default function AdminDashboardPage({ pushToast }) {
             placeholder="Search by formation title"
           />
           <select
-            value={filterMode}
-            onChange={(event) => setFilterMode(event.target.value)}
+            value={createdSort}
+            onChange={(event) => setCreatedSort(event.target.value)}
           >
-            <option value="latest_added">Added Latest (Default)</option>
-            <option value="published_only">Published Only</option>
-            <option value="draft_only">Draft Only</option>
-            <option value="online_first">Online First</option>
-            <option value="presentiel_first">Presentiel First</option>
+            <option value="newest_first">Newest first (Default)</option>
+            <option value="oldest_first">Oldest first</option>
           </select>
         </div>
 
         <div className="table-wrap">
-          <table>
+          <table className="formateur-formations-table">
             <thead>
               <tr>
                 <th>ID</th>
                 <th>Title</th>
                 <th>Type</th>
-                <th>Status</th>
                 <th>Price</th>
+                <th>Status</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {pageRows.map((formation) => (
+              {pendingRows.map((formation) => (
                 <tr key={formation.id}>
                   <td>{formation.id}</td>
-                  <td>{formation.title}</td>
+                  <td
+                    className="formateur-formation-title-cell"
+                    title={formation.title}
+                  >
+                    {formation.title}
+                  </td>
                   <td>
                     <StatusBadge
                       tone={formation.type === 'ONLINE' ? 'blue' : 'orange'}
                       label={formation.type}
                     />
                   </td>
-                  <td>
-                    <StatusBadge
-                      tone={formation.published ? 'green' : 'gray'}
-                      label={formation.published ? 'Published' : 'Draft'}
-                    />
-                  </td>
                   <td>{formation.price}</td>
                   <td>
+                    <StatusBadge
+                      tone="gray"
+                      label="Draft"
+                    />
+                  </td>
+                  <td>
                     <div className="row action-btn-group">
-                      <LoadingButton
-                        className="action-btn action-approve"
-                        type="button"
-                        isLoading={publishingId === formation.id}
-                        loadingText="Working..."
-                        disabled={formation.published}
-                        onClick={() => publishFormation(formation.id)}
-                      >
-                        {formation.published ? 'Published' : 'Publish'}
-                      </LoadingButton>
                       <button
                         type="button"
                         className="action-btn action-page"
@@ -306,6 +304,127 @@ export default function AdminDashboardPage({ pushToast }) {
                         }
                       >
                         Open
+                      </button>
+                      <LoadingButton
+                        className="action-btn action-publish"
+                        type="button"
+                        isLoading={publishingId === formation.id}
+                        loadingText="Working..."
+                        disabled={false}
+                        onClick={() => publishFormation(formation.id)}
+                      >
+                        Publish
+                      </LoadingButton>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {pendingRows.length === 0 && (
+                <tr>
+                  <td colSpan={6}>No pending draft formations.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="pagination-bar">
+          <button
+            type="button"
+            className="action-btn action-page"
+            onClick={() => setPendingPage((prev) => Math.max(1, prev - 1))}
+            disabled={pendingPage === 1}
+          >
+            Prev
+          </button>
+          <span>
+            Page {pendingPage} / {pendingTotalPages}
+          </span>
+          <button
+            type="button"
+            className="action-btn action-page"
+            onClick={() =>
+              setPendingPage((prev) => Math.min(pendingTotalPages, prev + 1))
+            }
+            disabled={pendingPage === pendingTotalPages}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
+      <div className="card formateur-formations-card">
+        <div className="card-head-row">
+          <h2>Formation Analytics</h2>
+          <StatusBadge
+            label={`${publishedFormations.length} published`}
+            tone={publishedFormations.length > 0 ? 'green' : 'gray'}
+          />
+        </div>
+        {analyticsData?.generatedAt && (
+          <p className="hint">
+            Last refresh: {new Date(analyticsData.generatedAt).toLocaleString()}
+          </p>
+        )}
+
+        {analyticsLoading && <p className="hint">Loading analytics...</p>}
+        <div className="table-toolbar">
+          <input
+            type="text"
+            value={titleSearch}
+            onChange={(event) => setTitleSearch(event.target.value)}
+            placeholder="Search by formation title"
+          />
+          <select
+            value={createdSort}
+            onChange={(event) => setCreatedSort(event.target.value)}
+          >
+            <option value="newest_first">Newest first (Default)</option>
+            <option value="oldest_first">Oldest first</option>
+          </select>
+        </div>
+        <div className="table-wrap">
+          <table className="formateur-formations-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {publishedRows.map((formation) => (
+                <tr key={formation.id}>
+                  <td>{formation.id}</td>
+                  <td
+                    className="formateur-formation-title-cell"
+                    title={formation.title}
+                  >
+                    {formation.title}
+                  </td>
+                  <td>
+                    <StatusBadge
+                      tone={formation.type === 'ONLINE' ? 'blue' : 'orange'}
+                      label={formation.type}
+                    />
+                  </td>
+                  <td>{formation.price}</td>
+                  <td>
+                    <StatusBadge tone="green" label="Published" />
+                  </td>
+                  <td>
+                    <div className="row action-btn-group">
+                      <button
+                        type="button"
+                        className="action-btn action-page"
+                        onClick={() =>
+                          navigate(`/formateur/formations/${formation.id}`)
+                        }
+                      >
+                        View
                       </button>
                       <button
                         type="button"
@@ -318,9 +437,9 @@ export default function AdminDashboardPage({ pushToast }) {
                   </td>
                 </tr>
               ))}
-              {pageRows.length === 0 && (
+              {publishedRows.length === 0 && (
                 <tr>
-                  <td colSpan={6}>No formations match this filter.</td>
+                  <td colSpan={6}>No published formations yet.</td>
                 </tr>
               )}
             </tbody>
@@ -331,51 +450,25 @@ export default function AdminDashboardPage({ pushToast }) {
           <button
             type="button"
             className="action-btn action-page"
-            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-            disabled={page === 1}
+            onClick={() => setPublishedPage((prev) => Math.max(1, prev - 1))}
+            disabled={publishedPage === 1}
           >
             Prev
           </button>
           <span>
-            Page {page} / {totalPages}
+            Page {publishedPage} / {publishedTotalPages}
           </span>
           <button
             type="button"
             className="action-btn action-page"
             onClick={() =>
-              setPage((prev) => Math.min(totalPages, prev + 1))
+              setPublishedPage((prev) => Math.min(publishedTotalPages, prev + 1))
             }
-            disabled={page === totalPages}
+            disabled={publishedPage === publishedTotalPages}
           >
             Next
           </button>
         </div>
-      </div>
-
-      <div className="card">
-        <div className="card-head-row">
-          <h2>Formation Analytics</h2>
-          <StatusBadge
-            label={`${analyticsFormations.length} formations`}
-            tone={analyticsFormations.length > 0 ? 'blue' : 'gray'}
-          />
-        </div>
-        {analyticsData?.generatedAt && (
-          <p className="hint">
-            Last refresh: {new Date(analyticsData.generatedAt).toLocaleString()}
-          </p>
-        )}
-
-        {analyticsLoading && <p className="hint">Loading analytics...</p>}
-        {!analyticsLoading && analyticsFormations.length > 0 && (
-          <p className="hint">
-            Click the `Stats` button on any formation row to open a detailed analytics window.
-          </p>
-        )}
-
-        {!analyticsLoading && analyticsFormations.length === 0 && (
-          <p className="hint">No analytics available yet for your formations.</p>
-        )}
       </div>
 
       {selectedAnalyticsEntry && (
@@ -406,7 +499,9 @@ export default function AdminDashboardPage({ pushToast }) {
                   <article className="formateur-analytics-card">
                     <div className="card-head-row">
                       <div>
-                        <h3>{formation.title}</h3>
+                        <h3 className="formateur-analytics-title" title={formation.title}>
+                          {formation.title}
+                        </h3>
                         <p className="hint">{formation.type} | Price: {formation.price}</p>
                       </div>
                       <div className="row">
@@ -500,8 +595,12 @@ export default function AdminDashboardPage({ pushToast }) {
                               student.completionStatus !== 'IN_PROGRESS';
                             return (
                               <tr key={student.id}>
-                                <td>{student.name}</td>
-                                <td>{student.email}</td>
+                                <td className="formateur-ellipsis-cell" title={student.name}>
+                                  {student.name}
+                                </td>
+                                <td className="formateur-ellipsis-cell" title={student.email}>
+                                  {student.email}
+                                </td>
                                 <td>
                                   <StatusBadge
                                     label={
@@ -549,7 +648,9 @@ export default function AdminDashboardPage({ pushToast }) {
                         <tbody>
                           {courses.map((course) => (
                             <tr key={course.id}>
-                              <td>{course.title}</td>
+                              <td className="formateur-ellipsis-cell" title={course.title}>
+                                {course.title}
+                              </td>
                               <td>{course.passedStudents}</td>
                               <td>{course.failedStudents}</td>
                               <td>{Number(course.averageScore || 0).toFixed(2)}%</td>

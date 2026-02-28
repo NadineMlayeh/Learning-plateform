@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { FormationService } from './formation.service';
 import { CreateFormationDto } from './dto/create-formation.dto';
+import { UpdateFormationDto } from './dto/update-formation.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -51,6 +52,21 @@ export class FormationController {
     return this.formationService.findManageFormationById(
       Number(id),
       req.user.userId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.FORMATEUR)
+  @Patch(':id')
+  updateFormation(
+    @Param('id') id: string,
+    @Body() dto: UpdateFormationDto,
+    @Req() req,
+  ) {
+    return this.formationService.updateFormation(
+      Number(id),
+      req.user.userId,
+      dto,
     );
   }
 

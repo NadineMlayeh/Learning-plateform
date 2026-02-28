@@ -8,6 +8,7 @@ export default function SignupPage() {
     name: '',
     dateOfBirth: '',
     email: '',
+    phoneNumber: '',
     password: '',
     role: 'STUDENT',
   });
@@ -73,6 +74,23 @@ export default function SignupPage() {
               type="email"
               placeholder="Email address"
               value={form.email}
+              onChange={updateField}
+              required
+            />
+          </label>
+
+          <label className="auth-field">
+            <span className="auth-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                <path d="M10 18h4" />
+              </svg>
+            </span>
+            <input
+              name="phoneNumber"
+              type="tel"
+              placeholder="Phone number"
+              value={form.phoneNumber}
               onChange={updateField}
               required
             />

@@ -27,6 +27,7 @@ export default function ProfileSidebar({ user }) {
   const [form, setForm] = useState({
     name: '',
     bio: '',
+    phoneNumber: '',
     dateOfBirth: '',
   });
   const [savingProfile, setSavingProfile] = useState(false);
@@ -80,9 +81,10 @@ export default function ProfileSidebar({ user }) {
     setForm({
       name: profile?.name || '',
       bio: profile?.bio || '',
+      phoneNumber: profile?.phoneNumber || '',
       dateOfBirth: formatDateForInput(profile?.dateOfBirth),
     });
-  }, [profile?.name, profile?.bio, profile?.dateOfBirth]);
+  }, [profile?.name, profile?.bio, profile?.phoneNumber, profile?.dateOfBirth]);
 
   useEffect(() => {
     if (!open) {
@@ -146,6 +148,7 @@ export default function ProfileSidebar({ user }) {
         body: {
           name: form.name,
           bio: form.bio,
+          phoneNumber: form.phoneNumber || null,
           dateOfBirth: form.dateOfBirth || null,
         },
       });
@@ -191,7 +194,6 @@ export default function ProfileSidebar({ user }) {
 
       <aside className={`profile-drawer ${open ? 'is-open' : ''}`}>
         <div className="profile-drawer-head">
-          <h2>Profile</h2>
           <button
             type="button"
             className="profile-drawer-close"
@@ -228,20 +230,62 @@ export default function ProfileSidebar({ user }) {
               </div>
             </div>
             <div className="profile-card">
-              <p className="hint">Bio</p>
+              <p className="hint profile-meta-label">
+                <span className="profile-meta-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 6h14M5 12h14M5 18h10" />
+                  </svg>
+                </span>
+                Bio
+              </p>
               <strong>{profile?.bio?.trim() || ''}</strong>
             </div>
             <div className="profile-card">
-              <p className="hint">Email</p>
+              <p className="hint profile-meta-label">
+                <span className="profile-meta-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M6 3h5l1.5 4-2.4 1.8a14 14 0 005.6 5.6L17.5 12 21 13.5v5a2 2 0 01-2 2A16 16 0 013 5a2 2 0 012-2z" />
+                  </svg>
+                </span>
+                Phone number
+              </p>
+              <strong>{profile?.phoneNumber || 'Not available'}</strong>
+            </div>
+            <div className="profile-card">
+              <p className="hint profile-meta-label">
+                <span className="profile-meta-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M3 6h18v12H3z" />
+                    <path d="M3 7l9 6 9-6" />
+                  </svg>
+                </span>
+                Email
+              </p>
               <strong>{profile?.email || 'Not available'}</strong>
             </div>
             <div className="profile-card">
-              <p className="hint">Date of birth</p>
+              <p className="hint profile-meta-label">
+                <span className="profile-meta-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <rect x="4" y="6" width="16" height="14" rx="2" />
+                    <path d="M8 4v4M16 4v4M4 10h16" />
+                  </svg>
+                </span>
+                Date of birth
+              </p>
               <strong>{formatDate(profile?.dateOfBirth)}</strong>
             </div>
 
             <div className="profile-card">
-              <p className="hint">Member since</p>
+              <p className="hint profile-meta-label">
+                <span className="profile-meta-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="8" />
+                    <path d="M12 8v5l3 2" />
+                  </svg>
+                </span>
+                Member since
+              </p>
               <strong>{formatDate(profile?.createdAt)}</strong>
             </div>
 
@@ -254,7 +298,12 @@ export default function ProfileSidebar({ user }) {
                   setIsEditMode(true);
                 }}
               >
-                <img src="/images/settings.png" alt="" className="profile-settings-icon" />
+                <span className="profile-settings-icon profile-settings-gear" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M10.4 2h3.2l.5 2.2a7.9 7.9 0 011.8.8l2-1.1 2.3 2.3-1.1 2a8.2 8.2 0 01.8 1.8L22 10.4v3.2l-2.2.5a8.2 8.2 0 01-.8 1.8l1.1 2-2.3 2.3-2-1.1a7.9 7.9 0 01-1.8.8l-.5 2.2h-3.2l-.5-2.2a7.9 7.9 0 01-1.8-.8l-2 1.1-2.3-2.3 1.1-2a8.2 8.2 0 01-.8-1.8L2 13.6v-3.2l2.2-.5a8.2 8.2 0 01.8-1.8l-1.1-2L6.2 3.8l2 1.1a7.9 7.9 0 011.8-.8L10.4 2z" />
+                    <circle cx="12" cy="12" r="2.8" />
+                  </svg>
+                </span>
                 <span>Settings</span>
               </a>
             )}
@@ -303,6 +352,21 @@ export default function ProfileSidebar({ user }) {
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, bio: event.target.value }))
                 }
+              />
+            </label>
+
+            <label className="profile-edit-field">
+              <span>Phone number</span>
+              <input
+                type="tel"
+                value={form.phoneNumber}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    phoneNumber: event.target.value,
+                  }))
+                }
+                placeholder="e.g. +212 6 12 34 56 78"
               />
             </label>
 

@@ -49,6 +49,7 @@ export class UserController {
       name?: string;
       bio?: string | null;
       dateOfBirth?: string | null;
+      phoneNumber?: string | null;
     },
   ) {
     if (!['STUDENT', 'FORMATEUR'].includes(String(req.user.role || ''))) {

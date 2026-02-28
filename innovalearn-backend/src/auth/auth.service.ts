@@ -51,6 +51,7 @@ async register(dto: RegisterDto) {
       email: dto.email,
       password: hashedPassword,
       name: dto.name,
+      phoneNumber: dto.phoneNumber.trim(),
       dateOfBirth: hasDateOfBirth ? new Date(dto.dateOfBirth as string) : null,
       role: dto.role ?? Role.STUDENT,
       formateurStatus:

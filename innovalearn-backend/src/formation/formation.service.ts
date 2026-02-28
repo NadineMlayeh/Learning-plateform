@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFormationDto } from './dto/create-formation.dto';
+import { UpdateFormationDto } from './dto/update-formation.dto';
 import { Role } from '@prisma/client';
 
 @Injectable()
@@ -299,6 +300,86 @@ export class FormationService {
     }
 
     return formation;
+  }
+
+  async updateFormation(
+    formationId: number,
+    formateurId: number,
+    dto: UpdateFormationDto,
+  ) {
+    const formation = await this.prisma.formation.findFirst({
+      where: { id: formationId, formateurId },
+      select: {
+        id: true,
+        published: true,
+      },
+    });
+
+    if (!formation) {
+      throw new NotFoundException(
+        'Formation not found or not accessible',
+      );
+    }
+
+    if (formation.published) {
+      throw new BadRequestException(
+        'Published formation cannot be edited',
+      );
+    }
+
+    const data: {
+      title?: string;
+      description?: string;
+      price?: number;
+    } = {};
+
+    if (dto.title !== undefined) {
+      const nextTitle = String(dto.title || '').trim();
+      if (!nextTitle) {
+        throw new BadRequestException('Title cannot be empty');
+      }
+      data.title = nextTitle;
+    }
+
+    if (dto.description !== undefined) {
+      const nextDescription = String(dto.description || '').trim();
+      if (!nextDescription) {
+        throw new BadRequestException('Description cannot be empty');
+      }
+      data.description = nextDescription;
+    }
+
+    if (dto.price !== undefined) {
+      const nextPrice = Number(dto.price);
+      if (!Number.isFinite(nextPrice) || nextPrice < 0) {
+        throw new BadRequestException(
+          'Price must be a valid non-negative number',
+        );
+      }
+      data.price = nextPrice;
+    }
+
+    if (!Object.keys(data).length) {
+      throw new BadRequestException(
+        'At least one field is required (title, description, price)',
+      );
+    }
+
+    return this.prisma.formation.update({
+      where: { id: formationId },
+      data,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        price: true,
+        type: true,
+        published: true,
+        location: true,
+        startDate: true,
+        endDate: true,
+      },
+    });
   }
 
   async publishFormation(formationId: number, formateurId: number) {

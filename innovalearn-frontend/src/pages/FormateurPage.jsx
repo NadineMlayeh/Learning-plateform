@@ -242,13 +242,13 @@ export default function FormateurPage() {
       <form className="card grid" onSubmit={publishCourse}>
         <h2>Publish Course</h2>
         <input placeholder="Course ID" value={courseIdForPublish} onChange={(e) => setCourseIdForPublish(e.target.value)} required />
-        <button type="submit">Publish course</button>
+        <button type="submit" className="action-publish">Publish course</button>
       </form>
 
       <form className="card grid" onSubmit={publishFormation}>
         <h2>Publish Formation</h2>
         <input placeholder="Formation ID" value={formationIdForPublish} onChange={(e) => setFormationIdForPublish(e.target.value)} required />
-        <button type="submit">Publish formation</button>
+        <button type="submit" className="action-publish">Publish formation</button>
       </form>
 
       <pre className="card log">{log}</pre>

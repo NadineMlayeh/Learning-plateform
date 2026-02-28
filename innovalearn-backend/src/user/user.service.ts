@@ -18,6 +18,7 @@ async create(dto: CreateUserDto) {
     data: {
       name: dto.name,
       email: dto.email,
+      phoneNumber: dto.phoneNumber?.trim() || null,
       password: hashedPassword,
       role: dto.role,
       formateurStatus: dto.formateurStatus || null,
@@ -33,6 +34,7 @@ async create(dto: CreateUserDto) {
         id: true,
         name: true,
         email: true,
+        phoneNumber: true,
         role: true,
         formateurStatus: true,
         createdAt: true,
@@ -51,6 +53,7 @@ async create(dto: CreateUserDto) {
         id: true,
         name: true,
         email: true,
+        phoneNumber: true,
         role: true,
         formateurStatus: true,
         createdAt: true,
@@ -74,6 +77,7 @@ async create(dto: CreateUserDto) {
         id: true,
         name: true,
         email: true,
+        phoneNumber: true,
         role: true,
         formateurStatus: true,
         createdAt: true,
@@ -111,6 +115,7 @@ async create(dto: CreateUserDto) {
       name?: string;
       bio?: string | null;
       dateOfBirth?: string | null;
+      phoneNumber?: string | null;
     },
   ) {
     const data: Prisma.UserUpdateInput = {};
@@ -144,9 +149,21 @@ async create(dto: CreateUserDto) {
       }
     }
 
+    if (payload.phoneNumber !== undefined) {
+      if (payload.phoneNumber == null || payload.phoneNumber === '') {
+        data.phoneNumber = null;
+      } else if (typeof payload.phoneNumber === 'string') {
+        const trimmedPhone = payload.phoneNumber.trim();
+        if (!/^[+]?[\d\s\-()]{8,20}$/.test(trimmedPhone)) {
+          throw new BadRequestException('Invalid phone number format');
+        }
+        data.phoneNumber = trimmedPhone;
+      }
+    }
+
     if (!Object.keys(data).length) {
       throw new BadRequestException(
-        'At least one field is required (name, bio, dateOfBirth)',
+        'At least one field is required (name, bio, dateOfBirth, phoneNumber)',
       );
     }
 
@@ -157,6 +174,7 @@ async create(dto: CreateUserDto) {
         id: true,
         name: true,
         email: true,
+        phoneNumber: true,
         role: true,
         formateurStatus: true,
         createdAt: true,

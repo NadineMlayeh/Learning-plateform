@@ -939,12 +939,12 @@ export default function StudentPage({ pushToast }) {
 
       <article className="student-v2-hero">
         <div className="student-v2-hero-edge-avatar" aria-hidden="true">
-          <img src="/images/student.png" alt="Student avatar" />
+          <img src="/images/robot.png" alt="Student avatar" />
         </div>
 
         <div className="student-v2-hero-main">
           <div className="student-v2-hero-text">
-            <h1>Welcome back, {studentName} 👋</h1>
+            <h1>Welcome back ! {studentName}</h1>
             <p>Keep learning. You&apos;re making great progress!</p>
           </div>
 
