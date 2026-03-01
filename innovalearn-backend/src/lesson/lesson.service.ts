@@ -89,4 +89,37 @@ export class LessonService {
       },
     });
   }
+
+  async deleteLesson(lessonId: number, formateurId: number) {
+    const lesson = await this.prisma.lesson.findUnique({
+      where: { id: lessonId },
+      include: {
+        course: {
+          include: {
+            formation: true,
+          },
+        },
+      },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException('Lesson not found');
+    }
+
+    if (lesson.course.formation.formateurId !== formateurId) {
+      throw new ForbiddenException('You cannot delete this lesson');
+    }
+
+    if (lesson.course.formation.published || lesson.course.published) {
+      throw new BadRequestException(
+        'Published content cannot be altered',
+      );
+    }
+
+    await this.prisma.lesson.delete({
+      where: { id: lessonId },
+    });
+
+    return { message: 'Lesson deleted successfully' };
+  }
 }

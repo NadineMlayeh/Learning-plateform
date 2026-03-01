@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Patch,
+  Delete,
   Param,
   Body,
   UseGuards,
@@ -62,6 +63,16 @@ export class QuizController {
     return this.quizService.updateQuiz(
       Number(quizId),
       dto,
+      req.user.userId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.FORMATEUR)
+  @Delete('quizzes/:quizId')
+  deleteQuiz(@Param('quizId') quizId: string, @Req() req) {
+    return this.quizService.deleteQuiz(
+      Number(quizId),
       req.user.userId,
     );
   }

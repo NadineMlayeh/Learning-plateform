@@ -1,20 +1,22 @@
 import {
-  Controller,
-  Post,
   Body,
-  UseGuards,
-  Req,
+  Controller,
+  Delete,
   Get,
-  Patch,
+  ParseIntPipe,
   Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { FormationService } from './formation.service';
-import { CreateFormationDto } from './dto/create-formation.dto';
-import { UpdateFormationDto } from './dto/update-formation.dto';
+import { Role } from '@prisma/client';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { Role } from '@prisma/client';
+import { CreateFormationDto } from './dto/create-formation.dto';
+import { UpdateFormationDto } from './dto/update-formation.dto';
+import { FormationService } from './formation.service';
 
 @Controller('formations')
 export class FormationController {
@@ -31,26 +33,22 @@ export class FormationController {
   @Roles(Role.FORMATEUR)
   @Get('manage/analytics')
   getManageAnalytics(@Req() req) {
-    return this.formationService.getFormateurAnalytics(
-      req.user.userId,
-    );
+    return this.formationService.getFormateurAnalytics(req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.FORMATEUR)
   @Get('manage')
   getManageFormations(@Req() req) {
-    return this.formationService.findManageFormations(
-      req.user.userId,
-    );
+    return this.formationService.findManageFormations(req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.FORMATEUR)
   @Get(':id/manage')
-  getManageFormationById(@Param('id') id: string, @Req() req) {
+  getManageFormationById(@Param('id', ParseIntPipe) id: number, @Req() req) {
     return this.formationService.findManageFormationById(
-      Number(id),
+      id,
       req.user.userId,
     );
   }
@@ -58,16 +56,22 @@ export class FormationController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.FORMATEUR)
   @Patch(':id')
-  updateFormation(
-    @Param('id') id: string,
-    @Body() dto: UpdateFormationDto,
-    @Req() req,
-  ) {
-    return this.formationService.updateFormation(
-      Number(id),
-      req.user.userId,
-      dto,
-    );
+  updateFormation(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateFormationDto, @Req() req) {
+    return this.formationService.updateFormation(id, req.user.userId, dto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.FORMATEUR)
+  @Patch(':id/publish')
+  publishFormation(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.formationService.publishFormation(id, req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.FORMATEUR)
+  @Delete(':id')
+  deletePendingFormation(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.formationService.deletePendingFormation(id, req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -76,24 +80,11 @@ export class FormationController {
     return this.formationService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.FORMATEUR)
-  @Patch(':id/publish')
-  publishFormation(@Param('id') id: string, @Req() req) {
-    return this.formationService.publishFormation(
-      Number(id),
-      req.user.userId,
-    );
-  }
   // STUDENTS ONLY — view formation details if enrolled & approved
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.STUDENT)
-@Get(':id/details')
-async getFormationDetails(@Param('id') id: string, @Req() req) {
-  return this.formationService.findFormationDetails(
-    Number(id),
-    req.user.userId,
-  );
-}
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.STUDENT)
+  @Get(':id/details')
+  async getFormationDetails(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.formationService.findFormationDetails(id, req.user.userId);
+  }
 }

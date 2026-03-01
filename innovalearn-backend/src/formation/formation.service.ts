@@ -273,6 +273,10 @@ export class FormationService {
     formationId: number,
     formateurId: number,
   ) {
+    if (!Number.isInteger(formationId) || formationId <= 0) {
+      throw new BadRequestException('Invalid formation id');
+    }
+
     const formation = await this.prisma.formation.findFirst({
       where: { id: formationId, formateurId },
       include: {
@@ -422,6 +426,117 @@ export class FormationService {
     return this.prisma.formation.update({
       where: { id: formationId },
       data: { published: true },
+    });
+  }
+
+  async deletePendingFormation(formationId: number, formateurId: number) {
+    return this.prisma.$transaction(async (tx) => {
+      const formation = await tx.formation.findUnique({
+        where: { id: formationId },
+        select: {
+          id: true,
+          formateurId: true,
+          published: true,
+        },
+      });
+
+      if (!formation) {
+        throw new NotFoundException('Formation not found');
+      }
+
+      if (formation.formateurId !== formateurId) {
+        throw new ForbiddenException('You cannot delete this formation');
+      }
+
+      if (formation.published) {
+        throw new BadRequestException(
+          'Only pending (draft) formations can be deleted',
+        );
+      }
+
+      const courses = await tx.course.findMany({
+        where: { formationId },
+        select: { id: true },
+      });
+      const courseIds = courses.map((entry) => entry.id);
+
+      const quizzes =
+        courseIds.length === 0
+          ? []
+          : await tx.quiz.findMany({
+              where: { courseId: { in: courseIds } },
+              select: { id: true },
+            });
+      const quizIds = quizzes.map((entry) => entry.id);
+
+      const questions =
+        quizIds.length === 0
+          ? []
+          : await tx.question.findMany({
+              where: { quizId: { in: quizIds } },
+              select: { id: true },
+            });
+      const questionIds = questions.map((entry) => entry.id);
+
+      await tx.invoice.deleteMany({
+        where: {
+          enrollment: {
+            formationId,
+          },
+        },
+      });
+
+      await tx.enrollment.deleteMany({
+        where: { formationId },
+      });
+
+      await tx.formationResult.deleteMany({
+        where: { formationId },
+      });
+
+      if (courseIds.length > 0) {
+        await tx.courseResult.deleteMany({
+          where: { courseId: { in: courseIds } },
+        });
+      }
+
+      if (quizIds.length > 0) {
+        await tx.quizSubmission.deleteMany({
+          where: { quizId: { in: quizIds } },
+        });
+      }
+
+      if (questionIds.length > 0) {
+        await tx.choice.deleteMany({
+          where: { questionId: { in: questionIds } },
+        });
+
+        await tx.question.deleteMany({
+          where: { id: { in: questionIds } },
+        });
+      }
+
+      if (quizIds.length > 0) {
+        await tx.quiz.deleteMany({
+          where: { id: { in: quizIds } },
+        });
+      }
+
+      if (courseIds.length > 0) {
+        await tx.lesson.deleteMany({
+          where: { courseId: { in: courseIds } },
+        });
+
+        await tx.course.deleteMany({
+          where: { id: { in: courseIds } },
+        });
+      }
+
+      await tx.formation.delete({
+        where: { id: formationId },
+      });
+
+      return { message: 'Pending formation deleted successfully' };
     });
   }
 

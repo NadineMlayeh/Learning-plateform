@@ -232,7 +232,7 @@ export default function AdminFormateursPage({ pushToast }) {
   }, [search]);
 
   return (
-    <section className="stack">
+    <section className="stack admin-skin-page">
       <ProfileSidebar user={user} />
 
       <div className="card panel-head">
@@ -459,7 +459,7 @@ export default function AdminFormateursPage({ pushToast }) {
             <button type="button" className="action-btn action-reject" onClick={deleteFormateur} disabled={saving}>
               {saving ? 'Deleting...' : 'Confirm'}
             </button>
-            <button type="button" className="action-btn action-page" onClick={() => setDeleteTarget(null)} disabled={saving}>
+            <button type="button" className="action-btn modal-cancel-btn" onClick={() => setDeleteTarget(null)} disabled={saving}>
               Cancel
             </button>
           </div>

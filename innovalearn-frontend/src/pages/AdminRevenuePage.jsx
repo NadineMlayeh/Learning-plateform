@@ -64,7 +64,7 @@ export default function AdminRevenuePage({ pushToast }) {
   }, [year]);
 
   return (
-    <section className="stack">
+    <section className="stack admin-skin-page">
       <ProfileSidebar user={user} />
 
       <div className="card panel-head">

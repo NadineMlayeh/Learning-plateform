@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Patch,
+  Delete,
   Param,
   Body,
   UseGuards,
@@ -38,6 +39,16 @@ export class CourseController {
   @Patch('courses/:id/publish')
   publishCourse(@Param('id') id: string, @Req() req) {
     return this.courseService.publishCourse(
+      Number(id),
+      req.user.userId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.FORMATEUR)
+  @Delete('courses/:id')
+  deletePendingCourse(@Param('id') id: string, @Req() req) {
+    return this.courseService.deletePendingCourse(
       Number(id),
       req.user.userId,
     );

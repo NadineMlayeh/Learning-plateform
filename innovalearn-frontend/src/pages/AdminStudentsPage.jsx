@@ -135,7 +135,7 @@ export default function AdminStudentsPage({ pushToast }) {
   }, [search]);
 
   return (
-    <section className="stack">
+    <section className="stack admin-skin-page">
       <ProfileSidebar user={user} />
 
       <div className="card panel-head">
@@ -338,7 +338,7 @@ export default function AdminStudentsPage({ pushToast }) {
             <button type="button" className="action-btn action-reject" onClick={onConfirmDelete} disabled={saving}>
               {saving ? 'Deleting...' : 'Confirm'}
             </button>
-            <button type="button" className="action-btn action-page" onClick={() => setDeleteTarget(null)} disabled={saving}>
+            <button type="button" className="action-btn modal-cancel-btn" onClick={() => setDeleteTarget(null)} disabled={saving}>
               Cancel
             </button>
           </div>

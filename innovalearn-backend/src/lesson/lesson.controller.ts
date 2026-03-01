@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Patch,
+  Delete,
   Param,
   Body,
   UseGuards,
@@ -45,6 +46,16 @@ export class LessonController {
     return this.lessonService.updateLesson(
       Number(lessonId),
       dto,
+      req.user.userId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.FORMATEUR)
+  @Delete('lessons/:lessonId')
+  deleteLesson(@Param('lessonId') lessonId: string, @Req() req) {
+    return this.lessonService.deleteLesson(
+      Number(lessonId),
       req.user.userId,
     );
   }

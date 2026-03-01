@@ -506,6 +506,60 @@ export class QuizService {
     });
   }
 
+  async deleteQuiz(quizId: number, formateurId: number) {
+    return this.prisma.$transaction(async (tx) => {
+      const quiz = await tx.quiz.findUnique({
+        where: { id: quizId },
+        include: {
+          course: {
+            include: {
+              formation: true,
+            },
+          },
+          questions: {
+            select: { id: true },
+          },
+        },
+      });
+
+      if (!quiz) {
+        throw new NotFoundException('Quiz not found');
+      }
+
+      if (quiz.course.formation.formateurId !== formateurId) {
+        throw new ForbiddenException('You cannot delete this quiz');
+      }
+
+      if (quiz.course.formation.published || quiz.course.published) {
+        throw new BadRequestException(
+          'Published content cannot be altered',
+        );
+      }
+
+      const questionIds = quiz.questions.map((entry) => entry.id);
+
+      await tx.quizSubmission.deleteMany({
+        where: { quizId },
+      });
+
+      if (questionIds.length > 0) {
+        await tx.choice.deleteMany({
+          where: { questionId: { in: questionIds } },
+        });
+
+        await tx.question.deleteMany({
+          where: { id: { in: questionIds } },
+        });
+      }
+
+      await tx.quiz.delete({
+        where: { id: quizId },
+      });
+
+      return { message: 'Quiz deleted successfully' };
+    });
+  }
+
   async countQuizzes(courseId: number) {
     return this.prisma.quiz.count({ where: { courseId } });
   }

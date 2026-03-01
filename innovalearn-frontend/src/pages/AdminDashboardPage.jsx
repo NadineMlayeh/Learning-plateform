@@ -7,6 +7,15 @@ import StatusBadge from '../components/StatusBadge';
 import LoadingButton from '../components/LoadingButton';
 
 const PAGE_SIZE = 3;
+const INITIAL_FORMATION_FORM = {
+  title: '',
+  description: '',
+  price: '',
+  type: 'ONLINE',
+  location: '',
+  startDate: '',
+  endDate: '',
+};
 
 function createdTimestamp(item) {
   if (item?.createdAt) return new Date(item.createdAt).getTime();
@@ -60,10 +69,18 @@ export default function AdminDashboardPage({ pushToast }) {
 
   const [formations, setFormations] = useState([]);
   const [publishingId, setPublishingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [confirmDeleteFormationId, setConfirmDeleteFormationId] = useState(null);
   const [titleSearch, setTitleSearch] = useState('');
   const [createdSort, setCreatedSort] = useState('newest_first');
   const [pendingPage, setPendingPage] = useState(1);
   const [publishedPage, setPublishedPage] = useState(1);
+  const [isCreateFormationModalOpen, setIsCreateFormationModalOpen] =
+    useState(false);
+  const [createFormationForm, setCreateFormationForm] = useState(
+    INITIAL_FORMATION_FORM,
+  );
+  const [creatingFormation, setCreatingFormation] = useState(false);
 
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
@@ -115,6 +132,34 @@ export default function AdminDashboardPage({ pushToast }) {
       pushToast(err.message, 'error');
     } finally {
       setPublishingId(null);
+    }
+  }
+
+  async function deletePendingFormation(formationId) {
+    setDeletingId(formationId);
+    try {
+      const response = await apiRequest(`/formations/${formationId}`, {
+        method: 'DELETE',
+        token: user.token,
+      });
+
+      setFormations((prev) =>
+        prev.filter((formation) => formation.id !== formationId),
+      );
+
+      if (selectedAnalyticsFormationId === formationId) {
+        setSelectedAnalyticsFormationId(null);
+      }
+
+      pushToast(
+        response?.message || 'Pending formation deleted successfully.',
+        'success',
+      );
+      setConfirmDeleteFormationId(null);
+    } catch (err) {
+      pushToast(err.message, 'error');
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -214,8 +259,83 @@ export default function AdminDashboardPage({ pushToast }) {
     setSelectedAnalyticsFormationId(null);
   }
 
+  function openDeleteConfirmation(formationId) {
+    setConfirmDeleteFormationId(formationId);
+  }
+
+  function closeDeleteConfirmation() {
+    if (deletingId) return;
+    setConfirmDeleteFormationId(null);
+  }
+
+  function openCreateFormationModal() {
+    setCreateFormationForm(INITIAL_FORMATION_FORM);
+    setIsCreateFormationModalOpen(true);
+  }
+
+  function closeCreateFormationModal(force = false) {
+    if (creatingFormation && !force) return;
+    setIsCreateFormationModalOpen(false);
+  }
+
+  function updateCreateFormationField(event) {
+    const { name, value } = event.target;
+    setCreateFormationForm((prev) => {
+      if (name === 'type') {
+        return {
+          ...prev,
+          type: value,
+          startDate: value === 'PRESENTIEL' ? prev.startDate : '',
+          endDate: value === 'PRESENTIEL' ? prev.endDate : '',
+        };
+      }
+
+      return { ...prev, [name]: value };
+    });
+  }
+
+  async function createFormation(event) {
+    event.preventDefault();
+    setCreatingFormation(true);
+
+    try {
+      const payload = {
+        title: createFormationForm.title,
+        description: createFormationForm.description,
+        price: Number(createFormationForm.price),
+        type: createFormationForm.type,
+      };
+
+      if (createFormationForm.location) payload.location = createFormationForm.location;
+      if (createFormationForm.type === 'PRESENTIEL') {
+        if (createFormationForm.startDate) payload.startDate = createFormationForm.startDate;
+        if (createFormationForm.endDate) payload.endDate = createFormationForm.endDate;
+      }
+
+      await apiRequest('/formations', {
+        method: 'POST',
+        token: user.token,
+        body: payload,
+      });
+
+      await loadFormations();
+      await loadAnalytics();
+      setPendingPage(1);
+      closeCreateFormationModal(true);
+      pushToast('Formation created.', 'success');
+    } catch (err) {
+      pushToast(err.message, 'error');
+    } finally {
+      setCreatingFormation(false);
+    }
+  }
+
+  const formationToDelete = confirmDeleteFormationId
+    ? formations.find((item) => item.id === confirmDeleteFormationId)
+    : null;
+
   return (
-    <section className="stack formateur-dashboard-page">
+    <section className="stack formateur-dashboard-page admin-skin-page">
       <ProfileSidebar user={user} />
 
       <div className="card panel-head">
@@ -228,7 +348,7 @@ export default function AdminDashboardPage({ pushToast }) {
         <div className="row">
           <button
             type="button"
-            onClick={() => navigate('/formateur/formations/new')}
+            onClick={openCreateFormationModal}
           >
             Add Formation
           </button>
@@ -260,7 +380,7 @@ export default function AdminDashboardPage({ pushToast }) {
         </div>
 
         <div className="table-wrap">
-          <table className="formateur-formations-table">
+          <table className="formateur-formations-table pending-formations-table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -303,6 +423,7 @@ export default function AdminDashboardPage({ pushToast }) {
                           navigate(`/formateur/formations/${formation.id}`)
                         }
                       >
+                        <img src="/images/share.png" alt="" className="btn-inline-icon" />
                         Open
                       </button>
                       <LoadingButton
@@ -313,7 +434,21 @@ export default function AdminDashboardPage({ pushToast }) {
                         disabled={false}
                         onClick={() => publishFormation(formation.id)}
                       >
+                        <img src="/images/send.png" alt="" className="btn-inline-icon" />
                         Publish
+                      </LoadingButton>
+                      <LoadingButton
+                        className="action-btn action-delete pending-formation-delete-btn"
+                        type="button"
+                        isLoading={deletingId === formation.id}
+                        loadingText="Deleting..."
+                        disabled={false}
+                        onClick={() => openDeleteConfirmation(formation.id)}
+                      >
+                        <span className="action-delete-icon" aria-hidden="true">
+                          {'\uD83D\uDDD1'}
+                        </span>
+                        Delete
                       </LoadingButton>
                     </div>
                   </td>
@@ -424,6 +559,7 @@ export default function AdminDashboardPage({ pushToast }) {
                           navigate(`/formateur/formations/${formation.id}`)
                         }
                       >
+                        <img src="/images/analyzing.png" alt="" className="btn-inline-icon" />
                         View
                       </button>
                       <button
@@ -431,6 +567,7 @@ export default function AdminDashboardPage({ pushToast }) {
                         className="action-btn action-page"
                         onClick={() => openAnalyticsForFormation(formation.id)}
                       >
+                        <img src="/images/graph.png" alt="" className="btn-inline-icon" />
                         Stats
                       </button>
                     </div>
@@ -687,6 +824,156 @@ export default function AdminDashboardPage({ pushToast }) {
                 </div>
               );
             })()}
+          </article>
+        </div>
+      )}
+
+      {isCreateFormationModalOpen && (
+        <div className="admin-modal-overlay" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="admin-modal-backdrop"
+            onClick={closeCreateFormationModal}
+            aria-label="Close create formation modal"
+            disabled={creatingFormation}
+          />
+          <article className="admin-modal-card create-formation-modal">
+            <div className="admin-modal-head">
+              <h2>Create Formation</h2>
+              <button
+                type="button"
+                className="admin-modal-close create-formation-close-btn"
+                onClick={closeCreateFormationModal}
+                aria-label="Close create formation modal"
+                disabled={creatingFormation}
+              >
+                x
+              </button>
+            </div>
+            <div className="admin-modal-body">
+              <form className="grid" onSubmit={createFormation}>
+                <input
+                  name="title"
+                  value={createFormationForm.title}
+                  onChange={updateCreateFormationField}
+                  placeholder="Title"
+                  required
+                />
+                <textarea
+                  name="description"
+                  value={createFormationForm.description}
+                  onChange={updateCreateFormationField}
+                  placeholder="Description"
+                  required
+                />
+                <input
+                  name="price"
+                  type="number"
+                  min="0"
+                  value={createFormationForm.price}
+                  onChange={updateCreateFormationField}
+                  placeholder="Price"
+                  required
+                />
+                <select
+                  name="type"
+                  value={createFormationForm.type}
+                  onChange={updateCreateFormationField}
+                >
+                  <option value="ONLINE">ONLINE</option>
+                  <option value="PRESENTIEL">PRESENTIEL</option>
+                </select>
+                <input
+                  name="location"
+                  value={createFormationForm.location}
+                  onChange={updateCreateFormationField}
+                  placeholder="Location (optional)"
+                />
+                {createFormationForm.type === 'PRESENTIEL' && (
+                  <>
+                    <input
+                      name="startDate"
+                      type="date"
+                      value={createFormationForm.startDate}
+                      onChange={updateCreateFormationField}
+                    />
+                    <input
+                      name="endDate"
+                      type="date"
+                      value={createFormationForm.endDate}
+                      onChange={updateCreateFormationField}
+                    />
+                  </>
+                )}
+                <div className="row create-formation-actions">
+                  <button
+                    type="submit"
+                    className="action-btn modal-save-btn create-formation-save-btn formateur-popup-save-btn"
+                    disabled={creatingFormation}
+                  >
+                    {creatingFormation ? 'Creating...' : 'Create'}
+                  </button>
+                  <button
+                    type="button"
+                    className="action-btn modal-cancel-btn create-formation-cancel-btn formateur-popup-cancel-btn"
+                    onClick={closeCreateFormationModal}
+                    disabled={creatingFormation}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </article>
+        </div>
+      )}
+
+      {confirmDeleteFormationId && (
+        <div className="formateur-analytics-modal-backdrop" role="dialog" aria-modal="true">
+          <article className="formateur-analytics-modal confirm-delete-modal">
+            <div className="formateur-analytics-modal-head">
+              <h2>Delete Formation</h2>
+              <button
+                type="button"
+                className="formateur-analytics-modal-close"
+                onClick={closeDeleteConfirmation}
+                aria-label="Close delete confirmation"
+                disabled={Boolean(deletingId)}
+              >
+                x
+              </button>
+            </div>
+
+            <div className="grid">
+              <p>
+                Are you sure you want to delete this pending formation
+                {formationToDelete ? ` "${formationToDelete.title}"` : ''}?
+                This action cannot be undone.
+              </p>
+              <div className="row confirm-delete-actions">
+                <button
+                  type="button"
+                  className="action-btn modal-cancel-btn formateur-confirm-cancel-btn"
+                  onClick={closeDeleteConfirmation}
+                  disabled={Boolean(deletingId)}
+                >
+                  Cancel
+                </button>
+                <LoadingButton
+                  type="button"
+                  className="action-btn action-delete formateur-confirm-delete-btn"
+                  isLoading={deletingId === confirmDeleteFormationId}
+                  loadingText="Deleting..."
+                  disabled={false}
+                  onClick={() => deletePendingFormation(confirmDeleteFormationId)}
+                >
+                  <span className="action-delete-icon" aria-hidden="true">
+                    {'\uD83D\uDDD1'}
+                  </span>
+                  Delete
+                </LoadingButton>
+              </div>
+            </div>
           </article>
         </div>
       )}
