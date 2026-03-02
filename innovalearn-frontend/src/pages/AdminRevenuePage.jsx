@@ -31,7 +31,7 @@ function MonthlyRevenueChart({ rows }) {
   );
 }
 
-export default function AdminRevenuePage({ pushToast }) {
+export default function AdminRevenuePage({ pushToast, embedded = false }) {
   const user = getCurrentUser();
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
@@ -64,9 +64,10 @@ export default function AdminRevenuePage({ pushToast }) {
   }, [year]);
 
   return (
-    <section className="stack admin-skin-page">
-      <ProfileSidebar user={user} />
+    <section className={embedded ? 'stack admin-skin-page admin-embedded-content' : 'stack admin-skin-page'}>
+      {!embedded && <ProfileSidebar user={user} />}
 
+      {!embedded && (
       <div className="card panel-head">
         <div>
           <h1>Revenue Overview</h1>
@@ -87,8 +88,9 @@ export default function AdminRevenuePage({ pushToast }) {
           </Link>
         </div>
       </div>
+      )}
 
-      <div className="card">
+      <div className={embedded ? 'card admin-saas-section' : 'card'}>
         <div className="card-head-row">
           <h2>Revenue Dashboard</h2>
           <div className="row">

@@ -2189,6 +2189,70 @@ tr:last-child td {
   padding: 0.75rem;
 }
 
+.admin-invoice-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.admin-invoice-meta-row .hint {
+  margin: 0;
+}
+
+.admin-invoice-group .card-head-row {
+  align-items: flex-start;
+}
+
+.admin-invoice-head-badges {
+  align-self: flex-start;
+  margin-top: 0.1rem;
+}
+
+.admin-invoice-group > .table-wrap {
+  margin-top: 0.55rem;
+}
+
+.admin-invoice-download-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.admin-invoice-download-link:hover,
+.admin-invoice-download-link:focus-visible {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.admin-invoice-download-link::before,
+.admin-invoice-download-link::after {
+  display: none !important;
+  content: none !important;
+}
+
+.admin-invoice-download-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  display: block;
+}
+
+.admin-invoice-group .table-wrap td:last-child {
+  text-align: center;
+  vertical-align: middle;
+}
+
 .admin-metric-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -7517,8 +7581,10 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   align-items: start;
   min-height: calc(100vh - 110px);
   max-width: none;
-  width: calc(100% + 12px);
-  margin: 0 0 0 -12px;
+  width: calc(100% + 86px);
+  margin: 0 0 0 -76px;
+  padding-left: 10px;
+  box-sizing: border-box;
 }
 
 .admin-saas-page .card {
@@ -7610,9 +7676,9 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
 }
 
 .admin-saas-nav-item.is-active {
-  color: #ffffff;
-  border-color: transparent;
-  background: linear-gradient(125deg, #1d63be 0%, #2f8fd8 56%, #5cc7ea 100%);
+  background: #edf4fc;
+  border-color: #dde9f6;
+  color: #163f6d;
 }
 
 .admin-saas-nav-icon {
@@ -7620,6 +7686,16 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   text-align: center;
   font-size: 0.95rem;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-saas-nav-icon-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
 }
 
 .admin-saas-sidebar-bottom {
@@ -7645,7 +7721,7 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px;
-  background: url('/images/bb.png') center center / cover no-repeat !important;
+  background: linear-gradient(180deg, #f8fbff 0%, #f1f6fd 100%) !important;
 }
 
 .admin-saas-top-header h1 {
@@ -7669,31 +7745,126 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
 }
 
 .admin-saas-quick-actions .link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   min-height: 40px;
   height: 40px;
-  padding: 0 16px;
-  border-radius: 8px;
-  border: 1px solid #2e74c4;
-  color: #ffffff;
-  background: linear-gradient(125deg, #1c66c4 0%, #2f8fd8 56%, #58c6ea 100%);
-  box-shadow: 0 6px 14px rgba(24, 86, 158, 0.2);
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  color: #0b2d72;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fdf7fc 100%) padding-box,
+    linear-gradient(125deg, #71b7ea 0%, #0ac4e0 44%, #ddaed3 100%) border-box;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.96),
+    0 2px 0 #c989b8,
+    0 10px 16px -14px rgba(116, 64, 104, 0.46);
+  transition: box-shadow 180ms ease, border-color 180ms ease, filter 180ms ease, background 180ms ease;
+}
+
+.admin-saas-quick-actions .link-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 -44%;
+  width: 34%;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.58) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
 }
 
 .admin-saas-quick-actions .link-btn:hover {
-  border-color: #215fae;
-  color: #ffffff;
-  background: linear-gradient(125deg, #1a5cb1 0%, #2c80c3 56%, #55b7dc 100%);
-  box-shadow: 0 8px 16px rgba(24, 86, 158, 0.24);
+  color: #0b2d72;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f3f8ff 100%) padding-box,
+    linear-gradient(125deg, #71b7ea 0%, #0ac4e0 44%, #ddaed3 100%) border-box;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.98),
+    0 2px 0 #79b9e8,
+    0 12px 18px -14px rgba(32, 86, 136, 0.4);
+}
+
+.admin-saas-quick-actions .link-btn:hover::after {
+  animation: btn-shine 760ms ease;
+}
+
+body.backoffice-palette-active .container .admin-saas-quick-actions .link-btn {
+  border: 2px solid transparent !important;
+  color: #0b2d72 !important;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fdf7fc 100%) padding-box,
+    linear-gradient(125deg, #71b7ea 0%, #0ac4e0 44%, #ddaed3 100%) border-box !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.96),
+    0 2px 0 #c989b8,
+    0 10px 16px -14px rgba(116, 64, 104, 0.46) !important;
+  filter: none !important;
+}
+
+body.backoffice-palette-active .container .admin-saas-quick-actions .link-btn:hover,
+body.backoffice-palette-active .container .admin-saas-quick-actions .link-btn:focus-visible {
+  color: #0b2d72 !important;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f3f8ff 100%) padding-box,
+    linear-gradient(125deg, #71b7ea 0%, #0ac4e0 44%, #ddaed3 100%) border-box !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.98),
+    0 2px 0 #79b9e8,
+    0 12px 18px -14px rgba(32, 86, 136, 0.4) !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.admin-enrollment-result {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.admin-enrollment-result.is-approved {
+  color: #1f7a4f;
+}
+
+.admin-enrollment-result.is-rejected {
+  color: #b63b3b;
 }
 
 .admin-saas-section {
   display: grid;
   gap: 12px;
-  background: linear-gradient(145deg, #ffffff 0%, #f7f8fa 52%, #f2f4f7 100%) !important;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(246, 250, 255, 0.32) 52%,
+      rgba(255, 255, 255, 0.36) 100%
+    ),
+    url('/images/nn.jpg') center center / cover no-repeat !important;
 }
 
 .admin-saas-overview {
-  background: linear-gradient(145deg, #ffffff 0%, #f8f9fb 48%, #f3f5f8 100%) !important;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(246, 250, 255, 0.3) 48%,
+      rgba(255, 255, 255, 0.34) 100%
+    ),
+    url('/images/nn.jpg') center center / cover no-repeat !important;
+  padding: 12px !important;
+  gap: 10px;
 }
 
 .admin-saas-section h2 {
@@ -7703,10 +7874,43 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   color: #203b57;
 }
 
+.admin-reload-icon-btn {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  padding: 6px !important;
+  border-radius: 10px !important;
+  border: 1px solid #d6e3f1 !important;
+  background: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(16, 40, 70, 0.14) !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: none !important;
+  filter: none !important;
+}
+
+.admin-reload-icon-btn:hover,
+.admin-reload-icon-btn:focus-visible {
+  background: #f5f9ff !important;
+  border-color: #c7d9ed !important;
+  box-shadow: 0 10px 20px rgba(16, 40, 70, 0.18) !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.admin-reload-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
+}
+
 .admin-saas-kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
+  gap: 10px;
 }
 
 .admin-saas-kpi-card {
@@ -7715,8 +7919,8 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   border-radius: 14px;
   background: #ffffff;
   box-shadow: 0 16px 34px rgba(14, 36, 66, 0.18);
-  padding: 16px;
-  min-height: 112px;
+  padding: 14px;
+  min-height: 102px;
   overflow: hidden;
 }
 
@@ -7749,6 +7953,18 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   font-size: 1.05rem;
   color: #84a9cd;
   opacity: 0.95;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-saas-kpi-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .admin-saas-highlight-grid {
@@ -7875,6 +8091,7 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
     grid-template-columns: 1fr;
     width: 100%;
     margin: 0;
+    padding-left: 0;
   }
 
   .admin-saas-sidebar {

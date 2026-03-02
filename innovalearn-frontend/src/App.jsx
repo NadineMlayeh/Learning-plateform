@@ -14,10 +14,6 @@ import AdminAddFormationPage from './pages/AdminAddFormationPage';
 import AdminAddCoursePage from './pages/AdminAddCoursePage';
 import AdminAddLessonPage from './pages/AdminAddLessonPage';
 import AdminAddQuizPage from './pages/AdminAddQuizPage';
-import AdminStudentsPage from './pages/AdminStudentsPage';
-import AdminFormateursPage from './pages/AdminFormateursPage';
-import AdminFormationsPage from './pages/AdminFormationsPage';
-import AdminRevenuePage from './pages/AdminRevenuePage';
 import StudentPage from './pages/StudentPage';
 import StudentFormationDetailsPage from './pages/StudentFormationDetailsPage';
 import ForbiddenPage from './pages/ForbiddenPage';
@@ -35,7 +31,7 @@ export default function App() {
   const isStudentPage = location.pathname.startsWith('/student');
   const isStudentFormationDetailsPage =
     location.pathname.startsWith('/student/formations/');
-  const isAdminDashboardPage = location.pathname === '/admin';
+  const isAdminAreaPage = location.pathname.startsWith('/admin');
   const isFormateurFormationViewPage = /^\/formateur\/formations\/[^/]+$/.test(
     location.pathname,
   );
@@ -86,7 +82,7 @@ export default function App() {
               ? 'auth-main'
               : isStudentFormationDetailsPage
                 ? 'container container-wide'
-                : isAdminDashboardPage
+                : isAdminAreaPage
                   ? 'container container-wide'
                 : isFormateurFormationViewPage
                   ? 'container formation-manage-container'
@@ -110,7 +106,7 @@ export default function App() {
             path="/admin/formateurs"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminFormateursPage pushToast={pushToast} />
+                <AdminPage pushToast={pushToast} />
               </ProtectedRoute>
             }
           />
@@ -118,7 +114,7 @@ export default function App() {
             path="/admin/students"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminStudentsPage pushToast={pushToast} />
+                <AdminPage pushToast={pushToast} />
               </ProtectedRoute>
             }
           />
@@ -126,7 +122,7 @@ export default function App() {
             path="/admin/formations"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminFormationsPage pushToast={pushToast} />
+                <AdminPage pushToast={pushToast} />
               </ProtectedRoute>
             }
           />
@@ -134,7 +130,7 @@ export default function App() {
             path="/admin/revenue"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminRevenuePage pushToast={pushToast} />
+                <AdminPage pushToast={pushToast} />
               </ProtectedRoute>
             }
           />

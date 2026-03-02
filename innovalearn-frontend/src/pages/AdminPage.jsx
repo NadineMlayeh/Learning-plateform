@@ -3,6 +3,10 @@ import { Link, useLocation } from 'react-router-dom';
 import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
 import StatusBadge from '../components/StatusBadge';
+import AdminStudentsPage from './AdminStudentsPage';
+import AdminFormateursPage from './AdminFormateursPage';
+import AdminFormationsPage from './AdminFormationsPage';
+import AdminRevenuePage from './AdminRevenuePage';
 
 const PAGE_SIZE = 3;
 
@@ -21,6 +25,8 @@ function createdTimestamp(value, fallback = 0) {
 export default function AdminPage({ pushToast }) {
   const user = getCurrentUser();
   const location = useLocation();
+  const currentAdminPath = location.pathname.replace(/\/+$/, '') || '/admin';
+  const isDashboardSection = currentAdminPath === '/admin';
 
   const [globalOverview, setGlobalOverview] = useState(null);
   const [formateurs, setFormateurs] = useState([]);
@@ -40,8 +46,7 @@ export default function AdminPage({ pushToast }) {
   const [formateurPage, setFormateurPage] = useState(1);
 
   const [invoiceSearch, setInvoiceSearch] = useState('');
-  const [invoiceGroupFilter, setInvoiceGroupFilter] = useState('all');
-  const [invoiceGroupSort, setInvoiceGroupSort] = useState('recent');
+  const [invoiceGroupSort, setInvoiceGroupSort] = useState('newest');
   const [invoicePage, setInvoicePage] = useState(1);
   const [expandedInvoiceStudentId, setExpandedInvoiceStudentId] =
     useState(null);
@@ -152,27 +157,24 @@ export default function AdminPage({ pushToast }) {
   );
 
   const visibleEnrollments = useMemo(() => {
-    const filtered = enrollments.filter((entry) =>
+    let filtered = enrollments.filter((entry) =>
       (entry.student?.name || '')
         .toLowerCase()
         .includes(enrollmentSearch.toLowerCase().trim()),
     );
 
+    if (enrollmentSort === 'approved_only') {
+      filtered = filtered.filter((entry) => entry.status === 'APPROVED');
+    } else if (enrollmentSort === 'rejected_only') {
+      filtered = filtered.filter((entry) => entry.status === 'REJECTED');
+    } else if (enrollmentSort === 'pending_only') {
+      filtered = filtered.filter((entry) => entry.status === 'PENDING');
+    }
+
     filtered.sort((a, b) => {
-      if (enrollmentSort === 'newest') {
-        return createdTimestamp(b.createdAt, b.id) - createdTimestamp(a.createdAt, a.id);
+      if (enrollmentSort === 'oldest') {
+        return createdTimestamp(a.createdAt, a.id) - createdTimestamp(b.createdAt, b.id);
       }
-
-      const approvedPriority = { APPROVED: 0, PENDING: 1, REJECTED: 2 };
-      const rejectedPriority = { REJECTED: 0, PENDING: 1, APPROVED: 2 };
-      const priorityMap =
-        enrollmentSort === 'approved_first'
-          ? approvedPriority
-          : rejectedPriority;
-
-      const diff = priorityMap[a.status] - priorityMap[b.status];
-      if (diff !== 0) return diff;
-
       return createdTimestamp(b.createdAt, b.id) - createdTimestamp(a.createdAt, a.id);
     });
 
@@ -189,38 +191,26 @@ export default function AdminPage({ pushToast }) {
   );
 
   const visibleFormateurs = useMemo(() => {
-    const filtered = formateurs.filter((entry) =>
+    let filtered = formateurs.filter((entry) =>
       (entry.name || '')
         .toLowerCase()
         .includes(formateurSearch.toLowerCase().trim()),
     );
 
+    if (formateurSort === 'approved_only') {
+      filtered = filtered.filter((entry) => entry.formateurStatus === 'APPROVED');
+    } else if (formateurSort === 'rejected_only') {
+      filtered = filtered.filter((entry) => entry.formateurStatus === 'REJECTED');
+    } else if (formateurSort === 'pending_only') {
+      filtered = filtered.filter((entry) => entry.formateurStatus === 'PENDING');
+    }
+
     filtered.sort((a, b) => {
-      if (formateurSort === 'pending_only') {
-        const pendingFirstDiff =
-          Number(b.formateurStatus === 'PENDING') -
-          Number(a.formateurStatus === 'PENDING');
-        if (pendingFirstDiff !== 0) return pendingFirstDiff;
+      if (formateurSort === 'oldest') {
+        return createdTimestamp(a.createdAt, a.id) - createdTimestamp(b.createdAt, b.id);
       }
 
-      if (formateurSort === 'approved_only') {
-        const approvedFirstDiff =
-          Number(b.formateurStatus === 'APPROVED') -
-          Number(a.formateurStatus === 'APPROVED');
-        if (approvedFirstDiff !== 0) return approvedFirstDiff;
-      }
-
-      if (formateurSort === 'rejected_only') {
-        const rejectedFirstDiff =
-          Number(b.formateurStatus === 'REJECTED') -
-          Number(a.formateurStatus === 'REJECTED');
-        if (rejectedFirstDiff !== 0) return rejectedFirstDiff;
-      }
-
-      return (
-        createdTimestamp(b.createdAt, b.id) -
-        createdTimestamp(a.createdAt, a.id)
-      );
+      return createdTimestamp(b.createdAt, b.id) - createdTimestamp(a.createdAt, a.id);
     });
 
     return filtered;
@@ -245,6 +235,8 @@ export default function AdminPage({ pushToast }) {
           studentId,
           studentName: entry.student?.name || 'Unknown student',
           studentEmail: entry.student?.email || '-',
+          studentPhone:
+            entry.student?.phoneNumber || entry.student?.phone || '-',
           invoices: [],
           totalAmount: 0,
           latestIssuedAt: null,
@@ -268,6 +260,10 @@ export default function AdminPage({ pushToast }) {
       invoices: [...group.invoices].sort(
         (a, b) => createdTimestamp(b.createdAt, b.id) - createdTimestamp(a.createdAt, a.id),
       ),
+      highestInvoiceAmount: Math.max(
+        0,
+        ...group.invoices.map((entry) => Number(entry.amount || 0)),
+      ),
     }));
 
     const q = invoiceSearch.toLowerCase().trim();
@@ -284,22 +280,13 @@ export default function AdminPage({ pushToast }) {
       });
     }
 
-    if (invoiceGroupFilter === 'multi') {
-      groups = groups.filter((group) => group.invoices.length > 1);
-    } else if (invoiceGroupFilter === 'single') {
-      groups = groups.filter((group) => group.invoices.length === 1);
-    } else if (invoiceGroupFilter === 'high_value') {
-      groups = groups.filter((group) => group.totalAmount >= 500);
-    }
-
     groups.sort((a, b) => {
-      if (invoiceGroupSort === 'invoice_count') {
-        const diff = b.invoices.length - a.invoices.length;
-        if (diff !== 0) return diff;
+      if (invoiceGroupSort === 'oldest') {
+        return createdTimestamp(a.latestIssuedAt) - createdTimestamp(b.latestIssuedAt);
       }
 
-      if (invoiceGroupSort === 'total_amount') {
-        const diff = b.totalAmount - a.totalAmount;
+      if (invoiceGroupSort === 'highest_amount') {
+        const diff = b.highestInvoiceAmount - a.highestInvoiceAmount;
         if (diff !== 0) return diff;
       }
 
@@ -307,7 +294,7 @@ export default function AdminPage({ pushToast }) {
     });
 
     return groups;
-  }, [adminInvoices, invoiceSearch, invoiceGroupFilter, invoiceGroupSort]);
+  }, [adminInvoices, invoiceSearch, invoiceGroupSort]);
 
   const invoiceTotalPages = Math.max(
     1,
@@ -319,11 +306,12 @@ export default function AdminPage({ pushToast }) {
   );
 
   useEffect(() => {
+    if (!isDashboardSection) return;
     loadOverview();
     loadFormateurs();
     loadEnrollments();
     loadAdminInvoices();
-  }, []);
+  }, [isDashboardSection]);
 
   useEffect(() => {
     setEnrollmentPage(1);
@@ -336,7 +324,7 @@ export default function AdminPage({ pushToast }) {
   useEffect(() => {
     setInvoicePage(1);
     setExpandedInvoiceStudentId(null);
-  }, [invoiceSearch, invoiceGroupFilter, invoiceGroupSort]);
+  }, [invoiceSearch, invoiceGroupSort]);
 
   useEffect(() => {
     if (enrollmentPage > enrollmentTotalPages) {
@@ -357,7 +345,7 @@ export default function AdminPage({ pushToast }) {
   }, [invoicePage, invoiceTotalPages]);
 
   function navItemClass(path) {
-    return location.pathname === path
+    return currentAdminPath === path
       ? 'admin-saas-nav-item is-active'
       : 'admin-saas-nav-item';
   }
@@ -381,30 +369,42 @@ export default function AdminPage({ pushToast }) {
 
         <nav className="admin-saas-nav">
           <Link className={navItemClass('/admin')} to="/admin">
-            <span className="admin-saas-nav-icon" aria-hidden="true">DB</span>
+            <span className="admin-saas-nav-icon" aria-hidden="true">
+              <img src="/images/dashboard.png" alt="" className="admin-saas-nav-icon-img" />
+            </span>
             Dashboard
           </Link>
           <Link className={navItemClass('/admin/students')} to="/admin/students">
-            <span className="admin-saas-nav-icon" aria-hidden="true">ST</span>
+            <span className="admin-saas-nav-icon" aria-hidden="true">
+              <img src="/images/person.png" alt="" className="admin-saas-nav-icon-img" />
+            </span>
             Students
           </Link>
           <Link className={navItemClass('/admin/formateurs')} to="/admin/formateurs">
-            <span className="admin-saas-nav-icon" aria-hidden="true">FM</span>
+            <span className="admin-saas-nav-icon" aria-hidden="true">
+              <img src="/images/userr.png" alt="" className="admin-saas-nav-icon-img" />
+            </span>
             Formateurs
           </Link>
           <Link className={navItemClass('/admin/formations')} to="/admin/formations">
-            <span className="admin-saas-nav-icon" aria-hidden="true">FS</span>
+            <span className="admin-saas-nav-icon" aria-hidden="true">
+              <img src="/images/school.png" alt="" className="admin-saas-nav-icon-img" />
+            </span>
             Formations
           </Link>
           <Link className={navItemClass('/admin/revenue')} to="/admin/revenue">
-            <span className="admin-saas-nav-icon" aria-hidden="true">$</span>
+            <span className="admin-saas-nav-icon" aria-hidden="true">
+              <img src="/images/euro.png" alt="" className="admin-saas-nav-icon-img" />
+            </span>
             Revenue
           </Link>
         </nav>
 
         <div className="admin-saas-sidebar-bottom">
           <div className="admin-saas-nav-item admin-saas-settings-btn">
-            <span className="admin-saas-nav-icon" aria-hidden="true">SG</span>
+            <span className="admin-saas-nav-icon" aria-hidden="true">
+              <img src="/images/gear.png" alt="" className="admin-saas-nav-icon-img" />
+            </span>
             Settings
           </div>
         </div>
@@ -434,33 +434,49 @@ export default function AdminPage({ pushToast }) {
           </div>
         </div>
 
+        {isDashboardSection ? (
+          <>
         <div className="card admin-saas-section admin-saas-overview">
           <div className="card-head-row">
             <h2>Global Overview</h2>
-            <button type="button" className="action-btn action-page" onClick={loadOverview}>
-              Reload
+            <button
+              type="button"
+              className="admin-reload-icon-btn"
+              onClick={loadOverview}
+              aria-label="Refresh overview"
+              title="Refresh overview"
+            >
+              <img src="/images/refresh.png" alt="" className="admin-reload-icon" />
             </button>
           </div>
           <div className="admin-metric-grid admin-saas-kpi-grid">
             <article className="admin-metric-card admin-saas-kpi-card">
               <p className="hint">Total Students</p>
               <strong>{globalOverview?.totalStudents ?? '-'}</strong>
-              <span className="admin-saas-kpi-icon" aria-hidden="true">S</span>
+              <span className="admin-saas-kpi-icon" aria-hidden="true">
+                <img src="/images/grad.png" alt="" className="admin-saas-kpi-icon-img" />
+              </span>
             </article>
             <article className="admin-metric-card admin-saas-kpi-card">
               <p className="hint">Total Formateurs</p>
               <strong>{globalOverview?.totalFormateurs ?? '-'}</strong>
-              <span className="admin-saas-kpi-icon" aria-hidden="true">F</span>
+              <span className="admin-saas-kpi-icon" aria-hidden="true">
+                <img src="/images/user.png" alt="" className="admin-saas-kpi-icon-img" />
+              </span>
             </article>
             <article className="admin-metric-card admin-saas-kpi-card">
               <p className="hint">Total Formations</p>
               <strong>{globalOverview?.totalFormations ?? '-'}</strong>
-              <span className="admin-saas-kpi-icon" aria-hidden="true">M</span>
+              <span className="admin-saas-kpi-icon" aria-hidden="true">
+                <img src="/images/agreement.png" alt="" className="admin-saas-kpi-icon-img" />
+              </span>
             </article>
             <article className="admin-metric-card admin-saas-kpi-card">
               <p className="hint">Total Enrollments</p>
               <strong>{globalOverview?.totalEnrollments ?? '-'}</strong>
-              <span className="admin-saas-kpi-icon" aria-hidden="true">E</span>
+              <span className="admin-saas-kpi-icon" aria-hidden="true">
+                <img src="/images/enroll.png" alt="" className="admin-saas-kpi-icon-img" />
+              </span>
             </article>
           </div>
           <div className="admin-saas-highlight-grid">
@@ -499,8 +515,10 @@ export default function AdminPage({ pushToast }) {
               onChange={(event) => setEnrollmentSort(event.target.value)}
             >
               <option value="newest">Newest First</option>
-              <option value="approved_first">Approved First</option>
-              <option value="rejected_first">Rejected First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="pending_only">Pending Only</option>
+              <option value="rejected_only">Rejected Only</option>
+              <option value="approved_only">Approved Only</option>
             </select>
           </div>
 
@@ -538,28 +556,46 @@ export default function AdminPage({ pushToast }) {
                       </td>
                       <td>{new Date(entry.createdAt).toLocaleString()}</td>
                       <td>
-                        <div className="row action-btn-group">
-                          <button
-                            type="button"
-                            className="action-btn action-approve"
-                            disabled={!isPending || isProcessing}
-                            onClick={() =>
-                              updateEnrollmentStatus(entry.id, 'approve')
-                            }
+                        {isPending ? (
+                          <div className="row action-btn-group">
+                            <button
+                              type="button"
+                              className="action-btn action-approve"
+                              disabled={!isPending || isProcessing}
+                              onClick={() =>
+                                updateEnrollmentStatus(entry.id, 'approve')
+                              }
+                            >
+                              {isProcessing ? 'Working...' : 'Approve'}
+                            </button>
+                            <button
+                              type="button"
+                              className="action-btn action-reject"
+                              disabled={!isPending || isProcessing}
+                              onClick={() =>
+                                updateEnrollmentStatus(entry.id, 'reject')
+                              }
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        ) : (
+                          <span
+                            className={`admin-enrollment-result ${
+                              entry.status === 'APPROVED'
+                                ? 'is-approved'
+                                : entry.status === 'REJECTED'
+                                  ? 'is-rejected'
+                                  : ''
+                            }`}
                           >
-                            {isProcessing ? 'Working...' : 'Approve'}
-                          </button>
-                          <button
-                            type="button"
-                            className="action-btn action-reject"
-                            disabled={!isPending || isProcessing}
-                            onClick={() =>
-                              updateEnrollmentStatus(entry.id, 'reject')
-                            }
-                          >
-                            Reject
-                          </button>
-                        </div>
+                            {entry.status === 'APPROVED'
+                              ? 'Approved ✔'
+                              : entry.status === 'REJECTED'
+                                ? 'Rejected ✖'
+                                : entry.status}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -613,9 +649,10 @@ export default function AdminPage({ pushToast }) {
             onChange={(event) => setFormateurSort(event.target.value)}
           >
             <option value="newest">Newest First</option>
-            <option value="pending_only">Pending First</option>
-            <option value="approved_only">Approved First</option>
-            <option value="rejected_only">Rejected First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="pending_only">Pending Only</option>
+            <option value="approved_only">Approved Only</option>
+            <option value="rejected_only">Refused Only</option>
           </select>
         </div>
 
@@ -643,32 +680,44 @@ export default function AdminPage({ pushToast }) {
                     />
                   </td>
                   <td>
-                    <div className="row action-btn-group">
-                      <button
-                        type="button"
-                        className="action-btn action-approve"
-                        disabled={
-                          entry.formateurStatus === 'APPROVED' ||
-                          processingFormateurId === entry.id
-                        }
-                        onClick={() => approveFormateur(entry.id)}
+                    {(entry.formateurStatus || 'PENDING') === 'PENDING' ? (
+                      <div className="row action-btn-group">
+                        <button
+                          type="button"
+                          className="action-btn action-approve"
+                          disabled={processingFormateurId === entry.id}
+                          onClick={() => approveFormateur(entry.id)}
+                        >
+                          {processingFormateurId === entry.id
+                            ? 'Working...'
+                            : 'Approve'}
+                        </button>
+                        <button
+                          type="button"
+                          className="action-btn action-reject"
+                          disabled={processingFormateurId === entry.id}
+                          onClick={() => rejectFormateur(entry.id)}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    ) : (
+                      <span
+                        className={`admin-enrollment-result ${
+                          (entry.formateurStatus || 'PENDING') === 'APPROVED'
+                            ? 'is-approved'
+                            : (entry.formateurStatus || 'PENDING') === 'REJECTED'
+                              ? 'is-rejected'
+                              : ''
+                        }`}
                       >
-                        {processingFormateurId === entry.id
-                          ? 'Working...'
-                          : 'Approve'}
-                      </button>
-                      <button
-                        type="button"
-                        className="action-btn action-reject"
-                        disabled={
-                          entry.formateurStatus === 'REJECTED' ||
-                          processingFormateurId === entry.id
-                        }
-                        onClick={() => rejectFormateur(entry.id)}
-                      >
-                        Reject
-                      </button>
-                    </div>
+                        {(entry.formateurStatus || 'PENDING') === 'APPROVED'
+                          ? 'Approved ✔'
+                          : (entry.formateurStatus || 'PENDING') === 'REJECTED'
+                            ? 'Refused ✖'
+                            : entry.formateurStatus || 'PENDING'}
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -709,7 +758,7 @@ export default function AdminPage({ pushToast }) {
 
         <div className="card admin-saas-section">
           <div className="card-head-row">
-            <h2>Approved Students and Invoices</h2>
+            <h2>Students Invoices</h2>
             <StatusBadge
               label={`${groupedInvoices.length} students`}
               tone={groupedInvoices.length > 0 ? 'blue' : 'gray'}
@@ -724,21 +773,12 @@ export default function AdminPage({ pushToast }) {
             placeholder="Search by student or formation title"
           />
           <select
-            value={invoiceGroupFilter}
-            onChange={(event) => setInvoiceGroupFilter(event.target.value)}
-          >
-            <option value="all">All Students</option>
-            <option value="multi">Students with Multiple Invoices</option>
-            <option value="single">Students with One Invoice</option>
-            <option value="high_value">High Value (at least 500 EUR)</option>
-          </select>
-          <select
             value={invoiceGroupSort}
             onChange={(event) => setInvoiceGroupSort(event.target.value)}
           >
-            <option value="recent">Most Recent Invoice</option>
-            <option value="invoice_count">Most Invoices</option>
-            <option value="total_amount">Highest Total Amount</option>
+            <option value="newest">Newest Invoices</option>
+            <option value="oldest">Oldest Invoices</option>
+            <option value="highest_amount">Invoices with Highest Amount</option>
           </select>
         </div>
 
@@ -757,8 +797,9 @@ export default function AdminPage({ pushToast }) {
                   <div>
                     <h3>{group.studentName}</h3>
                     <p className="hint">{group.studentEmail}</p>
+                    <p className="hint">Phone: {group.studentPhone}</p>
                   </div>
-                  <div className="row">
+                  <div className="row admin-invoice-head-badges">
                     <StatusBadge
                       label={`${group.invoices.length} invoices`}
                       tone="blue"
@@ -767,25 +808,27 @@ export default function AdminPage({ pushToast }) {
                       label={`Total ${group.totalAmount.toFixed(2)} EUR`}
                       tone="green"
                     />
-                    <button
-                      type="button"
-                      className="action-btn action-page"
-                      onClick={() =>
-                        setExpandedInvoiceStudentId((prev) =>
-                          prev === group.studentId
-                            ? null
-                            : group.studentId,
-                        )
-                      }
-                    >
-                      {isExpanded ? 'Hide Details' : 'View Invoices'}
-                    </button>
                   </div>
                 </div>
 
-                <p className="hint">
-                  Latest invoice: {new Date(group.latestIssuedAt).toLocaleString()}
-                </p>
+                <div className="admin-invoice-meta-row">
+                  <p className="hint">
+                    Latest invoice: {new Date(group.latestIssuedAt).toLocaleString()}
+                  </p>
+                  <button
+                    type="button"
+                    className="action-btn action-page"
+                    onClick={() =>
+                      setExpandedInvoiceStudentId((prev) =>
+                        prev === group.studentId
+                          ? null
+                          : group.studentId,
+                      )
+                    }
+                  >
+                    {isExpanded ? 'Hide Details' : 'View Invoices'}
+                  </button>
+                </div>
 
                 {isExpanded && (
                   <div className="table-wrap">
@@ -812,12 +855,18 @@ export default function AdminPage({ pushToast }) {
                             </td>
                             <td>
                               <a
-                                className="link-btn small-btn"
+                                className="admin-invoice-download-link"
                                 href={resolveApiAssetUrl(entry.pdfUrl)}
                                 target="_blank"
                                 rel="noreferrer"
+                                aria-label="Download invoice PDF"
+                                title="Download invoice PDF"
                               >
-                                Open PDF
+                                <img
+                                  src="/images/download.png"
+                                  alt=""
+                                  className="admin-invoice-download-icon"
+                                />
                               </a>
                             </td>
                           </tr>
@@ -857,6 +906,20 @@ export default function AdminPage({ pushToast }) {
           </button>
         </div>
         </div>
+          </>
+        ) : currentAdminPath === '/admin/students' ? (
+          <AdminStudentsPage pushToast={pushToast} embedded />
+        ) : currentAdminPath === '/admin/formateurs' ? (
+          <AdminFormateursPage pushToast={pushToast} embedded />
+        ) : currentAdminPath === '/admin/formations' ? (
+          <AdminFormationsPage pushToast={pushToast} embedded />
+        ) : currentAdminPath === '/admin/revenue' ? (
+          <AdminRevenuePage pushToast={pushToast} embedded />
+        ) : (
+          <div className="card admin-saas-section">
+            <p className="hint">Section not found.</p>
+          </div>
+        )}
       </div>
     </section>
   );

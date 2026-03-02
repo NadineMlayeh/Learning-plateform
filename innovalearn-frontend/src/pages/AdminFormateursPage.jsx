@@ -90,7 +90,7 @@ function MiniBars({ title, data, valueKey }) {
   );
 }
 
-export default function AdminFormateursPage({ pushToast }) {
+export default function AdminFormateursPage({ pushToast, embedded = false }) {
   const user = getCurrentUser();
   const currentYear = new Date().getFullYear();
   const yearOptions = useMemo(() => Array.from({ length: 5 }, (_, i) => currentYear - i), [currentYear]);
@@ -232,9 +232,10 @@ export default function AdminFormateursPage({ pushToast }) {
   }, [search]);
 
   return (
-    <section className="stack admin-skin-page">
-      <ProfileSidebar user={user} />
+    <section className={embedded ? 'stack admin-skin-page admin-embedded-content' : 'stack admin-skin-page'}>
+      {!embedded && <ProfileSidebar user={user} />}
 
+      {!embedded && (
       <div className="card panel-head">
         <div>
           <h1>Formateur Management</h1>
@@ -252,8 +253,9 @@ export default function AdminFormateursPage({ pushToast }) {
           </Link>
         </div>
       </div>
+      )}
 
-      <div className="card">
+      <div className={embedded ? 'card admin-saas-section' : 'card'}>
         <div className="card-head-row">
           <h2>Formateurs</h2>
           <StatusBadge label={`${data.total} total`} tone="blue" />

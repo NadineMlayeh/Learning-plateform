@@ -48,7 +48,7 @@ function Modal({ open, title, onClose, children }) {
   );
 }
 
-export default function AdminStudentsPage({ pushToast }) {
+export default function AdminStudentsPage({ pushToast, embedded = false }) {
   const user = getCurrentUser();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -135,9 +135,10 @@ export default function AdminStudentsPage({ pushToast }) {
   }, [search]);
 
   return (
-    <section className="stack admin-skin-page">
-      <ProfileSidebar user={user} />
+    <section className={embedded ? 'stack admin-skin-page admin-embedded-content' : 'stack admin-skin-page'}>
+      {!embedded && <ProfileSidebar user={user} />}
 
+      {!embedded && (
       <div className="card panel-head">
         <div>
           <h1>Student Management</h1>
@@ -155,8 +156,9 @@ export default function AdminStudentsPage({ pushToast }) {
           </Link>
         </div>
       </div>
+      )}
 
-      <div className="card">
+      <div className={embedded ? 'card admin-saas-section' : 'card'}>
         <div className="card-head-row">
           <h2>Students</h2>
           <StatusBadge label={`${data.total} total`} tone="blue" />

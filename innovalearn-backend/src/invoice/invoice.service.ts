@@ -226,6 +226,7 @@ export class InvoiceService {
             id: true,
             name: true,
             email: true,
+            phoneNumber: true,
           },
         },
         enrollment: {
