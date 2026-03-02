@@ -44,7 +44,11 @@ export default function NavBar() {
               Manage Content
             </Link>
           )}
-          {user?.role === 'ADMIN' && <Link to="/admin">Admin Dashboard</Link>}
+          {user?.role === 'ADMIN' && (
+            <Link to="/admin" className="topbar-link-underline">
+              Admin Dashboard
+            </Link>
+          )}
           {user?.role === 'STUDENT' && (
             <Link to="/student" className="topbar-link-underline">
               Student

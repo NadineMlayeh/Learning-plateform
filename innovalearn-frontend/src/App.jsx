@@ -35,6 +35,7 @@ export default function App() {
   const isStudentPage = location.pathname.startsWith('/student');
   const isStudentFormationDetailsPage =
     location.pathname.startsWith('/student/formations/');
+  const isAdminDashboardPage = location.pathname === '/admin';
   const isFormateurFormationViewPage = /^\/formateur\/formations\/[^/]+$/.test(
     location.pathname,
   );
@@ -85,6 +86,8 @@ export default function App() {
               ? 'auth-main'
               : isStudentFormationDetailsPage
                 ? 'container container-wide'
+                : isAdminDashboardPage
+                  ? 'container container-wide'
                 : isFormateurFormationViewPage
                   ? 'container formation-manage-container'
                 : 'container'

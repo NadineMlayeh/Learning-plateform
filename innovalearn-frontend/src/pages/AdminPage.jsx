@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
-import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 
 const PAGE_SIZE = 3;
@@ -21,6 +20,7 @@ function createdTimestamp(value, fallback = 0) {
 
 export default function AdminPage({ pushToast }) {
   const user = getCurrentUser();
+  const location = useLocation();
 
   const [globalOverview, setGlobalOverview] = useState(null);
   const [formateurs, setFormateurs] = useState([]);
@@ -356,194 +356,251 @@ export default function AdminPage({ pushToast }) {
     }
   }, [invoicePage, invoiceTotalPages]);
 
-  return (
-    <section className="stack admin-skin-page">
-      <ProfileSidebar user={user} />
+  function navItemClass(path) {
+    return location.pathname === path
+      ? 'admin-saas-nav-item is-active'
+      : 'admin-saas-nav-item';
+  }
 
-      <div className="card panel-head">
-        <div>
-          <h1>Admin Dashboard</h1>
-          <p className="hint">
-            Manage approvals here, and use dedicated sections for full users, formations, and revenue management.
-          </p>
+  return (
+    <section className="admin-saas-page admin-skin-page">
+      <aside className="admin-saas-sidebar">
+        <div className="admin-saas-profile">
+          <div className="admin-saas-avatar-wrap">
+            <img
+              src={resolveApiAssetUrl(user.profilePictureUrl) || '/images/student.png'}
+              alt={user.name || 'Admin user'}
+              className="admin-saas-avatar"
+            />
+          </div>
+          <div>
+            <h3>{user.name || 'Admin User'}</h3>
+            <p>{user.role || 'ADMIN'}</p>
+          </div>
         </div>
-        <div className="row">
-          <Link className="link-btn small-btn" to="/admin/students">
+
+        <nav className="admin-saas-nav">
+          <Link className={navItemClass('/admin')} to="/admin">
+            <span className="admin-saas-nav-icon" aria-hidden="true">DB</span>
+            Dashboard
+          </Link>
+          <Link className={navItemClass('/admin/students')} to="/admin/students">
+            <span className="admin-saas-nav-icon" aria-hidden="true">ST</span>
             Students
           </Link>
-          <Link className="link-btn small-btn" to="/admin/formateurs">
+          <Link className={navItemClass('/admin/formateurs')} to="/admin/formateurs">
+            <span className="admin-saas-nav-icon" aria-hidden="true">FM</span>
             Formateurs
           </Link>
-          <Link className="link-btn small-btn" to="/admin/formations">
+          <Link className={navItemClass('/admin/formations')} to="/admin/formations">
+            <span className="admin-saas-nav-icon" aria-hidden="true">FS</span>
             Formations
           </Link>
-          <Link className="link-btn small-btn" to="/admin/revenue">
+          <Link className={navItemClass('/admin/revenue')} to="/admin/revenue">
+            <span className="admin-saas-nav-icon" aria-hidden="true">$</span>
             Revenue
           </Link>
-        </div>
-      </div>
+        </nav>
 
-      <div className="card">
-        <div className="card-head-row">
-          <h2>Global Overview</h2>
-          <button type="button" className="action-btn action-page" onClick={loadOverview}>
-            Reload
-          </button>
+        <div className="admin-saas-sidebar-bottom">
+          <div className="admin-saas-nav-item admin-saas-settings-btn">
+            <span className="admin-saas-nav-icon" aria-hidden="true">SG</span>
+            Settings
+          </div>
         </div>
-        <div className="admin-metric-grid">
-          <article className="admin-metric-card">
-            <p className="hint">Total Users</p>
-            <strong>{globalOverview?.totalUsers ?? '-'}</strong>
-          </article>
-          <article className="admin-metric-card">
-            <p className="hint">Total Students</p>
-            <strong>{globalOverview?.totalStudents ?? '-'}</strong>
-          </article>
-          <article className="admin-metric-card">
-            <p className="hint">Total Formateurs</p>
-            <strong>{globalOverview?.totalFormateurs ?? '-'}</strong>
-          </article>
-          <article className="admin-metric-card">
-            <p className="hint">Total Formations</p>
-            <strong>{globalOverview?.totalFormations ?? '-'}</strong>
-          </article>
-          <article className="admin-metric-card">
-            <p className="hint">Total Enrollments</p>
-            <strong>{globalOverview?.totalEnrollments ?? '-'}</strong>
-          </article>
-          <article className="admin-metric-card">
-            <p className="hint">Total Revenue</p>
-            <strong>{Number(globalOverview?.totalRevenue || 0).toFixed(2)} EUR</strong>
-          </article>
-          <article className="admin-metric-card">
-            <p className="hint">Average Completion Rate</p>
-            <strong>{Number(globalOverview?.averageCompletionRate || 0).toFixed(2)}%</strong>
-          </article>
-        </div>
-      </div>
+      </aside>
 
-      <div className="card">
-        <div className="card-head-row">
-          <h2>Student Enrollments</h2>
-          <StatusBadge
-            label={`${pendingCount} Pending`}
-            tone={pendingCount > 0 ? 'orange' : 'gray'}
-          />
-        </div>
-        <div className="table-toolbar">
-          <input
-            type="text"
-            value={enrollmentSearch}
-            onChange={(event) => setEnrollmentSearch(event.target.value)}
-            placeholder="Search by student name"
-          />
-          <select
-            value={enrollmentSort}
-            onChange={(event) => setEnrollmentSort(event.target.value)}
-          >
-            <option value="newest">Newest First</option>
-            <option value="approved_first">Approved First</option>
-            <option value="rejected_first">Rejected First</option>
-          </select>
+      <div className="admin-saas-main">
+        <div className="card panel-head admin-saas-top-header">
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p className="hint">
+              Manage approvals and use dedicated sections for users, formations, and revenue.
+            </p>
+          </div>
+          <div className="admin-saas-quick-actions">
+            <Link className="link-btn small-btn" to="/admin/students">
+              Students
+            </Link>
+            <Link className="link-btn small-btn" to="/admin/formateurs">
+              Formateurs
+            </Link>
+            <Link className="link-btn small-btn" to="/admin/formations">
+              Formations
+            </Link>
+            <Link className="link-btn small-btn" to="/admin/revenue">
+              Revenue
+            </Link>
+          </div>
         </div>
 
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Student</th>
-                <th>Formation</th>
-                <th>Status</th>
-                <th>Requested</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {enrollmentPageRows.map((entry) => {
-                const isPending = entry.status === 'PENDING';
-                const isProcessing = processingEnrollmentId === entry.id;
+        <div className="card admin-saas-section admin-saas-overview">
+          <div className="card-head-row">
+            <h2>Global Overview</h2>
+            <button type="button" className="action-btn action-page" onClick={loadOverview}>
+              Reload
+            </button>
+          </div>
+          <div className="admin-metric-grid admin-saas-kpi-grid">
+            <article className="admin-metric-card admin-saas-kpi-card">
+              <p className="hint">Total Students</p>
+              <strong>{globalOverview?.totalStudents ?? '-'}</strong>
+              <span className="admin-saas-kpi-icon" aria-hidden="true">S</span>
+            </article>
+            <article className="admin-metric-card admin-saas-kpi-card">
+              <p className="hint">Total Formateurs</p>
+              <strong>{globalOverview?.totalFormateurs ?? '-'}</strong>
+              <span className="admin-saas-kpi-icon" aria-hidden="true">F</span>
+            </article>
+            <article className="admin-metric-card admin-saas-kpi-card">
+              <p className="hint">Total Formations</p>
+              <strong>{globalOverview?.totalFormations ?? '-'}</strong>
+              <span className="admin-saas-kpi-icon" aria-hidden="true">M</span>
+            </article>
+            <article className="admin-metric-card admin-saas-kpi-card">
+              <p className="hint">Total Enrollments</p>
+              <strong>{globalOverview?.totalEnrollments ?? '-'}</strong>
+              <span className="admin-saas-kpi-icon" aria-hidden="true">E</span>
+            </article>
+          </div>
+          <div className="admin-saas-highlight-grid">
+            <article className="admin-metric-card admin-saas-highlight-card">
+              <span className="admin-saas-highlight-accent" />
+              <span className="admin-saas-highlight-badge" aria-hidden="true">$</span>
+              <p className="hint">Total Revenue</p>
+              <strong>{Number(globalOverview?.totalRevenue || 0).toFixed(2)} EUR</strong>
+            </article>
+            <article className="admin-metric-card admin-saas-highlight-card">
+              <span className="admin-saas-highlight-accent" />
+              <span className="admin-saas-highlight-badge" aria-hidden="true">%</span>
+              <p className="hint">Average Completion Rate</p>
+              <strong>{Number(globalOverview?.averageCompletionRate || 0).toFixed(2)}%</strong>
+            </article>
+          </div>
+        </div>
 
-                return (
-                  <tr key={entry.id}>
-                    <td>{entry.id}</td>
-                    <td>
-                      {entry.student?.name}
-                      <br />
-                      <span className="hint">{entry.student?.email}</span>
-                    </td>
-                    <td>{entry.formation?.title}</td>
-                    <td>
-                      <StatusBadge
-                        label={entry.status}
-                        tone={statusTone(entry.status)}
-                      />
-                    </td>
-                    <td>{new Date(entry.createdAt).toLocaleString()}</td>
-                    <td>
-                      <div className="row action-btn-group">
-                        <button
-                          type="button"
-                          className="action-btn action-approve"
-                          disabled={!isPending || isProcessing}
-                          onClick={() =>
-                            updateEnrollmentStatus(entry.id, 'approve')
-                          }
-                        >
-                          {isProcessing ? 'Working...' : 'Approve'}
-                        </button>
-                        <button
-                          type="button"
-                          className="action-btn action-reject"
-                          disabled={!isPending || isProcessing}
-                          onClick={() =>
-                            updateEnrollmentStatus(entry.id, 'reject')
-                          }
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {enrollmentPageRows.length === 0 && (
+        <div className="card admin-saas-section">
+          <div className="card-head-row">
+            <h2>Student Enrollments</h2>
+            <StatusBadge
+              label={`${pendingCount} Pending`}
+              tone={pendingCount > 0 ? 'orange' : 'gray'}
+            />
+          </div>
+          <div className="table-toolbar">
+            <input
+              type="text"
+              value={enrollmentSearch}
+              onChange={(event) => setEnrollmentSearch(event.target.value)}
+              placeholder="Search by student name"
+            />
+            <select
+              value={enrollmentSort}
+              onChange={(event) => setEnrollmentSort(event.target.value)}
+            >
+              <option value="newest">Newest First</option>
+              <option value="approved_first">Approved First</option>
+              <option value="rejected_first">Rejected First</option>
+            </select>
+          </div>
+
+          <div className="table-wrap">
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan={6}>No enrollments match this filter.</td>
+                  <th>ID</th>
+                  <th>Student</th>
+                  <th>Formation</th>
+                  <th>Status</th>
+                  <th>Requested</th>
+                  <th>Action</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        <div className="pagination-bar">
-          <button
-            type="button"
-            className="action-btn action-page"
-            onClick={() => setEnrollmentPage((prev) => Math.max(1, prev - 1))}
-            disabled={enrollmentPage === 1}
-          >
-            Prev
-          </button>
-          <span>
-            Page {enrollmentPage} / {enrollmentTotalPages}
-          </span>
-          <button
-            type="button"
-            className="action-btn action-page"
-            onClick={() =>
-              setEnrollmentPage((prev) =>
-                Math.min(enrollmentTotalPages, prev + 1),
-              )
-            }
-            disabled={enrollmentPage === enrollmentTotalPages}
-          >
-            Next
-          </button>
-        </div>
-      </div>
+              </thead>
+              <tbody>
+                {enrollmentPageRows.map((entry) => {
+                  const isPending = entry.status === 'PENDING';
+                  const isProcessing = processingEnrollmentId === entry.id;
 
-      <div className="card">
-        <h2>Formateur Approvals</h2>
+                  return (
+                    <tr key={entry.id}>
+                      <td>{entry.id}</td>
+                      <td>
+                        {entry.student?.name}
+                        <br />
+                        <span className="hint">{entry.student?.email}</span>
+                      </td>
+                      <td>{entry.formation?.title}</td>
+                      <td>
+                        <StatusBadge
+                          label={entry.status}
+                          tone={statusTone(entry.status)}
+                        />
+                      </td>
+                      <td>{new Date(entry.createdAt).toLocaleString()}</td>
+                      <td>
+                        <div className="row action-btn-group">
+                          <button
+                            type="button"
+                            className="action-btn action-approve"
+                            disabled={!isPending || isProcessing}
+                            onClick={() =>
+                              updateEnrollmentStatus(entry.id, 'approve')
+                            }
+                          >
+                            {isProcessing ? 'Working...' : 'Approve'}
+                          </button>
+                          <button
+                            type="button"
+                            className="action-btn action-reject"
+                            disabled={!isPending || isProcessing}
+                            onClick={() =>
+                              updateEnrollmentStatus(entry.id, 'reject')
+                            }
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {enrollmentPageRows.length === 0 && (
+                  <tr>
+                    <td colSpan={6}>No enrollments match this filter.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="pagination-bar">
+            <button
+              type="button"
+              className="action-btn action-page"
+              onClick={() => setEnrollmentPage((prev) => Math.max(1, prev - 1))}
+              disabled={enrollmentPage === 1}
+            >
+              Prev
+            </button>
+            <span>
+              Page {enrollmentPage} / {enrollmentTotalPages}
+            </span>
+            <button
+              type="button"
+              className="action-btn action-page"
+              onClick={() =>
+                setEnrollmentPage((prev) =>
+                  Math.min(enrollmentTotalPages, prev + 1),
+                )
+              }
+              disabled={enrollmentPage === enrollmentTotalPages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+
+        <div className="card admin-saas-section">
+          <h2>Formateur Approvals</h2>
         <div className="table-toolbar">
           <input
             type="text"
@@ -648,16 +705,16 @@ export default function AdminPage({ pushToast }) {
             Next
           </button>
         </div>
-      </div>
-
-      <div className="card">
-        <div className="card-head-row">
-          <h2>Approved Students and Invoices</h2>
-          <StatusBadge
-            label={`${groupedInvoices.length} students`}
-            tone={groupedInvoices.length > 0 ? 'blue' : 'gray'}
-          />
         </div>
+
+        <div className="card admin-saas-section">
+          <div className="card-head-row">
+            <h2>Approved Students and Invoices</h2>
+            <StatusBadge
+              label={`${groupedInvoices.length} students`}
+              tone={groupedInvoices.length > 0 ? 'blue' : 'gray'}
+            />
+          </div>
 
         <div className="table-toolbar">
           <input
@@ -798,6 +855,7 @@ export default function AdminPage({ pushToast }) {
           >
             Next
           </button>
+        </div>
         </div>
       </div>
     </section>

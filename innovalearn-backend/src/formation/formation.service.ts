@@ -64,6 +64,7 @@ export class FormationService {
         type: true,
         price: true,
         published: true,
+        publishedAt: true,
         createdAt: true,
         enrollments: {
           select: {
@@ -76,6 +77,7 @@ export class FormationService {
                 id: true,
                 name: true,
                 email: true,
+                phoneNumber: true,
               },
             },
           },
@@ -84,6 +86,11 @@ export class FormationService {
           select: {
             id: true,
             title: true,
+            _count: {
+              select: {
+                quizzes: true,
+              },
+            },
           },
         },
         results: {
@@ -160,6 +167,7 @@ export class FormationService {
           id: entry.student.id,
           name: entry.student.name,
           email: entry.student.email,
+          phoneNumber: entry.student.phoneNumber || null,
           completionStatus,
           certificateIssued: Boolean(result?.certificateUrl),
         };
@@ -205,6 +213,7 @@ export class FormationService {
           return {
             id: course.id,
             title: course.title,
+            quizCount: course._count?.quizzes || 0,
             passedStudents,
             failedStudents,
             averageScore,
@@ -221,6 +230,7 @@ export class FormationService {
           type: formation.type,
           price: formation.price,
           published: formation.published,
+          publishedAt: formation.publishedAt,
           createdAt: formation.createdAt,
         },
         enrolledStudents,
@@ -403,7 +413,10 @@ export class FormationService {
     if (formation.type === 'PRESENTIEL') {
       return this.prisma.formation.update({
         where: { id: formationId },
-        data: { published: true },
+        data: {
+          published: true,
+          publishedAt: new Date(),
+        },
       });
     }
 
@@ -425,7 +438,10 @@ export class FormationService {
 
     return this.prisma.formation.update({
       where: { id: formationId },
-      data: { published: true },
+      data: {
+        published: true,
+        publishedAt: new Date(),
+      },
     });
   }
 

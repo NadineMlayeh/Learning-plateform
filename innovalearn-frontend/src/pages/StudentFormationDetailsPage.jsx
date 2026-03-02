@@ -311,7 +311,15 @@ export default function StudentFormationDetailsPage({ pushToast }) {
     }
   }
 
-  async function startQuizzes(course) {
+  async function toggleQuizzes(course, isVisible) {
+    if (isVisible) {
+      setShowQuizzesByCourse((prev) => ({
+        ...prev,
+        [course.id]: false,
+      }));
+      return;
+    }
+
     setShowQuizzesByCourse((prev) => ({
       ...prev,
       [course.id]: true,
@@ -645,15 +653,15 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                     <button
                       type="button"
                       className="student-start-quiz-btn"
-                      onClick={() => startQuizzes(course)}
+                      onClick={() => toggleQuizzes(course, showQuizzes)}
                       disabled={!hasQuizzes || loadingAnswers}
                     >
                       {loadingAnswers
                         ? 'Loading quizzes...'
-                        : courseLocked
-                          ? 'View Submitted Quizzes'
-                          : showQuizzes
-                            ? 'Quizzes Ready Below'
+                        : showQuizzes
+                          ? 'Cancel'
+                          : courseLocked
+                            ? 'View Submitted Quizzes'
                             : 'Start the Quizzes'}
                     </button>
                   </div>
@@ -804,22 +812,17 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                           </p>
                         )}
 
-                        {isLastQuiz && (
+                        {isLastQuiz && !courseLocked && (
                           <div className="student-final-submit-wrap">
                             <button
                               type="button"
                               className="student-final-submit-btn"
-                              disabled={
-                                courseLocked ||
-                                submittingCourseId === course.id
-                              }
+                              disabled={submittingCourseId === course.id}
                               onClick={() => submitCourseAnswers(course)}
                             >
                               {submittingCourseId === course.id
                                 ? 'Submitting Final Answers...'
-                                : courseLocked
-                                  ? 'Final Submission Completed'
-                                  : 'Submit Final Answers'}
+                                : 'Submit Final Answers'}
                             </button>
 
                           </div>

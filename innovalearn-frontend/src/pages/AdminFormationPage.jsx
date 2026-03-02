@@ -5,6 +5,33 @@ import { getCurrentUser } from '../auth';
 import StatusBadge from '../components/StatusBadge';
 import LoadingButton from '../components/LoadingButton';
 
+const FORMATION_PUBLISH_TS_KEY = 'formateur_published_at_map_v1';
+
+function readPublishedAtFallbackMap() {
+  try {
+    const raw = localStorage.getItem(FORMATION_PUBLISH_TS_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writePublishedAtFallbackMap(map) {
+  try {
+    localStorage.setItem(FORMATION_PUBLISH_TS_KEY, JSON.stringify(map));
+  } catch {
+    // ignore storage failures
+  }
+}
+
+function savePublishedAtFallback(formationId, iso) {
+  if (!formationId || !iso) return;
+  const map = readPublishedAtFallbackMap();
+  map[String(formationId)] = iso;
+  writePublishedAtFallbackMap(map);
+}
+
 function padChoices(choices) {
   const next = [...choices];
   while (next.length < 3) {
@@ -100,7 +127,13 @@ export default function AdminFormationPage({ pushToast }) {
         method: 'PATCH',
         token: user.token,
       });
-      setFormation((prev) => ({ ...prev, published: updated.published }));
+      const publishedIso = updated?.publishedAt || new Date().toISOString();
+      savePublishedAtFallback(Number(formationId), publishedIso);
+      setFormation((prev) => ({
+        ...prev,
+        published: updated.published,
+        publishedAt: updated?.publishedAt || prev?.publishedAt || null,
+      }));
       pushToast('Formation published.', 'success');
     } catch (err) {
       pushToast(err.message, 'error');

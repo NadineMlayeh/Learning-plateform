@@ -7,6 +7,7 @@ import StatusBadge from '../components/StatusBadge';
 import LoadingButton from '../components/LoadingButton';
 
 const PAGE_SIZE = 3;
+const FORMATION_PUBLISH_TS_KEY = 'formateur_published_at_map_v1';
 const INITIAL_FORMATION_FORM = {
   title: '',
   description: '',
@@ -17,9 +18,41 @@ const INITIAL_FORMATION_FORM = {
   endDate: '',
 };
 
+function readPublishedAtFallbackMap() {
+  try {
+    const raw = localStorage.getItem(FORMATION_PUBLISH_TS_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writePublishedAtFallbackMap(map) {
+  try {
+    localStorage.setItem(FORMATION_PUBLISH_TS_KEY, JSON.stringify(map));
+  } catch {
+    // ignore storage failures
+  }
+}
+
+function savePublishedAtFallback(formationId, iso) {
+  if (!formationId || !iso) return;
+  const map = readPublishedAtFallbackMap();
+  map[String(formationId)] = iso;
+  writePublishedAtFallbackMap(map);
+}
+
 function createdTimestamp(item) {
   if (item?.createdAt) return new Date(item.createdAt).getTime();
   return item?.id || 0;
+}
+
+function publishedTimestamp(item) {
+  if (item?.publishedAt) return new Date(item.publishedAt).getTime();
+  if (item?.publishedAtClient) return new Date(item.publishedAtClient).getTime();
+  if (item?.published) return 0;
+  return createdTimestamp(item);
 }
 
 function DonutChart({ segments, label, valueText, size = 120, thickness = 20 }) {
@@ -73,6 +106,8 @@ export default function AdminDashboardPage({ pushToast }) {
   const [confirmDeleteFormationId, setConfirmDeleteFormationId] = useState(null);
   const [titleSearch, setTitleSearch] = useState('');
   const [createdSort, setCreatedSort] = useState('newest_first');
+  const [pendingTypeFilter, setPendingTypeFilter] = useState('ALL');
+  const [publishedTypeFilter, setPublishedTypeFilter] = useState('ALL');
   const [pendingPage, setPendingPage] = useState(1);
   const [publishedPage, setPublishedPage] = useState(1);
   const [isCreateFormationModalOpen, setIsCreateFormationModalOpen] =
@@ -92,7 +127,16 @@ export default function AdminDashboardPage({ pushToast }) {
       const data = await apiRequest('/formations/manage', {
         token: user.token,
       });
-      setFormations(data);
+      const fallbackMap = readPublishedAtFallbackMap();
+      const normalized = (Array.isArray(data) ? data : []).map((formation) => {
+        const fallbackPublishedAt = fallbackMap[String(formation.id)];
+        if (formation?.publishedAt || !fallbackPublishedAt) return formation;
+        return {
+          ...formation,
+          publishedAtClient: fallbackPublishedAt,
+        };
+      });
+      setFormations(normalized);
     } catch (err) {
       pushToast(err.message, 'error');
     }
@@ -115,14 +159,26 @@ export default function AdminDashboardPage({ pushToast }) {
   async function publishFormation(formationId) {
     setPublishingId(formationId);
     try {
-      await apiRequest(`/formations/${formationId}/publish`, {
-        method: 'PATCH',
-        token: user.token,
-      });
+      const publishedFormation = await apiRequest(
+        `/formations/${formationId}/publish`,
+        {
+          method: 'PATCH',
+          token: user.token,
+        },
+      );
+      const publishedIso =
+        publishedFormation?.publishedAt || new Date().toISOString();
+      savePublishedAtFallback(formationId, publishedIso);
+
       setFormations((prev) =>
         prev.map((formation) =>
           formation.id === formationId
-            ? { ...formation, published: true }
+            ? {
+                ...formation,
+                published: true,
+                publishedAt: publishedFormation?.publishedAt || formation.publishedAt || null,
+                publishedAtClient: publishedIso,
+              }
             : formation,
         ),
       );
@@ -168,32 +224,44 @@ export default function AdminDashboardPage({ pushToast }) {
     loadAnalytics();
   }, []);
 
-  const sortedFormations = useMemo(() => {
-    const list = [...formations];
-    if (createdSort === 'oldest_first') {
-      return list.sort((a, b) => createdTimestamp(a) - createdTimestamp(b));
-    }
-    return list.sort((a, b) => createdTimestamp(b) - createdTimestamp(a));
-  }, [formations, createdSort]);
-
   const filteredFormations = useMemo(
     () =>
-      sortedFormations.filter((formation) =>
+      formations.filter((formation) =>
         String(formation.title || '')
           .toLowerCase()
           .includes(titleSearch.toLowerCase().trim()),
       ),
-    [sortedFormations, titleSearch],
+    [formations, titleSearch],
   );
 
   const pendingFormations = useMemo(
-    () => filteredFormations.filter((formation) => !formation.published),
-    [filteredFormations],
+    () => {
+      const list = filteredFormations.filter(
+        (formation) =>
+          !formation.published &&
+          (pendingTypeFilter === 'ALL' || formation.type === pendingTypeFilter),
+      );
+      if (createdSort === 'oldest_first') {
+        return list.sort((a, b) => createdTimestamp(a) - createdTimestamp(b));
+      }
+      return list.sort((a, b) => createdTimestamp(b) - createdTimestamp(a));
+    },
+    [filteredFormations, createdSort, pendingTypeFilter],
   );
 
   const publishedFormations = useMemo(
-    () => filteredFormations.filter((formation) => formation.published),
-    [filteredFormations],
+    () => {
+      const list = filteredFormations.filter(
+        (formation) =>
+          formation.published &&
+          (publishedTypeFilter === 'ALL' || formation.type === publishedTypeFilter),
+      );
+      if (createdSort === 'oldest_first') {
+        return list.sort((a, b) => publishedTimestamp(a) - publishedTimestamp(b));
+      }
+      return list.sort((a, b) => publishedTimestamp(b) - publishedTimestamp(a));
+    },
+    [filteredFormations, createdSort, publishedTypeFilter],
   );
 
   const pendingTotalPages = Math.max(
@@ -229,7 +297,7 @@ export default function AdminDashboardPage({ pushToast }) {
   useEffect(() => {
     setPendingPage(1);
     setPublishedPage(1);
-  }, [titleSearch]);
+  }, [titleSearch, createdSort, pendingTypeFilter, publishedTypeFilter]);
 
   const analyticsFormations = analyticsData?.formations || [];
 
@@ -371,6 +439,14 @@ export default function AdminDashboardPage({ pushToast }) {
             placeholder="Search by formation title"
           />
           <select
+            value={pendingTypeFilter}
+            onChange={(event) => setPendingTypeFilter(event.target.value)}
+          >
+            <option value="ALL">All types</option>
+            <option value="ONLINE">Online only</option>
+            <option value="PRESENTIEL">Presentiel only</option>
+          </select>
+          <select
             value={createdSort}
             onChange={(event) => setCreatedSort(event.target.value)}
           >
@@ -511,6 +587,14 @@ export default function AdminDashboardPage({ pushToast }) {
             placeholder="Search by formation title"
           />
           <select
+            value={publishedTypeFilter}
+            onChange={(event) => setPublishedTypeFilter(event.target.value)}
+          >
+            <option value="ALL">All types</option>
+            <option value="ONLINE">Online only</option>
+            <option value="PRESENTIEL">Presentiel only</option>
+          </select>
+          <select
             value={createdSort}
             onChange={(event) => setCreatedSort(event.target.value)}
           >
@@ -628,6 +712,7 @@ export default function AdminDashboardPage({ pushToast }) {
               const formation = entry.formation;
               const stats = entry.statistics;
               const courses = entry.courseStatistics || [];
+              const isPresentiel = formation.type === 'PRESENTIEL';
               const approvedTotal = stats.totalApprovedStudents || 0;
               const completedTotal = stats.totalCompletedStudents || 0;
 
@@ -662,59 +747,65 @@ export default function AdminDashboardPage({ pushToast }) {
                         <span>Approved</span>
                         <strong>{stats.totalApprovedStudents}</strong>
                       </article>
-                      <article>
-                        <span>Completed</span>
-                        <strong>{stats.totalCompletedStudents}</strong>
-                      </article>
-                      <article>
-                        <span>Completion Rate</span>
-                        <strong>{Number(stats.completionRate || 0).toFixed(2)}%</strong>
-                      </article>
-                      <article>
-                        <span>Success Rate</span>
-                        <strong>{Number(stats.successRate || 0).toFixed(2)}%</strong>
-                      </article>
+                      {!isPresentiel && (
+                        <>
+                          <article>
+                            <span>Completed</span>
+                            <strong>{stats.totalCompletedStudents}</strong>
+                          </article>
+                          <article>
+                            <span>Completion Rate</span>
+                            <strong>{Number(stats.completionRate || 0).toFixed(2)}%</strong>
+                          </article>
+                          <article>
+                            <span>Success Rate</span>
+                            <strong>{Number(stats.successRate || 0).toFixed(2)}%</strong>
+                          </article>
+                        </>
+                      )}
                     </div>
 
-                    <div className="formateur-chart-row">
-                      <DonutChart
-                        label="Completion Rate"
-                        valueText={`${Number(stats.completionRate || 0).toFixed(1)}%`}
-                        segments={[
-                          { value: completedTotal, color: '#1ca36a' },
-                          {
-                            value: Math.max(approvedTotal - completedTotal, 0),
-                            color: '#dce8f8',
-                          },
-                        ]}
-                      />
+                    {!isPresentiel && (
+                      <div className="formateur-chart-row">
+                        <DonutChart
+                          label="Completion Rate"
+                          valueText={`${Number(stats.completionRate || 0).toFixed(1)}%`}
+                          segments={[
+                            { value: completedTotal, color: '#1ca36a' },
+                            {
+                              value: Math.max(approvedTotal - completedTotal, 0),
+                              color: '#dce8f8',
+                            },
+                          ]}
+                        />
 
-                      <div className="formateur-bars">
-                        <h4>Average Score per Course</h4>
-                        {courses.length === 0 && (
-                          <p className="hint">No course statistics yet.</p>
-                        )}
-                        {courses.map((course) => (
-                          <div key={course.id} className="formateur-bar-row">
-                            <span>{course.title}</span>
-                            <div className="formateur-bar-track">
-                              <div
-                                className="formateur-bar-fill"
-                                style={{
-                                  width: `${Math.max(
-                                    0,
-                                    Math.min(Number(course.averageScore || 0), 100),
-                                  )}%`,
-                                }}
-                              />
+                        <div className="formateur-bars">
+                          <h4>Average Score per Course</h4>
+                          {courses.length === 0 && (
+                            <p className="hint">No course statistics yet.</p>
+                          )}
+                          {courses.map((course) => (
+                            <div key={course.id} className="formateur-bar-row">
+                              <span>{course.title}</span>
+                              <div className="formateur-bar-track">
+                                <div
+                                  className="formateur-bar-fill"
+                                  style={{
+                                    width: `${Math.max(
+                                      0,
+                                      Math.min(Number(course.averageScore || 0), 100),
+                                    )}%`,
+                                  }}
+                                />
+                              </div>
+                              <strong>
+                                {Number(course.averageScore || 0).toFixed(2)}%
+                              </strong>
                             </div>
-                            <strong>
-                              {Number(course.averageScore || 0).toFixed(2)}%
-                            </strong>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <section className="table-wrap formateur-analytics-table">
                       <table>
@@ -722,8 +813,9 @@ export default function AdminDashboardPage({ pushToast }) {
                           <tr>
                             <th>Student</th>
                             <th>Email</th>
-                            <th>Completion</th>
-                            <th>Certificate</th>
+                            <th>Phone Number</th>
+                            {!isPresentiel && <th>Completion</th>}
+                            {!isPresentiel && <th>Certificate</th>}
                           </tr>
                         </thead>
                         <tbody>
@@ -738,88 +830,93 @@ export default function AdminDashboardPage({ pushToast }) {
                                 <td className="formateur-ellipsis-cell" title={student.email}>
                                   {student.email}
                                 </td>
-                                <td>
-                                  <StatusBadge
-                                    label={
-                                      isCompleted ? 'Completed' : 'In Progress'
-                                    }
-                                    tone={isCompleted ? 'green' : 'orange'}
-                                  />
-                                </td>
-                                <td>
-                                  <StatusBadge
-                                    label={
-                                      student.certificateIssued ? 'Yes' : 'No'
-                                    }
-                                    tone={
-                                      student.certificateIssued
-                                        ? 'green'
-                                        : 'gray'
-                                    }
-                                  />
-                                </td>
+                                <td>{student.phoneNumber || '-'}</td>
+                                {!isPresentiel && (
+                                  <td>
+                                    <StatusBadge
+                                      label={
+                                        isCompleted ? 'Completed' : 'In Progress'
+                                      }
+                                      tone={isCompleted ? 'green' : 'orange'}
+                                    />
+                                  </td>
+                                )}
+                                {!isPresentiel && (
+                                  <td>
+                                    <StatusBadge
+                                      label={
+                                        student.certificateIssued ? 'Yes' : 'No'
+                                      }
+                                      tone={
+                                        student.certificateIssued
+                                          ? 'green'
+                                          : 'gray'
+                                      }
+                                    />
+                                  </td>
+                                )}
                               </tr>
                             );
                           })}
                           {(entry.enrolledStudents || []).length === 0 && (
                             <tr>
-                              <td colSpan={4}>No approved students yet.</td>
+                              <td colSpan={isPresentiel ? 3 : 5}>No approved students yet.</td>
                             </tr>
                           )}
                         </tbody>
                       </table>
                     </section>
 
-                    <section className="table-wrap formateur-analytics-table">
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Course</th>
-                            <th>Passed</th>
-                            <th>Failed</th>
-                            <th>Average Score</th>
-                            <th>Total Attempts</th>
-                            <th>Pass/Fail</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {courses.map((course) => (
-                            <tr key={course.id}>
-                              <td className="formateur-ellipsis-cell" title={course.title}>
-                                {course.title}
-                              </td>
-                              <td>{course.passedStudents}</td>
-                              <td>{course.failedStudents}</td>
-                              <td>{Number(course.averageScore || 0).toFixed(2)}%</td>
-                              <td>{course.totalAttempts}</td>
-                              <td>
-                                <DonutChart
-                                  size={54}
-                                  thickness={11}
-                                  label=""
-                                  valueText={`${course.totalAttempts}`}
-                                  segments={[
-                                    {
-                                      value: course.passedStudents,
-                                      color: '#169f63',
-                                    },
-                                    {
-                                      value: course.failedStudents,
-                                      color: '#f26969',
-                                    },
-                                  ]}
-                                />
-                              </td>
-                            </tr>
-                          ))}
-                          {courses.length === 0 && (
+                    {!isPresentiel && (
+                      <section className="table-wrap formateur-analytics-table">
+                        <table>
+                          <thead>
                             <tr>
-                              <td colSpan={6}>No course statistics yet.</td>
+                              <th>Course</th>
+                              <th>Passed</th>
+                              <th>Failed</th>
+                              <th>Average Score</th>
+                              <th>Pass/Fail</th>
                             </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </section>
+                          </thead>
+                          <tbody>
+                            {courses.map((course) => (
+                              <tr key={course.id}>
+                                <td className="formateur-ellipsis-cell" title={course.title}>
+                                  {course.title}
+                                </td>
+                                <td>{course.passedStudents}</td>
+                                <td>{course.failedStudents}</td>
+                                <td>{Number(course.averageScore || 0).toFixed(2)}%</td>
+                                <td>
+                                  <DonutChart
+                                    size={54}
+                                    thickness={11}
+                                    label=""
+                                    valueText={`${course.passedStudents}/${course.failedStudents}`}
+                                    segments={[
+                                      {
+                                        value: course.passedStudents,
+                                        color: '#169f63',
+                                      },
+                                      {
+                                        value: course.failedStudents,
+                                        color: '#f26969',
+                                      },
+                                    ]}
+                                  />
+                                </td>
+                              </tr>
+                            ))}
+                            {courses.length === 0 && (
+                              <tr>
+                                <td colSpan={5}>No course statistics yet.</td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </section>
+                    )}
                   </article>
                 </div>
               );
