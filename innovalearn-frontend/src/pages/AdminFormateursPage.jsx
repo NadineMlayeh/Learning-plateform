@@ -433,6 +433,10 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
                 <p className="hint">Date of Birth</p>
                 <strong>{formatDateOfBirth(details.dateOfBirth)}</strong>
               </article>
+              <article className="admin-metric-card">
+                <p className="hint">Status</p>
+                <strong>{details.status || 'PENDING'}</strong>
+              </article>
             </div>
             <div className="table-wrap">
               <table>

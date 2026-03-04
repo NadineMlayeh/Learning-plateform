@@ -7576,14 +7576,13 @@ body.backoffice-palette-active .admin-skin-page .action-btn-group {
   gap: 0.62rem !important;
 }
 
-/* Suspend button: white background, red text, outlined like other buttons */
+/* Suspend button: red background with white text */
 body .admin-skin-page .action-btn.action-suspend:not(:disabled),
 body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend:not(:disabled) {
-  background:
-    linear-gradient(180deg, #ffffff 0%, #fdf5fb 100%) padding-box,
-    linear-gradient(125deg, #82c0ec 0%, #23c9e2 46%, #e4b8d9 100%) border-box !important;
-  color: #c83e4d !important;
-  border: 1px solid transparent !important;
+  background: #FF5555 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border: 1px solid #FF5555 !important;
   white-space: nowrap !important;
 }
 
@@ -7591,33 +7590,30 @@ body .admin-skin-page .action-btn.action-suspend:hover:not(:disabled),
 body .admin-skin-page .action-btn.action-suspend:focus-visible:not(:disabled),
 body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend:hover:not(:disabled),
 body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend:focus-visible:not(:disabled) {
-  background:
-    linear-gradient(180deg, #ffffff 0%, #fff6f8 100%) padding-box,
-    linear-gradient(125deg, #82c0ec 0%, #23c9e2 46%, #e4b8d9 100%) border-box !important;
-  color: #b93242 !important;
+  background: #ef4d4d !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-color: #ef4d4d !important;
 }
 
-/* Suspend toggle state: Unsuspend must be black background + red text */
+/* Unsuspend state: white background with red text */
 body .admin-skin-page .action-btn.action-suspend.is-unsuspend:not(:disabled),
 body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend.is-unsuspend:not(:disabled) {
-  background: linear-gradient(180deg, #131820 0%, #1a2029 100%) !important;
-  background-image: linear-gradient(180deg, #131820 0%, #1a2029 100%) !important;
-  color: #ff5b5b !important;
-  border: 1px solid #0e1218 !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 2px 0 rgba(8, 10, 14, 0.9),
-    0 10px 16px -14px rgba(0, 0, 0, 0.6) !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #FF5555 !important;
+  border: 1px solid #FF5555 !important;
+  box-shadow: 0 4px 10px -8px rgba(255, 85, 85, 0.45) !important;
 }
 
 body .admin-skin-page .action-btn.action-suspend.is-unsuspend:hover:not(:disabled),
 body .admin-skin-page .action-btn.action-suspend.is-unsuspend:focus-visible:not(:disabled),
 body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend.is-unsuspend:hover:not(:disabled),
 body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend.is-unsuspend:focus-visible:not(:disabled) {
-  background: linear-gradient(180deg, #171d26 0%, #222a35 100%) !important;
-  background-image: linear-gradient(180deg, #171d26 0%, #222a35 100%) !important;
-  color: #ff6f6f !important;
-  border-color: #141a22 !important;
+  background: #fff6f6 !important;
+  background-image: none !important;
+  color: #FF5555 !important;
+  border-color: #FF5555 !important;
 }
 
 /* Admin table square trash button (students/formateurs/formations action columns) */
@@ -8319,6 +8315,218 @@ body.backoffice-palette-active .container .admin-saas-quick-actions .link-btn:fo
   border-radius: 14px;
   background: #ffffff;
   box-shadow: 0 14px 30px rgba(14, 36, 66, 0.16);
+}
+
+/* Admin formations table: equal-size status etiquettes for Draft/Published */
+.admin-formation-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 94px;
+  border-radius: 999px;
+  padding: 0.26rem 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.admin-formation-status-pill.is-draft {
+  background: #edf2f8;
+  color: #586d85;
+  border: 1px solid #cdd9e6;
+}
+
+.admin-formation-status-pill.is-published {
+  background: #d8f2e6;
+  color: #1a7a4f;
+  border: 1px solid #a8d8bf;
+}
+
+/* Admin formations table: compact action column, wider content columns */
+.admin-formations-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.admin-formations-table th:nth-child(1),
+.admin-formations-table td:nth-child(1) {
+  width: 80px;
+}
+
+.admin-formations-table th:nth-child(3),
+.admin-formations-table td:nth-child(3) {
+  width: 130px;
+}
+
+.admin-formations-table th:nth-child(4),
+.admin-formations-table td:nth-child(4) {
+  width: 170px;
+}
+
+.admin-formations-table th.action-col,
+.admin-formations-table td.action-col {
+  width: 410px;
+  white-space: nowrap;
+}
+
+.admin-formations-table td.action-col .action-btn-group {
+  width: max-content;
+}
+
+.admin-formation-course-table table {
+  table-layout: fixed;
+}
+
+.admin-formation-course-table th,
+.admin-formation-course-table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.admin-formation-course-table th:nth-child(1),
+.admin-formation-course-table td:nth-child(1) {
+  width: 86px;
+}
+
+.admin-formation-course-table th:nth-child(2),
+.admin-formation-course-table td:nth-child(2) {
+  width: 170px;
+}
+
+.admin-formation-course-table th:nth-child(4),
+.admin-formation-course-table td:nth-child(4) {
+  width: 132px;
+}
+
+.admin-formation-course-table th:nth-child(5),
+.admin-formation-course-table td:nth-child(5) {
+  width: 170px;
+}
+
+.admin-edit-course-list {
+  gap: 0.6rem;
+  margin-top: 0.2rem;
+}
+
+.admin-edit-course-list h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #143b75;
+}
+
+.admin-edit-course-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.58rem;
+}
+
+body .admin-skin-page .admin-edit-course-row .action-btn.admin-edit-course-trash-btn,
+body.backoffice-palette-active .admin-skin-page .admin-edit-course-row .action-btn.admin-edit-course-trash-btn {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body .admin-skin-page .admin-edit-course-row .action-btn.admin-edit-course-trash-btn::before,
+body .admin-skin-page .admin-edit-course-row .action-btn.admin-edit-course-trash-btn::after,
+body.backoffice-palette-active .admin-skin-page .admin-edit-course-row .action-btn.admin-edit-course-trash-btn::before,
+body.backoffice-palette-active .admin-skin-page .admin-edit-course-row .action-btn.admin-edit-course-trash-btn::after {
+  display: none !important;
+  content: none !important;
+}
+
+body .admin-skin-page .admin-edit-course-row .action-btn.admin-edit-course-trash-btn:hover:not(:disabled),
+body .admin-skin-page .admin-edit-course-row .action-btn.admin-edit-course-trash-btn:focus-visible:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .admin-edit-course-row .action-btn.admin-edit-course-trash-btn:hover:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .admin-edit-course-row .action-btn.admin-edit-course-trash-btn:focus-visible:not(:disabled) {
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.admin-edit-course-row .admin-square-trash-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.admin-course-content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.admin-course-content-column {
+  min-width: 0;
+  border: 1px solid #d2e2f3;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.6rem;
+  align-content: start;
+}
+
+.admin-course-content-column h3 {
+  margin: 0;
+}
+
+.admin-course-content-item {
+  border: 1px solid #d8e6f4;
+  border-radius: 10px;
+  background: #f9fcff;
+  padding: 0.55rem 0.65rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.admin-course-content-item a {
+  width: fit-content;
+}
+
+.admin-quiz-question-block {
+  border-top: 1px solid #dce8f6;
+  padding-top: 0.4rem;
+}
+
+.admin-quiz-question-block p {
+  margin: 0 0 0.32rem;
+  font-weight: 700;
+}
+
+.admin-quiz-choice-list {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.16rem;
+}
+
+.admin-quiz-choice-list li.is-correct {
+  color: #0f7a4d;
+  font-weight: 700;
+}
+
+@media (max-width: 860px) {
+  .admin-course-content-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 1180px) {

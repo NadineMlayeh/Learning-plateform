@@ -3,7 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EnrollmentStatus, FormateurStatus, Prisma, Role } from '@prisma/client';
+import {
+  EnrollmentStatus,
+  FormateurStatus,
+  FormationType,
+  Prisma,
+  Role,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -765,12 +771,22 @@ export class AdminService {
     const page = this.toNumber(query.page, 1);
     const pageSize = Math.min(this.toNumber(query.pageSize, 10), 100);
     const search = String(query.search || '').trim();
+    const status = String(query.status || '').trim().toUpperCase();
+    const type = String(query.type || '').trim().toUpperCase();
 
     const where: Prisma.FormationWhereInput = {
       ...(search
         ? {
             title: { contains: search, mode: 'insensitive' },
           }
+        : {}),
+      ...(status === 'PUBLISHED'
+        ? { published: true }
+        : status === 'DRAFT'
+          ? { published: false }
+          : {}),
+      ...(type === 'ONLINE' || type === 'PRESENTIEL'
+        ? { type: type as 'ONLINE' | 'PRESENTIEL' }
         : {}),
     };
 
@@ -849,6 +865,550 @@ export class AdminService {
         };
       }),
     };
+  }
+
+  async getFormationAnalytics(formationId: number) {
+    const formation = await this.prisma.formation.findUnique({
+      where: { id: formationId },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        type: true,
+        price: true,
+        published: true,
+        publishedAt: true,
+        createdAt: true,
+        enrollments: {
+          select: {
+            id: true,
+            status: true,
+            studentId: true,
+            createdAt: true,
+            student: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phoneNumber: true,
+              },
+            },
+          },
+        },
+        courses: {
+          select: {
+            id: true,
+            title: true,
+            _count: {
+              select: {
+                quizzes: true,
+              },
+            },
+          },
+        },
+        results: {
+          select: {
+            studentId: true,
+            completed: true,
+            certificateUrl: true,
+          },
+        },
+      },
+    });
+
+    if (!formation) {
+      throw new NotFoundException('Formation not found');
+    }
+
+    const courseIds = formation.courses.map((course) => course.id);
+    const courseResults =
+      courseIds.length === 0
+        ? []
+        : await this.prisma.courseResult.findMany({
+            where: {
+              courseId: { in: courseIds },
+            },
+            select: {
+              courseId: true,
+              studentId: true,
+              score: true,
+              passed: true,
+            },
+          });
+
+    const courseResultsByCourseId = new Map<
+      number,
+      { studentId: number; score: number; passed: boolean }[]
+    >();
+
+    for (const result of courseResults) {
+      const existing = courseResultsByCourseId.get(result.courseId) || [];
+      existing.push(result);
+      courseResultsByCourseId.set(result.courseId, existing);
+    }
+
+    const totalStudentsEnrolled = formation.enrollments.length;
+    const approvedEnrollments = formation.enrollments
+      .filter((entry) => entry.status === 'APPROVED')
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    const totalApprovedStudents = approvedEnrollments.length;
+    const approvedStudentIds = new Set(
+      approvedEnrollments.map((entry) => entry.studentId),
+    );
+
+    const formationResultByStudent = new Map(
+      formation.results.map((entry) => [entry.studentId, entry]),
+    );
+
+    const enrolledStudents = approvedEnrollments.map((entry) => {
+      const result = formationResultByStudent.get(entry.studentId);
+
+      let completionStatus = 'IN_PROGRESS';
+      if (result?.completed === true) completionStatus = 'COMPLETED_SUCCESS';
+      else if (result) completionStatus = 'COMPLETED_FAIL';
+
+      return {
+        id: entry.student.id,
+        name: entry.student.name,
+        email: entry.student.email,
+        phoneNumber: entry.student.phoneNumber || null,
+        completionStatus,
+        certificateIssued: Boolean(result?.certificateUrl),
+      };
+    });
+
+    const totalCompletedStudents = enrolledStudents.filter(
+      (entry) => entry.completionStatus !== 'IN_PROGRESS',
+    ).length;
+
+    const totalSuccessfulStudents = enrolledStudents.filter(
+      (entry) => entry.completionStatus === 'COMPLETED_SUCCESS',
+    ).length;
+
+    const completionRate =
+      totalApprovedStudents === 0
+        ? 0
+        : this.round2((totalCompletedStudents / totalApprovedStudents) * 100);
+    const successRate =
+      totalApprovedStudents === 0
+        ? 0
+        : this.round2((totalSuccessfulStudents / totalApprovedStudents) * 100);
+
+    const courses = formation.courses
+      .map((course) => {
+        const attempts = (courseResultsByCourseId.get(course.id) || []).filter(
+          (result) => approvedStudentIds.has(result.studentId),
+        );
+
+        const totalAttempts = attempts.length;
+        const passedStudents = attempts.filter((attempt) => attempt.passed)
+          .length;
+        const failedStudents = totalAttempts - passedStudents;
+        const averageScore =
+          totalAttempts === 0
+            ? 0
+            : this.round2(
+                attempts.reduce((sum, attempt) => sum + attempt.score, 0) /
+                  totalAttempts,
+              );
+
+        return {
+          id: course.id,
+          title: course.title,
+          quizCount: course._count?.quizzes || 0,
+          passedStudents,
+          failedStudents,
+          averageScore,
+          totalAttempts,
+        };
+      })
+      .sort((a, b) => b.id - a.id);
+
+    return {
+      generatedAt: new Date().toISOString(),
+      formation: {
+        id: formation.id,
+        title: formation.title,
+        description: formation.description,
+        type: formation.type,
+        price: formation.price,
+        published: formation.published,
+        publishedAt: formation.publishedAt,
+        createdAt: formation.createdAt,
+      },
+      enrolledStudents,
+      statistics: {
+        totalStudentsEnrolled,
+        totalApprovedStudents,
+        totalCompletedStudents,
+        completionRate,
+        successRate,
+        averageScorePerCourse: courses.map((course) => ({
+          courseId: course.id,
+          title: course.title,
+          averageScore: course.averageScore,
+        })),
+      },
+      courseStatistics: courses,
+    };
+  }
+
+  async getFormationById(formationId: number) {
+    const formation = await this.prisma.formation.findUnique({
+      where: { id: formationId },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        price: true,
+        type: true,
+        published: true,
+        publishedAt: true,
+        location: true,
+        startDate: true,
+        endDate: true,
+        createdAt: true,
+        formateur: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        enrollments: {
+          select: {
+            id: true,
+            invoice: {
+              select: {
+                amount: true,
+              },
+            },
+          },
+        },
+        courses: {
+          select: {
+            id: true,
+            title: true,
+            published: true,
+            lessons: {
+              select: {
+                id: true,
+                title: true,
+                pdfUrl: true,
+              },
+              orderBy: { id: 'asc' },
+            },
+            quizzes: {
+              select: {
+                id: true,
+                title: true,
+                questions: {
+                  select: {
+                    id: true,
+                    text: true,
+                    choices: {
+                      select: {
+                        id: true,
+                        text: true,
+                        isCorrect: true,
+                      },
+                      orderBy: { id: 'asc' },
+                    },
+                  },
+                  orderBy: { id: 'asc' },
+                },
+              },
+              orderBy: { id: 'asc' },
+            },
+          },
+          orderBy: { id: 'asc' },
+        },
+      },
+    });
+
+    if (!formation) {
+      throw new NotFoundException('Formation not found');
+    }
+
+    const revenueGenerated = formation.enrollments.reduce(
+      (sum, enrollment) => sum + Number(enrollment.invoice?.amount || 0),
+      0,
+    );
+
+    return {
+      id: formation.id,
+      title: formation.title,
+      description: formation.description,
+      price: formation.price,
+      type: formation.type,
+      published: formation.published,
+      publishedAt: formation.publishedAt,
+      location: formation.location,
+      startDate: formation.startDate,
+      endDate: formation.endDate,
+      createdAt: formation.createdAt,
+      formateur: formation.formateur,
+      totalStudentsEnrolled: formation.enrollments.length,
+      revenueGenerated: this.round2(revenueGenerated),
+      courses: formation.courses.map((course) => ({
+        id: course.id,
+        courseName: course.title,
+        title: formation.title,
+        description: formation.description,
+        published: course.published,
+        lessons: course.lessons,
+        quizzes: course.quizzes,
+      })),
+    };
+  }
+
+  async updateFormation(
+    formationId: number,
+    payload: {
+      title?: string;
+      description?: string;
+      price?: number;
+      type?: FormationType;
+      location?: string | null;
+      startDate?: string | null;
+      endDate?: string | null;
+    },
+  ) {
+    const formation = await this.prisma.formation.findUnique({
+      where: { id: formationId },
+      select: { id: true, type: true },
+    });
+
+    if (!formation) {
+      throw new NotFoundException('Formation not found');
+    }
+
+    const data: Prisma.FormationUpdateInput = {};
+    let nextType: FormationType = formation.type;
+
+    if (typeof payload.title === 'string') {
+      const value = payload.title.trim();
+      if (!value) throw new BadRequestException('Title cannot be empty');
+      data.title = value;
+    }
+
+    if (typeof payload.description === 'string') {
+      const value = payload.description.trim();
+      if (!value) throw new BadRequestException('Description cannot be empty');
+      data.description = value;
+    }
+
+    if (payload.price !== undefined) {
+      const value = Number(payload.price);
+      if (!Number.isFinite(value) || value < 0) {
+        throw new BadRequestException('Price must be a valid non-negative number');
+      }
+      data.price = value;
+    }
+
+    if (
+      payload.type !== undefined &&
+      payload.type !== FormationType.ONLINE &&
+      payload.type !== FormationType.PRESENTIEL
+    ) {
+      throw new BadRequestException('Invalid formation type');
+    }
+
+    if (payload.type !== undefined) {
+      nextType = payload.type;
+      data.type = payload.type;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(payload, 'location')) {
+      if (payload.location === null) data.location = null;
+      else if (typeof payload.location === 'string') {
+        data.location = payload.location.trim() || null;
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(payload, 'startDate')) {
+      if (payload.startDate === null || payload.startDate === '') {
+        data.startDate = null;
+      } else if (typeof payload.startDate === 'string') {
+        const parsed = new Date(payload.startDate);
+        if (Number.isNaN(parsed.getTime())) {
+          throw new BadRequestException('Invalid start date');
+        }
+        data.startDate = parsed;
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(payload, 'endDate')) {
+      if (payload.endDate === null || payload.endDate === '') {
+        data.endDate = null;
+      } else if (typeof payload.endDate === 'string') {
+        const parsed = new Date(payload.endDate);
+        if (Number.isNaN(parsed.getTime())) {
+          throw new BadRequestException('Invalid end date');
+        }
+        data.endDate = parsed;
+      }
+    }
+
+    if (nextType === FormationType.ONLINE) {
+      data.startDate = null;
+      data.endDate = null;
+      data.location = null;
+    }
+
+    if (Object.keys(data).length === 0) {
+      throw new BadRequestException(
+        'At least one editable field must be provided',
+      );
+    }
+
+    return this.prisma.formation.update({
+      where: { id: formationId },
+      data,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        price: true,
+        type: true,
+        location: true,
+        startDate: true,
+        endDate: true,
+        published: true,
+      },
+    });
+  }
+
+  async updateCourse(
+    courseId: number,
+    payload: {
+      title?: string;
+    },
+  ) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      select: {
+        id: true,
+        formation: {
+          select: {
+            type: true,
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (course.formation.type !== FormationType.ONLINE) {
+      throw new BadRequestException(
+        'Only online formation courses can be edited here',
+      );
+    }
+
+    const data: Prisma.CourseUpdateInput = {};
+
+    if (typeof payload.title === 'string') {
+      const value = payload.title.trim();
+      if (!value) {
+        throw new BadRequestException('Course title cannot be empty');
+      }
+      data.title = value;
+    }
+
+    if (Object.keys(data).length === 0) {
+      throw new BadRequestException('At least one editable field is required');
+    }
+
+    return this.prisma.course.update({
+      where: { id: courseId },
+      data,
+      select: {
+        id: true,
+        title: true,
+        published: true,
+        formationId: true,
+      },
+    });
+  }
+
+  async deleteCourse(courseId: number) {
+    return this.prisma.$transaction(async (tx) => {
+      const course = await tx.course.findUnique({
+        where: { id: courseId },
+        include: {
+          formation: {
+            select: {
+              type: true,
+            },
+          },
+          quizzes: {
+            select: { id: true },
+          },
+        },
+      });
+
+      if (!course) {
+        throw new NotFoundException('Course not found');
+      }
+
+      if (course.formation.type !== FormationType.ONLINE) {
+        throw new BadRequestException(
+          'Only online formation courses can be deleted here',
+        );
+      }
+
+      const quizIds = course.quizzes.map((entry) => entry.id);
+      const questionIds =
+        quizIds.length === 0
+          ? []
+          : (
+              await tx.question.findMany({
+                where: { quizId: { in: quizIds } },
+                select: { id: true },
+              })
+            ).map((entry) => entry.id);
+
+      await tx.courseResult.deleteMany({
+        where: { courseId },
+      });
+
+      await tx.lesson.deleteMany({
+        where: { courseId },
+      });
+
+      if (quizIds.length > 0) {
+        await tx.quizSubmission.deleteMany({
+          where: { quizId: { in: quizIds } },
+        });
+      }
+
+      if (questionIds.length > 0) {
+        await tx.choice.deleteMany({
+          where: { questionId: { in: questionIds } },
+        });
+
+        await tx.question.deleteMany({
+          where: { id: { in: questionIds } },
+        });
+      }
+
+      if (quizIds.length > 0) {
+        await tx.quiz.deleteMany({
+          where: { id: { in: quizIds } },
+        });
+      }
+
+      await tx.course.delete({
+        where: { id: courseId },
+      });
+
+      return { message: 'Course deleted successfully' };
+    });
   }
 
   async deleteFormation(formationId: number) {

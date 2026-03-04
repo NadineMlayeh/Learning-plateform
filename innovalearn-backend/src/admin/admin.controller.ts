@@ -162,9 +162,52 @@ export class AdminController {
     return this.adminService.getFormations(query);
   }
 
+  @Get('formations/:id/analytics')
+  getFormationAnalytics(@Param('id') id: string) {
+    return this.adminService.getFormationAnalytics(Number(id));
+  }
+
+  @Get('formations/:id')
+  getFormationById(@Param('id') id: string) {
+    return this.adminService.getFormationById(Number(id));
+  }
+
+  @Patch('formations/:id')
+  updateFormation(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      title?: string;
+      description?: string;
+      price?: number;
+      type?: 'ONLINE' | 'PRESENTIEL';
+      location?: string | null;
+      startDate?: string | null;
+      endDate?: string | null;
+    },
+  ) {
+    return this.adminService.updateFormation(Number(id), body || {});
+  }
+
   @Delete('formations/:id')
   deleteFormation(@Param('id') id: string) {
     return this.adminService.deleteFormation(Number(id));
+  }
+
+  @Patch('courses/:id')
+  updateCourse(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      title?: string;
+    },
+  ) {
+    return this.adminService.updateCourse(Number(id), body || {});
+  }
+
+  @Delete('courses/:id')
+  deleteCourse(@Param('id') id: string) {
+    return this.adminService.deleteCourse(Number(id));
   }
 
   @Get('revenue-overview')
