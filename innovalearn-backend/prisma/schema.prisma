@@ -30,6 +30,7 @@ model User {
   dateOfBirth     DateTime?
   role            Role             @default(STUDENT)
   formateurStatus FormateurStatus?
+  isSuspended     Boolean          @default(false)
   createdAt       DateTime         @default(now())
   formations      Formation[]
   enrollments     Enrollment[] 

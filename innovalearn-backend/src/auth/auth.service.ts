@@ -5,8 +5,6 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { Role } from '@prisma/client';
 
-
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -14,27 +12,27 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-async validateUser(email: string, password: string) {
-  const user = await this.prisma.user.findUnique({ where: { email } });
+  async validateUser(email: string, password: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
 
-  if (!user) return null;
+    if (!user) return null;
 
-  const passwordValid = await bcrypt.compare(password, user.password);
-  if (!passwordValid) return null;
+    const passwordValid = await bcrypt.compare(password, user.password);
+    if (!passwordValid) return null;
 
-  // 🔒 BLOCK unapproved formateurs
-  if (
-    user.role === Role.FORMATEUR &&
-    user.formateurStatus !== 'APPROVED'
-  ) {
-    throw new UnauthorizedException(
-      'Your formateur account is not approved by admin'
-    );
+    if (user.isSuspended) {
+      throw new UnauthorizedException('Your account has been suspended');
+    }
+
+    // Block unapproved formateurs
+    if (user.role === Role.FORMATEUR && user.formateurStatus !== 'APPROVED') {
+      throw new UnauthorizedException(
+        'Your formateur account is not approved by admin',
+      );
+    }
+
+    return user;
   }
-
-  return user;
-}
-
 
   async login(user: any) {
     const payload = { sub: user.id, role: user.role };
@@ -42,23 +40,21 @@ async validateUser(email: string, password: string) {
       access_token: this.jwtService.sign(payload),
     };
   }
-async register(dto: RegisterDto) {
-  const hashedPassword = await bcrypt.hash(dto.password, 10);
-  const hasDateOfBirth = Boolean(dto.dateOfBirth);
 
-  return this.prisma.user.create({
-    data: {
-      email: dto.email,
-      password: hashedPassword,
-      name: dto.name,
-      phoneNumber: dto.phoneNumber.trim(),
-      dateOfBirth: hasDateOfBirth ? new Date(dto.dateOfBirth as string) : null,
-      role: dto.role ?? Role.STUDENT,
-      formateurStatus:
-        dto.role === Role.FORMATEUR ? 'PENDING' : null,
-    },
-  });
-}
+  async register(dto: RegisterDto) {
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const hasDateOfBirth = Boolean(dto.dateOfBirth);
 
-
+    return this.prisma.user.create({
+      data: {
+        email: dto.email,
+        password: hashedPassword,
+        name: dto.name,
+        phoneNumber: dto.phoneNumber.trim(),
+        dateOfBirth: hasDateOfBirth ? new Date(dto.dateOfBirth as string) : null,
+        role: dto.role ?? Role.STUDENT,
+        formateurStatus: dto.role === Role.FORMATEUR ? 'PENDING' : null,
+      },
+    });
+  }
 }

@@ -6,7 +6,7 @@ import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 
 function money(value) {
-  return `${Number(value || 0).toFixed(2)} EUR`;
+  return `${Number(value || 0).toFixed(2)} TND`;
 }
 
 function MonthlyRevenueChart({ rows }) {

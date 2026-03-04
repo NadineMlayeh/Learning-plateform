@@ -484,7 +484,7 @@ export default function AdminPage({ pushToast }) {
               <span className="admin-saas-highlight-accent" />
               <span className="admin-saas-highlight-badge" aria-hidden="true">$</span>
               <p className="hint">Total Revenue</p>
-              <strong>{Number(globalOverview?.totalRevenue || 0).toFixed(2)} EUR</strong>
+              <strong>{Number(globalOverview?.totalRevenue || 0).toFixed(2)} TND</strong>
             </article>
             <article className="admin-metric-card admin-saas-highlight-card">
               <span className="admin-saas-highlight-accent" />
@@ -805,7 +805,7 @@ export default function AdminPage({ pushToast }) {
                       tone="blue"
                     />
                     <StatusBadge
-                      label={`Total ${group.totalAmount.toFixed(2)} EUR`}
+                      label={`Total ${group.totalAmount.toFixed(2)} TND`}
                       tone="green"
                     />
                   </div>
@@ -849,7 +849,7 @@ export default function AdminPage({ pushToast }) {
                             <td>#{entry.id}</td>
                             <td>{entry.enrollment?.formation?.title || '-'}</td>
                             <td>{entry.enrollment?.formation?.type || '-'}</td>
-                            <td>{Number(entry.amount || 0).toFixed(2)} EUR</td>
+                            <td>{Number(entry.amount || 0).toFixed(2)} TND</td>
                             <td>
                               {new Date(entry.createdAt).toLocaleString()}
                             </td>

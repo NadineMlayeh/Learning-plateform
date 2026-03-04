@@ -15,7 +15,28 @@ function statusTone(status) {
 }
 
 function money(value) {
-  return `${Number(value || 0).toFixed(2)} EUR`;
+  return `${Number(value || 0).toFixed(2)} TND`;
+}
+
+function formatDateOfBirth(value) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString();
+}
+
+function toDateInputValue(value) {
+  if (!value) return '';
+  if (typeof value === 'string') {
+    const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) return match[1];
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function buildQuery(path, params) {
@@ -102,8 +123,9 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
   const [details, setDetails] = useState(null);
   const [editModel, setEditModel] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [suspendTarget, setSuspendTarget] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [processingId, setProcessingId] = useState(null);
+  const [suspendingId, setSuspendingId] = useState(null);
   const [analytics, setAnalytics] = useState({
     open: false,
     loading: false,
@@ -136,25 +158,6 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
     }
   }
 
-  async function updateStatus(formateurId, action) {
-    setProcessingId(formateurId);
-    try {
-      await apiRequest(`/admin/formateur/${formateurId}/${action}`, {
-        method: 'PATCH',
-        token: user.token,
-      });
-      pushToast(`Formateur ${action}d successfully.`, 'success');
-      await loadFormateurs();
-      if (details?.id === formateurId) {
-        await openDetails(formateurId);
-      }
-    } catch (err) {
-      pushToast(err.message, 'error');
-    } finally {
-      setProcessingId(null);
-    }
-  }
-
   async function saveFormateur(event) {
     event.preventDefault();
     if (!editModel) return;
@@ -167,7 +170,8 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
         body: {
           name: editModel.name,
           email: editModel.email,
-          status: editModel.status,
+          phoneNumber: editModel.phoneNumber,
+          dateOfBirth: editModel.dateOfBirth || null,
         },
       });
       pushToast('Formateur updated successfully.', 'success');
@@ -199,6 +203,33 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
       pushToast(err.message, 'error');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function toggleFormateurSuspend(target) {
+    if (!target) return;
+    const action = target.isSuspended ? 'unsuspend' : 'suspend';
+    setSuspendingId(target.id);
+    try {
+      await apiRequest(`/admin/formateurs/${target.id}/${action}`, {
+        method: 'PATCH',
+        token: user.token,
+      });
+      pushToast(
+        action === 'suspend'
+          ? 'Formateur account suspended.'
+          : 'Formateur account unsuspended.',
+        'success',
+      );
+      setSuspendTarget(null);
+      await loadFormateurs();
+      if (details?.id === target.id) {
+        await openDetails(target.id);
+      }
+    } catch (err) {
+      pushToast(err.message, 'error');
+    } finally {
+      setSuspendingId((prev) => (prev === target.id ? null : prev));
     }
   }
 
@@ -278,9 +309,6 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Status</th>
-                <th>Formations</th>
-                <th>Students</th>
-                <th>Revenue</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -293,32 +321,17 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
                   <td>
                     <StatusBadge label={entry.status} tone={statusTone(entry.status)} />
                   </td>
-                  <td>{entry.formationsCount}</td>
-                  <td>{entry.totalStudentsEnrolled}</td>
-                  <td>{money(entry.totalRevenueGenerated)}</td>
                   <td>
                     <div className="row action-btn-group">
                       <button type="button" className="action-btn action-page" onClick={() => openDetails(entry.id)}>
                         Details
                       </button>
-                      <button type="button" className="action-btn action-page" onClick={() => openAnalytics(entry.id)}>
-                        View Analytics
-                      </button>
                       <button
                         type="button"
-                        className="action-btn action-approve"
-                        disabled={entry.status === 'APPROVED' || processingId === entry.id}
-                        onClick={() => updateStatus(entry.id, 'approve')}
+                        className="action-btn action-analytics"
+                        onClick={() => openAnalytics(entry.id)}
                       >
-                        Approve
-                      </button>
-                      <button
-                        type="button"
-                        className="action-btn action-reject"
-                        disabled={entry.status === 'REJECTED' || processingId === entry.id}
-                        onClick={() => updateStatus(entry.id, 'reject')}
-                      >
-                        Reject
+                        Analytics
                       </button>
                       <button
                         type="button"
@@ -328,7 +341,8 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
                             id: entry.id,
                             name: entry.name,
                             email: entry.email,
-                            status: entry.status,
+                            phoneNumber: entry.phoneNumber || '',
+                            dateOfBirth: toDateInputValue(entry.dateOfBirth),
                           })
                         }
                       >
@@ -336,10 +350,32 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
                       </button>
                       <button
                         type="button"
-                        className="action-btn action-reject"
+                        className={`action-btn action-suspend ${
+                          entry.isSuspended ? 'is-unsuspend' : ''
+                        }`}
+                        onClick={() =>
+                          setSuspendTarget({
+                            id: entry.id,
+                            name: entry.name,
+                            isSuspended: Boolean(entry.isSuspended),
+                          })
+                        }
+                        disabled={suspendingId === entry.id}
+                      >
+                        {suspendingId === entry.id
+                          ? 'Working...'
+                          : entry.isSuspended
+                            ? 'Unsuspend'
+                            : 'Suspend'}
+                      </button>
+                      <button
+                        type="button"
+                        className="action-btn admin-square-trash-btn"
+                        aria-label={`Delete formateur ${entry.name}`}
+                        title="Delete"
                         onClick={() => setDeleteTarget(entry)}
                       >
-                        Delete
+                        <img src="/images/trash.png" alt="" className="admin-square-trash-icon" />
                       </button>
                     </div>
                   </td>
@@ -347,7 +383,7 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
               ))}
               {data.items.length === 0 && (
                 <tr>
-                  <td colSpan={8}>{loading ? 'Loading formateurs...' : 'No formateurs found.'}</td>
+                  <td colSpan={5}>{loading ? 'Loading formateurs...' : 'No formateurs found.'}</td>
                 </tr>
               )}
             </tbody>
@@ -380,7 +416,7 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
       <Modal open={Boolean(details)} title={`Formateur #${details?.id || ''}`} onClose={() => setDetails(null)}>
         {details && (
           <div className="stack">
-            <div className="admin-metric-grid">
+            <div className="admin-metric-grid admin-user-detail-cards">
               <article className="admin-metric-card">
                 <p className="hint">Name</p>
                 <strong>{details.name}</strong>
@@ -390,24 +426,81 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
                 <strong>{details.email}</strong>
               </article>
               <article className="admin-metric-card">
-                <p className="hint">Status</p>
-                <strong>{details.status}</strong>
+                <p className="hint">Phone Number</p>
+                <strong>{details.phoneNumber || '-'}</strong>
               </article>
               <article className="admin-metric-card">
-                <p className="hint">Formations</p>
-                <strong>{details.formationsCount}</strong>
+                <p className="hint">Date of Birth</p>
+                <strong>{formatDateOfBirth(details.dateOfBirth)}</strong>
               </article>
-              <article className="admin-metric-card">
-                <p className="hint">Total Students</p>
-                <strong>{details.totalStudentsEnrolled}</strong>
-              </article>
-              <article className="admin-metric-card">
-                <p className="hint">Revenue</p>
-                <strong>{money(details.totalRevenueGenerated)}</strong>
-              </article>
+            </div>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Formation ID</th>
+                    <th>Formation Name</th>
+                    <th>Price</th>
+                    <th>Type</th>
+                    <th>Enrollments</th>
+                    <th>Success Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(details.formations || []).map((formation) => (
+                    <tr key={formation.id}>
+                      <td>{formation.id}</td>
+                      <td>{formation.title}</td>
+                      <td>{money(formation.price)}</td>
+                      <td>{formation.type}</td>
+                      <td>{formation.enrollmentsCount ?? 0}</td>
+                      <td>{Number(formation.successRate || 0).toFixed(2)}%</td>
+                    </tr>
+                  ))}
+                  {(details.formations || []).length === 0 && (
+                    <tr>
+                      <td colSpan={6}>No formations found for this formateur.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        open={Boolean(suspendTarget)}
+        title={suspendTarget?.isSuspended ? 'Unsuspend Formateur' : 'Suspend Formateur'}
+        onClose={() => setSuspendTarget(null)}
+      >
+        <div className="grid">
+          <p>
+            Are you sure you want to{' '}
+            {suspendTarget?.isSuspended ? 'unsuspend' : 'suspend'} this
+            formateur?
+          </p>
+          <div className="row">
+            <button
+              type="button"
+              className="action-btn action-reject"
+              onClick={() => toggleFormateurSuspend(suspendTarget)}
+              disabled={!suspendTarget || suspendingId === suspendTarget.id}
+            >
+              {suspendTarget && suspendingId === suspendTarget.id
+                ? 'Working...'
+                : 'Confirm'}
+            </button>
+            <button
+              type="button"
+              className="action-btn modal-cancel-btn"
+              onClick={() => setSuspendTarget(null)}
+              disabled={suspendTarget && suspendingId === suspendTarget.id}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </Modal>
 
       <Modal open={Boolean(editModel)} title={`Edit Formateur #${editModel?.id || ''}`} onClose={() => setEditModel(null)}>
@@ -432,21 +525,38 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
               />
             </label>
             <label className="grid">
-              <span>Status</span>
-              <select
-                value={editModel.status}
-                onChange={(event) => setEditModel((prev) => ({ ...prev, status: event.target.value }))}
-              >
-                <option value="PENDING">PENDING</option>
-                <option value="APPROVED">APPROVED</option>
-                <option value="REJECTED">REJECTED</option>
-              </select>
+              <span>Phone Number</span>
+              <input
+                type="text"
+                value={editModel.phoneNumber || ''}
+                onChange={(event) =>
+                  setEditModel((prev) => ({ ...prev, phoneNumber: event.target.value }))
+                }
+              />
+            </label>
+            <label className="grid">
+              <span>Date of Birth</span>
+              <input
+                type="date"
+                value={editModel.dateOfBirth || ''}
+                onChange={(event) =>
+                  setEditModel((prev) => ({ ...prev, dateOfBirth: event.target.value }))
+                }
+              />
             </label>
             <div className="row">
-              <button type="submit" disabled={saving}>
+              <button
+                type="submit"
+                className="action-btn admin-student-edit-save"
+                disabled={saving}
+              >
                 {saving ? 'Saving...' : 'Save'}
               </button>
-              <button type="button" className="action-btn action-page" onClick={() => setEditModel(null)}>
+              <button
+                type="button"
+                className="action-btn admin-student-edit-cancel"
+                onClick={() => setEditModel(null)}
+              >
                 Cancel
               </button>
             </div>

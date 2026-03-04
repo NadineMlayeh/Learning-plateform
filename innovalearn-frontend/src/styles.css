@@ -2273,6 +2273,25 @@ tr:last-child td {
   font-size: 1.02rem;
 }
 
+/* Compact info cards inside student/formateur details popup */
+.admin-modal-body .admin-user-detail-cards .admin-metric-card {
+  padding: 0.44rem 0.58rem;
+  min-height: 64px;
+  gap: 0.14rem;
+  align-content: start;
+}
+
+.admin-modal-body .admin-user-detail-cards .admin-metric-card .hint {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.15;
+}
+
+.admin-modal-body .admin-user-detail-cards .admin-metric-card strong {
+  font-size: 0.94rem;
+  line-height: 1.2;
+}
+
 .admin-metric-card-centered {
   justify-items: center;
 }
@@ -7240,6 +7259,87 @@ body.backoffice-palette-active .formateur-dashboard-page .create-formation-modal
   animation-iteration-count: 1 !important;
 }
 
+/* Admin students edit popup: force equal size + save green + cancel black */
+body .admin-skin-page .admin-modal-body .row > .action-btn.admin-student-edit-save,
+body.backoffice-palette-active
+  .admin-skin-page
+  .admin-modal-body
+  .row
+  > .action-btn.admin-student-edit-save,
+body .admin-skin-page .admin-modal-body .row > .action-btn.admin-student-edit-cancel,
+body.backoffice-palette-active
+  .admin-skin-page
+  .admin-modal-body
+  .row
+  > .action-btn.admin-student-edit-cancel {
+  width: 118px !important;
+  min-width: 118px !important;
+  max-width: 118px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  justify-content: center !important;
+}
+
+body .admin-skin-page .admin-modal-body .row > .action-btn.admin-student-edit-save,
+body.backoffice-palette-active
+  .admin-skin-page
+  .admin-modal-body
+  .row
+  > .action-btn.admin-student-edit-save {
+  background: linear-gradient(140deg, #1fab67 0%, #16814f 100%) !important;
+  background-image: linear-gradient(140deg, #1fab67 0%, #16814f 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #16814f !important;
+}
+
+body .admin-skin-page .admin-modal-body .row > .action-btn.admin-student-edit-save:hover:not(:disabled),
+body .admin-skin-page .admin-modal-body .row > .action-btn.admin-student-edit-save:focus-visible:not(:disabled),
+body.backoffice-palette-active
+  .admin-skin-page
+  .admin-modal-body
+  .row
+  > .action-btn.admin-student-edit-save:hover:not(:disabled),
+body.backoffice-palette-active
+  .admin-skin-page
+  .admin-modal-body
+  .row
+  > .action-btn.admin-student-edit-save:focus-visible:not(:disabled) {
+  background: linear-gradient(140deg, #25b872 0%, #1c915a 100%) !important;
+  background-image: linear-gradient(140deg, #25b872 0%, #1c915a 100%) !important;
+  color: #ffffff !important;
+  border-color: #1c915a !important;
+}
+
+body .admin-skin-page .admin-modal-body .row > .action-btn.admin-student-edit-cancel,
+body.backoffice-palette-active
+  .admin-skin-page
+  .admin-modal-body
+  .row
+  > .action-btn.admin-student-edit-cancel {
+  background: #12151a !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border: 2px solid #12151a !important;
+}
+
+body .admin-skin-page .admin-modal-body .row > .action-btn.admin-student-edit-cancel:hover:not(:disabled),
+body .admin-skin-page .admin-modal-body .row > .action-btn.admin-student-edit-cancel:focus-visible:not(:disabled),
+body.backoffice-palette-active
+  .admin-skin-page
+  .admin-modal-body
+  .row
+  > .action-btn.admin-student-edit-cancel:hover:not(:disabled),
+body.backoffice-palette-active
+  .admin-skin-page
+  .admin-modal-body
+  .row
+  > .action-btn.admin-student-edit-cancel:focus-visible:not(:disabled) {
+  background: #1c2027 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-color: #1c2027 !important;
+}
+
 /* Final force: table Publish button must match Publish Formation/Course gradient */
 body .formateur-dashboard-page .action-btn-group > button.action-btn.action-publish:not(:disabled),
 body.backoffice-palette-active .formateur-dashboard-page .action-btn-group > button.action-btn.action-publish:not(:disabled),
@@ -7427,6 +7527,141 @@ body.backoffice-palette-active .admin-skin-page .action-btn.action-approve:not(:
   background-image: linear-gradient(140deg, #1fab67 0%, #16814f 100%) !important;
   color: #ffffff !important;
   border: 2px solid #16814f !important;
+}
+
+body .admin-skin-page .action-btn.action-analytics:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.action-analytics:not(:disabled) {
+  background: linear-gradient(135deg, #1b5fb8 0%, #2e86d7 48%, #58b8ef 100%) !important;
+  background-image: linear-gradient(135deg, #1b5fb8 0%, #2e86d7 48%, #58b8ef 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #d3a5cc !important;
+  white-space: nowrap !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+    0 2px 0 #bf8db8,
+    0 10px 16px -14px rgba(51, 84, 145, 0.58) !important;
+}
+
+body .admin-skin-page .action-btn.action-analytics:hover:not(:disabled),
+body .admin-skin-page .action-btn.action-analytics:focus-visible:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.action-analytics:hover:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.action-analytics:focus-visible:not(:disabled) {
+  background: linear-gradient(135deg, #1b5fb8 0%, #2e86d7 48%, #58b8ef 100%) !important;
+  background-image: linear-gradient(135deg, #1b5fb8 0%, #2e86d7 48%, #58b8ef 100%) !important;
+  color: #ffffff !important;
+  border-color: #d3a5cc !important;
+  filter: brightness(1.07) !important;
+}
+
+/* Keep Details/Edit/View Analytics same size in action columns */
+body .admin-skin-page .action-btn-group > .action-btn.action-page,
+body .admin-skin-page .action-btn-group > .action-btn.action-approve,
+body .admin-skin-page .action-btn-group > .action-btn.action-analytics,
+body .admin-skin-page .action-btn-group > .action-btn.action-suspend,
+body.backoffice-palette-active .admin-skin-page .action-btn-group > .action-btn.action-page,
+body.backoffice-palette-active .admin-skin-page .action-btn-group > .action-btn.action-approve,
+body.backoffice-palette-active .admin-skin-page .action-btn-group > .action-btn.action-analytics,
+body.backoffice-palette-active .admin-skin-page .action-btn-group > .action-btn.action-suspend {
+  width: 108px !important;
+  min-width: 108px !important;
+  max-width: 108px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  justify-content: center !important;
+}
+
+/* Admin action rows: slightly more spacing between buttons */
+body .admin-skin-page .action-btn-group,
+body.backoffice-palette-active .admin-skin-page .action-btn-group {
+  gap: 0.62rem !important;
+}
+
+/* Suspend button: white background, red text, outlined like other buttons */
+body .admin-skin-page .action-btn.action-suspend:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend:not(:disabled) {
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fdf5fb 100%) padding-box,
+    linear-gradient(125deg, #82c0ec 0%, #23c9e2 46%, #e4b8d9 100%) border-box !important;
+  color: #c83e4d !important;
+  border: 1px solid transparent !important;
+  white-space: nowrap !important;
+}
+
+body .admin-skin-page .action-btn.action-suspend:hover:not(:disabled),
+body .admin-skin-page .action-btn.action-suspend:focus-visible:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend:hover:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend:focus-visible:not(:disabled) {
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fff6f8 100%) padding-box,
+    linear-gradient(125deg, #82c0ec 0%, #23c9e2 46%, #e4b8d9 100%) border-box !important;
+  color: #b93242 !important;
+}
+
+/* Suspend toggle state: Unsuspend must be black background + red text */
+body .admin-skin-page .action-btn.action-suspend.is-unsuspend:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend.is-unsuspend:not(:disabled) {
+  background: linear-gradient(180deg, #131820 0%, #1a2029 100%) !important;
+  background-image: linear-gradient(180deg, #131820 0%, #1a2029 100%) !important;
+  color: #ff5b5b !important;
+  border: 1px solid #0e1218 !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 2px 0 rgba(8, 10, 14, 0.9),
+    0 10px 16px -14px rgba(0, 0, 0, 0.6) !important;
+}
+
+body .admin-skin-page .action-btn.action-suspend.is-unsuspend:hover:not(:disabled),
+body .admin-skin-page .action-btn.action-suspend.is-unsuspend:focus-visible:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend.is-unsuspend:hover:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.action-suspend.is-unsuspend:focus-visible:not(:disabled) {
+  background: linear-gradient(180deg, #171d26 0%, #222a35 100%) !important;
+  background-image: linear-gradient(180deg, #171d26 0%, #222a35 100%) !important;
+  color: #ff6f6f !important;
+  border-color: #141a22 !important;
+}
+
+/* Admin table square trash button (students/formateurs/formations action columns) */
+body .admin-skin-page .action-btn.admin-square-trash-btn,
+body.backoffice-palette-active .admin-skin-page .action-btn.admin-square-trash-btn {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+body .admin-skin-page .action-btn.admin-square-trash-btn::before,
+body .admin-skin-page .action-btn.admin-square-trash-btn::after,
+body.backoffice-palette-active .admin-skin-page .action-btn.admin-square-trash-btn::before,
+body.backoffice-palette-active .admin-skin-page .action-btn.admin-square-trash-btn::after {
+  display: none !important;
+  content: none !important;
+}
+
+body .admin-skin-page .action-btn.admin-square-trash-btn:hover:not(:disabled),
+body .admin-skin-page .action-btn.admin-square-trash-btn:focus-visible:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.admin-square-trash-btn:hover:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.admin-square-trash-btn:focus-visible:not(:disabled) {
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  filter: brightness(1.04) !important;
+}
+
+.admin-square-trash-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 body .admin-skin-page .action-btn.action-delete:not(:disabled),

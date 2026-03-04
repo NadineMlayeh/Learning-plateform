@@ -26,7 +26,28 @@ function buildQuery(path, params) {
 }
 
 function formatMoney(value) {
-  return `${Number(value || 0).toFixed(2)} EUR`;
+  return `${Number(value || 0).toFixed(2)} TND`;
+}
+
+function formatDateOfBirth(value) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString();
+}
+
+function toDateInputValue(value) {
+  if (!value) return '';
+  if (typeof value === 'string') {
+    const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) return match[1];
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function Modal({ open, title, onClose, children }) {
@@ -57,7 +78,9 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
   const [details, setDetails] = useState(null);
   const [editModel, setEditModel] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [suspendTarget, setSuspendTarget] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [suspendingId, setSuspendingId] = useState(null);
 
   async function loadStudents() {
     setLoading(true);
@@ -92,7 +115,12 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
       await apiRequest(`/admin/students/${editModel.id}`, {
         method: 'PATCH',
         token: user.token,
-        body: { name: editModel.name, email: editModel.email },
+        body: {
+          name: editModel.name,
+          email: editModel.email,
+          phoneNumber: editModel.phoneNumber,
+          dateOfBirth: editModel.dateOfBirth || null,
+        },
       });
       pushToast('Student updated successfully.', 'success');
       setEditModel(null);
@@ -123,6 +151,33 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
       pushToast(err.message, 'error');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function toggleStudentSuspend(target) {
+    if (!target) return;
+    const action = target.isSuspended ? 'unsuspend' : 'suspend';
+    setSuspendingId(target.id);
+    try {
+      await apiRequest(`/admin/students/${target.id}/${action}`, {
+        method: 'PATCH',
+        token: user.token,
+      });
+      pushToast(
+        action === 'suspend'
+          ? 'Student account suspended.'
+          : 'Student account unsuspended.',
+        'success',
+      );
+      setSuspendTarget(null);
+      await loadStudents();
+      if (details?.id === target.id) {
+        await openDetails(target.id);
+      }
+    } catch (err) {
+      pushToast(err.message, 'error');
+    } finally {
+      setSuspendingId((prev) => (prev === target.id ? null : prev));
     }
   }
 
@@ -179,9 +234,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                 <th>ID</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Status</th>
-                <th>Total Enrollments</th>
-                <th>Total Paid</th>
+                <th>Phone Number</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -191,11 +244,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                   <td>{student.id}</td>
                   <td>{student.name}</td>
                   <td>{student.email}</td>
-                  <td>
-                    <StatusBadge label={student.status} tone={statusTone(student.status)} />
-                  </td>
-                  <td>{student.totalEnrollments}</td>
-                  <td>{formatMoney(student.totalAmountPaid)}</td>
+                  <td>{student.phoneNumber || '-'}</td>
                   <td>
                     <div className="row action-btn-group">
                       <button type="button" className="action-btn action-page" onClick={() => openDetails(student.id)}>
@@ -204,16 +253,46 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                       <button
                         type="button"
                         className="action-btn action-approve"
-                        onClick={() => setEditModel({ id: student.id, name: student.name, email: student.email })}
+                        onClick={() =>
+                          setEditModel({
+                            id: student.id,
+                            name: student.name || '',
+                            email: student.email || '',
+                            phoneNumber: student.phoneNumber || '',
+                            dateOfBirth: toDateInputValue(student.dateOfBirth),
+                          })
+                        }
                       >
                         Edit
                       </button>
                       <button
                         type="button"
-                        className="action-btn action-reject"
+                        className={`action-btn action-suspend ${
+                          student.isSuspended ? 'is-unsuspend' : ''
+                        }`}
+                        onClick={() =>
+                          setSuspendTarget({
+                            id: student.id,
+                            name: student.name,
+                            isSuspended: Boolean(student.isSuspended),
+                          })
+                        }
+                        disabled={suspendingId === student.id}
+                      >
+                        {suspendingId === student.id
+                          ? 'Working...'
+                          : student.isSuspended
+                            ? 'Unsuspend'
+                            : 'Suspend'}
+                      </button>
+                      <button
+                        type="button"
+                        className="action-btn admin-square-trash-btn"
+                        aria-label={`Delete student ${student.name}`}
+                        title="Delete"
                         onClick={() => setDeleteTarget(student)}
                       >
-                        Delete
+                        <img src="/images/trash.png" alt="" className="admin-square-trash-icon" />
                       </button>
                     </div>
                   </td>
@@ -221,7 +300,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
               ))}
               {data.items.length === 0 && (
                 <tr>
-                  <td colSpan={7}>{loading ? 'Loading students...' : 'No students found.'}</td>
+                  <td colSpan={5}>{loading ? 'Loading students...' : 'No students found.'}</td>
                 </tr>
               )}
             </tbody>
@@ -254,7 +333,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
       <Modal open={Boolean(details)} title={`Student #${details?.id || ''}`} onClose={() => setDetails(null)}>
         {details && (
           <div className="stack">
-            <div className="admin-metric-grid">
+            <div className="admin-metric-grid admin-user-detail-cards">
               <article className="admin-metric-card">
                 <p className="hint">Full Name</p>
                 <strong>{details.name}</strong>
@@ -262,6 +341,14 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
               <article className="admin-metric-card">
                 <p className="hint">Email</p>
                 <strong>{details.email}</strong>
+              </article>
+              <article className="admin-metric-card">
+                <p className="hint">Phone Number</p>
+                <strong>{details.phoneNumber || '-'}</strong>
+              </article>
+              <article className="admin-metric-card">
+                <p className="hint">Date of Birth</p>
+                <strong>{formatDateOfBirth(details.dateOfBirth)}</strong>
               </article>
               <article className="admin-metric-card">
                 <p className="hint">Total Enrollments</p>
@@ -300,6 +387,40 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
         )}
       </Modal>
 
+      <Modal
+        open={Boolean(suspendTarget)}
+        title={suspendTarget?.isSuspended ? 'Unsuspend Student' : 'Suspend Student'}
+        onClose={() => setSuspendTarget(null)}
+      >
+        <div className="grid">
+          <p>
+            Are you sure you want to{' '}
+            {suspendTarget?.isSuspended ? 'unsuspend' : 'suspend'} this student
+            ?
+          </p>
+          <div className="row">
+            <button
+              type="button"
+              className="action-btn action-reject"
+              onClick={() => toggleStudentSuspend(suspendTarget)}
+              disabled={!suspendTarget || suspendingId === suspendTarget.id}
+            >
+              {suspendTarget && suspendingId === suspendTarget.id
+                ? 'Working...'
+                : 'Confirm'}
+            </button>
+            <button
+              type="button"
+              className="action-btn modal-cancel-btn"
+              onClick={() => setSuspendTarget(null)}
+              disabled={suspendTarget && suspendingId === suspendTarget.id}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       <Modal open={Boolean(editModel)} title={`Edit Student #${editModel?.id || ''}`} onClose={() => setEditModel(null)}>
         {editModel && (
           <form className="grid" onSubmit={onSaveStudent}>
@@ -321,11 +442,35 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                 required
               />
             </label>
+            <label className="grid">
+              <span>Phone Number</span>
+              <input
+                type="text"
+                value={editModel.phoneNumber || ''}
+                onChange={(event) =>
+                  setEditModel((prev) => ({ ...prev, phoneNumber: event.target.value }))
+                }
+              />
+            </label>
+            <label className="grid">
+              <span>Date of Birth</span>
+              <input
+                type="date"
+                value={editModel.dateOfBirth || ''}
+                onChange={(event) =>
+                  setEditModel((prev) => ({ ...prev, dateOfBirth: event.target.value }))
+                }
+              />
+            </label>
             <div className="row">
-              <button type="submit" disabled={saving}>
+              <button type="submit" className="action-btn admin-student-edit-save" disabled={saving}>
                 {saving ? 'Saving...' : 'Save'}
               </button>
-              <button type="button" className="action-btn action-page" onClick={() => setEditModel(null)}>
+              <button
+                type="button"
+                className="action-btn admin-student-edit-cancel"
+                onClick={() => setEditModel(null)}
+              >
                 Cancel
               </button>
             </div>

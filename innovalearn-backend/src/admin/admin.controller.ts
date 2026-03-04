@@ -83,7 +83,13 @@ export class AdminController {
   @Patch('students/:id')
   updateStudent(
     @Param('id') id: string,
-    @Body() body: { name?: string; email?: string },
+    @Body()
+    body: {
+      name?: string;
+      email?: string;
+      phoneNumber?: string | null;
+      dateOfBirth?: string | null;
+    },
   ) {
     return this.adminService.updateStudent(Number(id), body || {});
   }
@@ -91,6 +97,16 @@ export class AdminController {
   @Delete('students/:id')
   deleteStudent(@Param('id') id: string) {
     return this.adminService.deleteStudent(Number(id));
+  }
+
+  @Patch('students/:id/suspend')
+  suspendStudent(@Param('id') id: string) {
+    return this.adminService.suspendStudent(Number(id));
+  }
+
+  @Patch('students/:id/unsuspend')
+  unsuspendStudent(@Param('id') id: string) {
+    return this.adminService.unsuspendStudent(Number(id));
   }
 
   @Get('formateurs')
@@ -111,6 +127,8 @@ export class AdminController {
       name?: string;
       email?: string;
       status?: FormateurStatus;
+      phoneNumber?: string | null;
+      dateOfBirth?: string | null;
     },
   ) {
     return this.adminService.updateFormateur(Number(id), body || {});
@@ -119,6 +137,16 @@ export class AdminController {
   @Delete('formateurs/:id')
   deleteFormateur(@Param('id') id: string) {
     return this.adminService.deleteFormateur(Number(id));
+  }
+
+  @Patch('formateurs/:id/suspend')
+  suspendFormateur(@Param('id') id: string) {
+    return this.adminService.suspendFormateur(Number(id));
+  }
+
+  @Patch('formateurs/:id/unsuspend')
+  unsuspendFormateur(@Param('id') id: string) {
+    return this.adminService.unsuspendFormateur(Number(id));
   }
 
   @Get('formateurs/:id/analytics')

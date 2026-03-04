@@ -156,6 +156,9 @@ export class AdminService {
           id: true,
           name: true,
           email: true,
+          phoneNumber: true,
+          dateOfBirth: true,
+          isSuspended: true,
           createdAt: true,
           enrollments: {
             select: { status: true },
@@ -186,6 +189,9 @@ export class AdminService {
           id: student.id,
           name: student.name,
           email: student.email,
+          phoneNumber: student.phoneNumber,
+          dateOfBirth: student.dateOfBirth,
+          isSuspended: student.isSuspended,
           status: this.deriveStudentStatus(statuses),
           totalEnrollments: student._count.enrollments,
           totalAmountPaid: this.round2(totalAmountPaid),
@@ -202,6 +208,8 @@ export class AdminService {
         id: true,
         name: true,
         email: true,
+        phoneNumber: true,
+        dateOfBirth: true,
         createdAt: true,
         enrollments: {
           orderBy: { createdAt: 'desc' },
@@ -260,7 +268,12 @@ export class AdminService {
 
   async updateStudent(
     studentId: number,
-    payload: { name?: string; email?: string },
+    payload: {
+      name?: string;
+      email?: string;
+      phoneNumber?: string | null;
+      dateOfBirth?: string | null;
+    },
   ) {
     const student = await this.prisma.user.findFirst({
       where: { id: studentId, role: 'STUDENT' },
@@ -281,9 +294,30 @@ export class AdminService {
       data.email = payload.email.trim().toLowerCase();
     }
 
+    if (Object.prototype.hasOwnProperty.call(payload, 'phoneNumber')) {
+      if (typeof payload.phoneNumber === 'string') {
+        const trimmedPhone = payload.phoneNumber.trim();
+        data.phoneNumber = trimmedPhone || null;
+      } else if (payload.phoneNumber === null) {
+        data.phoneNumber = null;
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(payload, 'dateOfBirth')) {
+      if (payload.dateOfBirth === null || payload.dateOfBirth === '') {
+        data.dateOfBirth = null;
+      } else if (typeof payload.dateOfBirth === 'string') {
+        const parsed = new Date(payload.dateOfBirth);
+        if (Number.isNaN(parsed.getTime())) {
+          throw new BadRequestException('Invalid date of birth');
+        }
+        data.dateOfBirth = parsed;
+      }
+    }
+
     if (Object.keys(data).length === 0) {
       throw new BadRequestException(
-        'At least one of name or email must be provided',
+        'At least one editable field must be provided',
       );
     }
 
@@ -294,8 +328,51 @@ export class AdminService {
         id: true,
         name: true,
         email: true,
+        isSuspended: true,
         role: true,
       },
+    });
+  }
+
+  async suspendStudent(studentId: number) {
+    const student = await this.prisma.user.findFirst({
+      where: { id: studentId, role: 'STUDENT' },
+      select: { id: true, isSuspended: true },
+    });
+
+    if (!student) {
+      throw new NotFoundException('Student not found');
+    }
+
+    if (student.isSuspended) {
+      return { id: studentId, isSuspended: true };
+    }
+
+    return this.prisma.user.update({
+      where: { id: studentId },
+      data: { isSuspended: true },
+      select: { id: true, isSuspended: true },
+    });
+  }
+
+  async unsuspendStudent(studentId: number) {
+    const student = await this.prisma.user.findFirst({
+      where: { id: studentId, role: 'STUDENT' },
+      select: { id: true, isSuspended: true },
+    });
+
+    if (!student) {
+      throw new NotFoundException('Student not found');
+    }
+
+    if (!student.isSuspended) {
+      return { id: studentId, isSuspended: false };
+    }
+
+    return this.prisma.user.update({
+      where: { id: studentId },
+      data: { isSuspended: false },
+      select: { id: true, isSuspended: true },
     });
   }
 
@@ -349,6 +426,9 @@ export class AdminService {
           id: true,
           name: true,
           email: true,
+          phoneNumber: true,
+          dateOfBirth: true,
+          isSuspended: true,
           createdAt: true,
           formateurStatus: true,
           formations: {
@@ -417,6 +497,9 @@ export class AdminService {
           id: entry.id,
           name: entry.name,
           email: entry.email,
+          phoneNumber: entry.phoneNumber,
+          dateOfBirth: entry.dateOfBirth,
+          isSuspended: entry.isSuspended,
           status: entry.formateurStatus || 'PENDING',
           formationsCount: entry.formations.length,
           totalStudentsEnrolled,
@@ -436,6 +519,8 @@ export class AdminService {
         id: true,
         name: true,
         email: true,
+        phoneNumber: true,
+        dateOfBirth: true,
         createdAt: true,
         formateurStatus: true,
         formations: {
@@ -443,11 +528,21 @@ export class AdminService {
           select: {
             id: true,
             title: true,
+            price: true,
             type: true,
             published: true,
             createdAt: true,
-            _count: {
-              select: { enrollments: true },
+            enrollments: {
+              select: {
+                id: true,
+                status: true,
+              },
+            },
+            results: {
+              select: {
+                id: true,
+                completed: true,
+              },
             },
           },
         },
@@ -474,15 +569,41 @@ export class AdminService {
       0,
     );
 
-    const totalStudentsEnrolled = formateur.formations.reduce(
-      (sum, formation) => sum + formation._count.enrollments,
+    const formations = formateur.formations.map((formation) => {
+      const enrollmentsCount = formation.enrollments.length;
+      const approvedCount = formation.enrollments.filter(
+        (entry) => entry.status === 'APPROVED',
+      ).length;
+      const completedSuccessCount = formation.results.filter(
+        (entry) => entry.completed,
+      ).length;
+      const successRate =
+        approvedCount === 0
+          ? 0
+          : this.round2((completedSuccessCount / approvedCount) * 100);
+
+      return {
+        id: formation.id,
+        title: formation.title,
+        price: formation.price,
+        type: formation.type,
+        published: formation.published,
+        createdAt: formation.createdAt,
+        enrollmentsCount,
+        successRate,
+      };
+    });
+
+    const totalStudentsEnrolled = formations.reduce(
+      (sum, formation) => sum + formation.enrollmentsCount,
       0,
     );
 
     return {
       ...formateur,
+      formations,
       status: formateur.formateurStatus || 'PENDING',
-      formationsCount: formateur.formations.length,
+      formationsCount: formations.length,
       totalStudentsEnrolled,
       totalRevenueGenerated: this.round2(totalRevenueGenerated),
     };
@@ -494,6 +615,8 @@ export class AdminService {
       name?: string;
       email?: string;
       status?: FormateurStatus;
+      phoneNumber?: string | null;
+      dateOfBirth?: string | null;
     },
   ) {
     const formateur = await this.prisma.user.findFirst({
@@ -522,6 +645,27 @@ export class AdminService {
       data.formateurStatus = payload.status;
     }
 
+    if (Object.prototype.hasOwnProperty.call(payload, 'phoneNumber')) {
+      if (typeof payload.phoneNumber === 'string') {
+        const trimmedPhone = payload.phoneNumber.trim();
+        data.phoneNumber = trimmedPhone || null;
+      } else if (payload.phoneNumber === null) {
+        data.phoneNumber = null;
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(payload, 'dateOfBirth')) {
+      if (payload.dateOfBirth === null || payload.dateOfBirth === '') {
+        data.dateOfBirth = null;
+      } else if (typeof payload.dateOfBirth === 'string') {
+        const parsed = new Date(payload.dateOfBirth);
+        if (Number.isNaN(parsed.getTime())) {
+          throw new BadRequestException('Invalid date of birth');
+        }
+        data.dateOfBirth = parsed;
+      }
+    }
+
     if (Object.keys(data).length === 0) {
       throw new BadRequestException(
         'At least one updatable field must be provided',
@@ -535,8 +679,51 @@ export class AdminService {
         id: true,
         name: true,
         email: true,
+        isSuspended: true,
         formateurStatus: true,
       },
+    });
+  }
+
+  async suspendFormateur(formateurId: number) {
+    const formateur = await this.prisma.user.findFirst({
+      where: { id: formateurId, role: 'FORMATEUR' },
+      select: { id: true, isSuspended: true },
+    });
+
+    if (!formateur) {
+      throw new NotFoundException('Formateur not found');
+    }
+
+    if (formateur.isSuspended) {
+      return { id: formateurId, isSuspended: true };
+    }
+
+    return this.prisma.user.update({
+      where: { id: formateurId },
+      data: { isSuspended: true },
+      select: { id: true, isSuspended: true },
+    });
+  }
+
+  async unsuspendFormateur(formateurId: number) {
+    const formateur = await this.prisma.user.findFirst({
+      where: { id: formateurId, role: 'FORMATEUR' },
+      select: { id: true, isSuspended: true },
+    });
+
+    if (!formateur) {
+      throw new NotFoundException('Formateur not found');
+    }
+
+    if (!formateur.isSuspended) {
+      return { id: formateurId, isSuspended: false };
+    }
+
+    return this.prisma.user.update({
+      where: { id: formateurId },
+      data: { isSuspended: false },
+      select: { id: true, isSuspended: true },
     });
   }
 

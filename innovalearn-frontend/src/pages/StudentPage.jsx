@@ -784,7 +784,7 @@ export default function StudentPage({ pushToast }) {
                         `Formation #${invoice.enrollment?.formation?.id || '-'}`}
                     </h4>
                     <p className="hint student-v2-invoice-meta">
-                      Amount: {Number(invoice.amount || 0).toFixed(2)} EUR
+                      Amount: {Number(invoice.amount || 0).toFixed(2)} TND
                     </p>
                     <p className="hint student-v2-invoice-meta">
                       Issued: {toDateLabel(invoice.createdAt)}

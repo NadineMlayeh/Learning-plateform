@@ -18,7 +18,7 @@ function buildQuery(path, params) {
 }
 
 function money(value) {
-  return `${Number(value || 0).toFixed(2)} EUR`;
+  return `${Number(value || 0).toFixed(2)} TND`;
 }
 
 function Modal({ open, title, onClose, children }) {
@@ -162,8 +162,14 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                   <td>{Number(formation.completionRate || 0).toFixed(2)}%</td>
                   <td>{money(formation.revenueGenerated)}</td>
                   <td>
-                    <button type="button" className="action-btn action-reject" onClick={() => setDeleteTarget(formation)}>
-                      Delete
+                    <button
+                      type="button"
+                      className="action-btn admin-square-trash-btn"
+                      aria-label={`Delete formation ${formation.title}`}
+                      title="Delete"
+                      onClick={() => setDeleteTarget(formation)}
+                    >
+                      <img src="/images/trash.png" alt="" className="admin-square-trash-icon" />
                     </button>
                   </td>
                 </tr>
