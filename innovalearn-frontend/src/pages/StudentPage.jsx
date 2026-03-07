@@ -6,6 +6,7 @@ import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 
 const INVOICE_PAGE_SIZE = 3;
+const COURSE_CARDS_PAGE_SIZE = 6;
 const STREAK_TARGET_DAYS = 5;
 const DASH_SECTIONS = {
   COURSES: 'courses',
@@ -238,6 +239,10 @@ export default function StudentPage({ pushToast }) {
   const [invoices, setInvoices] = useState([]);
   const [loadingInvoices, setLoadingInvoices] = useState(false);
   const [invoicePage, setInvoicePage] = useState(1);
+  const [enrolledPage, setEnrolledPage] = useState(1);
+  const [discoverPage, setDiscoverPage] = useState(1);
+  const [enrolledSearch, setEnrolledSearch] = useState('');
+  const [enrolledTypeFilter, setEnrolledTypeFilter] = useState('ALL');
   const [enrollingFormationId, setEnrollingFormationId] = useState(null);
   const [activeSection, setActiveSection] = useState(DASH_SECTIONS.COURSES);
   const [streakDays, setStreakDays] = useState(1);
@@ -356,6 +361,28 @@ export default function StudentPage({ pushToast }) {
     [enrollments],
   );
 
+  const enrolledDisplayRows = useMemo(() => {
+    return [...approvedEnrollments].sort((a, b) => {
+      const aCompleted = getFormationProgress(a).completed ? 1 : 0;
+      const bCompleted = getFormationProgress(b).completed ? 1 : 0;
+      if (aCompleted !== bCompleted) return aCompleted - bCompleted;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [approvedEnrollments]);
+
+  const filteredEnrolledRows = useMemo(() => {
+    const query = enrolledSearch.trim().toLowerCase();
+    return enrolledDisplayRows.filter((entry) => {
+      const title = String(
+        entry?.formation?.title || `Formation #${entry?.formationId || '-'}`,
+      ).toLowerCase();
+      const type = String(entry?.formation?.type || '').toUpperCase();
+      const matchesName = !query || title.includes(query);
+      const matchesType = enrolledTypeFilter === 'ALL' || type === enrolledTypeFilter;
+      return matchesName && matchesType;
+    });
+  }, [enrolledDisplayRows, enrolledSearch, enrolledTypeFilter]);
+
   const pendingEnrollments = useMemo(
     () =>
       enrollments
@@ -381,6 +408,24 @@ export default function StudentPage({ pushToast }) {
   const invoicePageRows = sortedInvoices.slice(
     (invoicePage - 1) * INVOICE_PAGE_SIZE,
     invoicePage * INVOICE_PAGE_SIZE,
+  );
+
+  const enrolledTotalPages = Math.max(
+    1,
+    Math.ceil(filteredEnrolledRows.length / COURSE_CARDS_PAGE_SIZE),
+  );
+  const enrolledPageRows = filteredEnrolledRows.slice(
+    (enrolledPage - 1) * COURSE_CARDS_PAGE_SIZE,
+    enrolledPage * COURSE_CARDS_PAGE_SIZE,
+  );
+
+  const discoverTotalPages = Math.max(
+    1,
+    Math.ceil(unenrolledFormations.length / COURSE_CARDS_PAGE_SIZE),
+  );
+  const discoverPageRows = unenrolledFormations.slice(
+    (discoverPage - 1) * COURSE_CARDS_PAGE_SIZE,
+    discoverPage * COURSE_CARDS_PAGE_SIZE,
   );
 
   const certificateCount = useMemo(
@@ -509,105 +554,152 @@ export default function StudentPage({ pushToast }) {
               <h3>Enrolled Courses</h3>
               <p className="hint">Open online content and continue where you left off.</p>
             </div>
-            <div className="student-v2-course-grid">
-              {approvedEnrollments.map((entry) => {
-                const formation = entry.formation;
-                const progress = getFormationProgress(entry);
-                const completedBadgeLabel = progress.completed
-                  ? progress.success === false
-                    ? 'Completed'
-                    : 'Completed'
-                  : null;
+            <div className="student-v2-enrolled-controls">
+              <input
+                type="text"
+                className="student-v2-enrolled-search"
+                placeholder="Search by formation name"
+                value={enrolledSearch}
+                onChange={(event) => setEnrolledSearch(event.target.value)}
+              />
+              <select
+                className="student-v2-enrolled-filter"
+                value={enrolledTypeFilter}
+                onChange={(event) => setEnrolledTypeFilter(event.target.value)}
+              >
+                <option value="ALL">All types</option>
+                <option value="ONLINE">Online only</option>
+                <option value="PRESENTIEL">Presentiel only</option>
+              </select>
+            </div>
+            {enrolledPageRows.length === 0 ? (
+              <p className="hint">No enrolled formation matches your search/filter.</p>
+            ) : (
+              <div className="student-v2-course-grid student-v2-course-grid-paged">
+                {enrolledPageRows.map((entry) => {
+                  const formation = entry.formation;
+                  const progress = getFormationProgress(entry);
+                  const completedBadgeLabel = progress.completed
+                    ? progress.success === false
+                      ? 'Completed'
+                      : 'Completed'
+                    : null;
 
-                return (
-                  <article key={entry.id} className="student-v2-course-card">
-                    <div className="student-v2-course-thumb">
-                      <img
-                        src={thumbnailFor(formation?.id || entry.formationId)}
-                        alt={formation?.title || 'Course'}
-                      />
-                    </div>
-                    <div className="student-v2-course-body">
-                      <div className="student-v2-course-head">
-                        <h4>{formation?.title || `Formation #${entry.formationId}`}</h4>
-                        <div className="row student-v2-badges">
-                          {completedBadgeLabel && (
-                            <StatusBadge
-                              label={completedBadgeLabel}
-                              tone={progress.success === false ? 'red' : 'green'}
-                            />
+                  return (
+                    <article key={entry.id} className="student-v2-course-card">
+                      <div className="student-v2-course-thumb">
+                        <img
+                          src={thumbnailFor(formation?.id || entry.formationId)}
+                          alt={formation?.title || 'Course'}
+                        />
+                      </div>
+                      <div className="student-v2-course-body">
+                        <div className="student-v2-course-head">
+                          <h4>{formation?.title || `Formation #${entry.formationId}`}</h4>
+                          <div className="row student-v2-badges">
+                            {completedBadgeLabel && (
+                              <StatusBadge
+                                label={completedBadgeLabel}
+                                tone={progress.success === false ? 'red' : 'green'}
+                              />
+                            )}
+                          </div>
+                        </div>
+
+                        {formation?.description && (
+                          <p className="hint">{shortText(formation.description, 108)}</p>
+                        )}
+
+                        <div className="student-v2-meta-line">
+                          <span className="student-v2-inline-icon">
+                            <IconSpark />
+                          </span>
+                          <span>{progress.percent}% overall progress</span>
+                        </div>
+
+                        {formation?.type === 'ONLINE' && (
+                          <div className="student-v2-meta-line">
+                            <span className="student-v2-inline-icon">
+                              <IconRocket />
+                            </span>
+                            <span>
+                              {progress.finalizedCourses}/{progress.totalCourses} courses finalized
+                            </span>
+                          </div>
+                        )}
+
+                        {formation?.type === 'PRESENTIEL' && formation?.location && (
+                          <div className="student-v2-meta-line">
+                            <span className="student-v2-inline-icon">
+                              <IconLocation />
+                            </span>
+                            <span>Location: {formation.location}</span>
+                          </div>
+                        )}
+
+                        {formation?.type === 'PRESENTIEL' && (
+                          <div className="student-v2-meta-line">
+                            <span className="student-v2-inline-icon">
+                              <IconCalendar />
+                            </span>
+                            <span>
+                              Dates: {toDateOnlyLabel(formation?.startDate)} -{' '}
+                              {toDateOnlyLabel(formation?.endDate)}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="student-v2-card-actions">
+                          {formation?.type === 'ONLINE' ? (
+                            <button
+                              type="button"
+                              className="student-v2-primary-btn student-v2-open-content-btn"
+                              onClick={() => navigate(`/student/formations/${entry.formationId}`)}
+                            >
+                              <span className="student-v2-inline-icon">
+                                <IconPlay />
+                              </span>
+                              Open Content
+                            </button>
+                          ) : (
+                            <span className="student-v2-soft-pill">On-site Formation</span>
                           )}
                         </div>
                       </div>
-
-                      {formation?.description && (
-                        <p className="hint">{shortText(formation.description, 108)}</p>
-                      )}
-
-                      <div className="student-v2-meta-line">
-                        <span className="student-v2-inline-icon">
-                          <IconSpark />
-                        </span>
-                        <span>{progress.percent}% overall progress</span>
-                      </div>
-
-                      {formation?.type === 'ONLINE' && (
-                        <div className="student-v2-meta-line">
-                          <span className="student-v2-inline-icon">
-                            <IconRocket />
-                          </span>
-                          <span>
-                            {progress.finalizedCourses}/{progress.totalCourses} courses finalized
-                          </span>
-                        </div>
-                      )}
-
-                      {formation?.type === 'PRESENTIEL' && formation?.location && (
-                        <div className="student-v2-meta-line">
-                          <span className="student-v2-inline-icon">
-                            <IconLocation />
-                          </span>
-                          <span>Location: {formation.location}</span>
-                        </div>
-                      )}
-
-                      {formation?.type === 'PRESENTIEL' && (
-                        <div className="student-v2-meta-line">
-                          <span className="student-v2-inline-icon">
-                            <IconCalendar />
-                          </span>
-                          <span>
-                            Dates: {toDateOnlyLabel(formation?.startDate)} -{' '}
-                            {toDateOnlyLabel(formation?.endDate)}
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="student-v2-card-actions">
-                        {formation?.type === 'ONLINE' ? (
-                          <button
-                            type="button"
-                            className="student-v2-primary-btn student-v2-open-content-btn"
-                            onClick={() => navigate(`/student/formations/${entry.formationId}`)}
-                          >
-                            <span className="student-v2-inline-icon">
-                              <IconPlay />
-                            </span>
-                            Open Content
-                          </button>
-                        ) : (
-                          <span className="student-v2-soft-pill">On-site Formation</span>
-                        )}
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+            {filteredEnrolledRows.length > COURSE_CARDS_PAGE_SIZE && (
+              <div className="pagination-bar">
+                <button
+                  type="button"
+                  className="action-btn action-page"
+                  onClick={() => setEnrolledPage((prev) => Math.max(1, prev - 1))}
+                  disabled={enrolledPage === 1}
+                >
+                  Prev
+                </button>
+                <span>
+                  Page {enrolledPage} / {enrolledTotalPages}
+                </span>
+                <button
+                  type="button"
+                  className="action-btn action-page"
+                  onClick={() =>
+                    setEnrolledPage((prev) => Math.min(enrolledTotalPages, prev + 1))
+                  }
+                  disabled={enrolledPage === enrolledTotalPages}
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        <div className="student-v2-group">
+        <div className="student-v2-group student-v2-enrolled-group">
           <div className="student-v2-group-head">
             <h3>Discover New Formations</h3>
             <p className="hint">Explore and enroll in newly published formations.</p>
@@ -615,9 +707,10 @@ export default function StudentPage({ pushToast }) {
           {unenrolledFormations.length === 0 ? (
             <p className="hint">You are already enrolled in all currently published formations.</p>
           ) : (
-            <div className="student-v2-course-grid">
-              {unenrolledFormations.map((formation) => (
-                <article key={formation.id} className="student-v2-course-card">
+            <>
+              <div className="student-v2-course-grid student-v2-course-grid-paged">
+	              {discoverPageRows.map((formation) => (
+	                <article key={formation.id} className="student-v2-course-card">
                   <div className="student-v2-course-thumb">
                     <img src={thumbnailFor(formation.id)} alt={formation.title} />
                   </div>
@@ -630,14 +723,34 @@ export default function StudentPage({ pushToast }) {
                       />
                     </div>
 
-                    <p className="hint">{shortText(formation.description, 100)}</p>
+	                    <p className="hint">{shortText(formation.description, 100)}</p>
 
-                    <div className="student-v2-meta-line">
-                      <span className="student-v2-inline-icon">
-                        <IconCoin />
-                      </span>
-                      <span>Price: {formation.price}</span>
-                    </div>
+	                    <div className="student-v2-meta-line">
+	                      <span className="student-v2-inline-icon">
+	                        <IconCoin />
+	                      </span>
+	                      <span>Price: {formation.price}</span>
+	                    </div>
+
+		                    {formation.type === 'ONLINE' && (
+		                      <div className="student-v2-meta-line">
+	                        <span className="student-v2-inline-icon">
+	                          <IconSpark />
+	                        </span>
+	                        <span>
+	                          Courses:{' '}
+	                          {Array.isArray(formation.courses)
+	                            ? formation.courses.length
+	                            : Number(formation.courseCount || 0)}
+	                        </span>
+		                      </div>
+		                    )}
+
+		                    {formation.type === 'ONLINE' && (
+		                      <div className="student-v2-meta-line student-v2-meta-line-ghost" aria-hidden="true">
+		                        <span>tst</span>
+		                      </div>
+		                    )}
 
                     {formation.type === 'PRESENTIEL' && formation.location && (
                       <div className="student-v2-meta-line">
@@ -660,22 +773,48 @@ export default function StudentPage({ pushToast }) {
                       </div>
                     )}
 
-                    <div className="student-v2-card-actions">
-                      <button
-                        type="button"
-                        className="student-v2-primary-btn"
-                        onClick={() => enroll(formation.id)}
-                        disabled={enrollingFormationId === formation.id}
-                      >
+	                    <div className="student-v2-card-actions">
+	                      <button
+	                        type="button"
+	                        className="student-v2-primary-btn student-v2-open-content-btn student-v2-enroll-btn"
+	                        onClick={() => enroll(formation.id)}
+	                        disabled={enrollingFormationId === formation.id}
+	                      >
                         {enrollingFormationId === formation.id ? 'Enrolling...' : 'Enroll'}
                       </button>
                     </div>
                   </div>
-                </article>
+	                </article>
               ))}
             </div>
+              {unenrolledFormations.length > COURSE_CARDS_PAGE_SIZE && (
+                <div className="pagination-bar">
+                  <button
+                    type="button"
+                    className="action-btn action-page"
+                    onClick={() => setDiscoverPage((prev) => Math.max(1, prev - 1))}
+                    disabled={discoverPage === 1}
+                  >
+                    Prev
+                  </button>
+                  <span>
+                    Page {discoverPage} / {discoverTotalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="action-btn action-page"
+                    onClick={() =>
+                      setDiscoverPage((prev) => Math.min(discoverTotalPages, prev + 1))
+                    }
+                    disabled={discoverPage === discoverTotalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
-        </div>
+	        </div>
       </div>
     );
   }
@@ -932,6 +1071,26 @@ export default function StudentPage({ pushToast }) {
       setInvoicePage(invoiceTotalPages);
     }
   }, [invoicePage, invoiceTotalPages]);
+
+  useEffect(() => {
+    setEnrolledPage(1);
+  }, [enrolledDisplayRows.length, enrolledSearch, enrolledTypeFilter]);
+
+  useEffect(() => {
+    if (enrolledPage > enrolledTotalPages) {
+      setEnrolledPage(enrolledTotalPages);
+    }
+  }, [enrolledPage, enrolledTotalPages]);
+
+  useEffect(() => {
+    setDiscoverPage(1);
+  }, [unenrolledFormations.length]);
+
+  useEffect(() => {
+    if (discoverPage > discoverTotalPages) {
+      setDiscoverPage(discoverTotalPages);
+    }
+  }, [discoverPage, discoverTotalPages]);
 
   return (
     <section className="student-v2 stack">

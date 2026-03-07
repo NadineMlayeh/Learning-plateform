@@ -347,7 +347,7 @@ body.auth-wallpaper-active {
   transform: none;
   background: linear-gradient(180deg, #ffffff 0%, #f9eefd 100%);
   border-color: #c989b8;
-  color: #72700b;
+  color: #0b2d72;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.98),
     0 2px 0 #c989b8,
@@ -847,7 +847,7 @@ body.backoffice-palette-active .container .formation-manage-stack .formation-cou
 }
 
 /* Formateur pages: use navbar logout button style for action buttons */
-.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn),
+.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):not(.profile-glass-item):not(.profile-glass-upload-btn):not(.profile-save-btn):not(.profile-glass-cancel-btn),
 .formation-manage-stack button:not(.admin-modal-backdrop):not(.admin-modal-close):not(.formation-edit-icon-btn) {
   flex-shrink: 0;
   display: inline-flex;
@@ -874,7 +874,7 @@ body.backoffice-palette-active .container .formation-manage-stack .formation-cou
   transition: box-shadow 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease;
 }
 
-.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn)::before,
+.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):not(.profile-glass-item):not(.profile-glass-upload-btn):not(.profile-save-btn):not(.profile-glass-cancel-btn)::before,
 .formation-manage-stack button:not(.admin-modal-backdrop):not(.admin-modal-close):not(.formation-edit-icon-btn)::before {
   content: '';
   position: absolute;
@@ -883,7 +883,7 @@ body.backoffice-palette-active .container .formation-manage-stack .formation-cou
   pointer-events: none;
 }
 
-.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn)::after,
+.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):not(.profile-glass-item):not(.profile-glass-upload-btn):not(.profile-save-btn):not(.profile-glass-cancel-btn)::after,
 .formation-manage-stack button:not(.admin-modal-backdrop):not(.admin-modal-close):not(.formation-edit-icon-btn)::after {
   content: '';
   position: absolute;
@@ -899,8 +899,8 @@ body.backoffice-palette-active .container .formation-manage-stack .formation-cou
   pointer-events: none;
 }
 
-.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):hover:not(:disabled),
-.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):focus-visible:not(:disabled),
+.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):not(.profile-glass-item):not(.profile-glass-upload-btn):not(.profile-save-btn):not(.profile-glass-cancel-btn):hover:not(:disabled),
+.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):not(.profile-glass-item):not(.profile-glass-upload-btn):not(.profile-save-btn):not(.profile-glass-cancel-btn):focus-visible:not(:disabled),
 .formation-manage-stack button:not(.admin-modal-backdrop):not(.admin-modal-close):not(.formation-edit-icon-btn):hover:not(:disabled),
 .formation-manage-stack button:not(.admin-modal-backdrop):not(.admin-modal-close):not(.formation-edit-icon-btn):focus-visible:not(:disabled) {
   transform: none !important;
@@ -916,14 +916,14 @@ body.backoffice-palette-active .container .formation-manage-stack .formation-cou
     0 0 12px rgba(210, 148, 196, 0.24) !important;
 }
 
-.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):hover:not(:disabled)::after,
-.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):focus-visible:not(:disabled)::after,
+.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):not(.profile-glass-item):not(.profile-glass-upload-btn):not(.profile-save-btn):not(.profile-glass-cancel-btn):hover:not(:disabled)::after,
+.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):not(.profile-glass-item):not(.profile-glass-upload-btn):not(.profile-save-btn):not(.profile-glass-cancel-btn):focus-visible:not(:disabled)::after,
 .formation-manage-stack button:not(.admin-modal-backdrop):not(.admin-modal-close):not(.formation-edit-icon-btn):hover:not(:disabled)::after,
 .formation-manage-stack button:not(.admin-modal-backdrop):not(.admin-modal-close):not(.formation-edit-icon-btn):focus-visible:not(:disabled)::after {
   animation: btn-shine 760ms ease;
 }
 
-.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):active:not(:disabled),
+.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):not(.profile-glass-item):not(.profile-glass-upload-btn):not(.profile-save-btn):not(.profile-glass-cancel-btn):active:not(:disabled),
 .formation-manage-stack button:not(.admin-modal-backdrop):not(.admin-modal-close):not(.formation-edit-icon-btn):active:not(:disabled) {
   transform: none !important;
   box-shadow:
@@ -932,7 +932,7 @@ body.backoffice-palette-active .container .formation-manage-stack .formation-cou
     0 8px 12px -14px rgba(116, 64, 104, 0.42) !important;
 }
 
-.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):disabled,
+.formateur-dashboard-page button:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.modal-save-btn):not(.modal-cancel-btn):not(.profile-glass-item):not(.profile-glass-upload-btn):not(.profile-save-btn):not(.profile-glass-cancel-btn):disabled,
 .formation-manage-stack button:not(.admin-modal-backdrop):not(.admin-modal-close):not(.formation-edit-icon-btn):disabled {
   background: #e8eef5 !important;
   color: #6a7e94 !important;
@@ -5116,14 +5116,14 @@ body.backoffice-palette-active .container td {
   border-bottom-color: rgba(11, 45, 114, 0.12);
 }
 
-body.backoffice-palette-active .container button:not(.profile-drawer-backdrop):not(.profile-drawer-toggle):not(.profile-drawer-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.formateur-analytics-modal-close):not(.formation-edit-icon-btn):not(.modal-save-btn):not(.modal-cancel-btn),
+body.backoffice-palette-active .container button:not(.profile-drawer-backdrop):not(.profile-drawer-toggle):not(.profile-drawer-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.formateur-analytics-modal-close):not(.formation-edit-icon-btn):not(.modal-save-btn):not(.modal-cancel-btn):not(.profile-glass-item):not(.profile-glass-upload-btn):not(.profile-save-btn):not(.profile-glass-cancel-btn),
 body.backoffice-palette-active .container .link-btn {
   background: linear-gradient(130deg, #0b2d72 0%, #1160b8 48%, #0ac4e0 78%, #ddaed3 100%);
   border-color: rgba(11, 45, 114, 0.42);
   color: #ffffff;
 }
 
-body.backoffice-palette-active .container button:not(.profile-drawer-backdrop):not(.profile-drawer-toggle):not(.profile-drawer-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.formateur-analytics-modal-close):not(.formation-edit-icon-btn):not(.modal-save-btn):not(.modal-cancel-btn):hover:not(:disabled),
+body.backoffice-palette-active .container button:not(.profile-drawer-backdrop):not(.profile-drawer-toggle):not(.profile-drawer-close):not(.admin-modal-backdrop):not(.admin-modal-close):not(.formateur-analytics-modal-close):not(.formation-edit-icon-btn):not(.modal-save-btn):not(.modal-cancel-btn):not(.profile-glass-item):not(.profile-glass-upload-btn):not(.profile-save-btn):not(.profile-glass-cancel-btn):hover:not(:disabled),
 body.backoffice-palette-active .container .link-btn:hover {
   filter: brightness(1.05);
 }
@@ -5256,8 +5256,13 @@ body.backoffice-palette-active .profile-drawer-close:focus-visible {
 .student-v2 {
   background: transparent;
   border-radius: 20px;
-  padding: 0.4rem;
+  --profile-content-offset: 0px;
+  padding-top: 0.4rem;
+  padding-right: 0.4rem;
+  padding-bottom: 0.4rem;
+  padding-left: calc(0.4rem + var(--profile-content-offset));
   gap: 1rem;
+  transition: padding-left 300ms ease;
 }
 
 .student-v2-hero {
@@ -5473,6 +5478,8 @@ body.backoffice-palette-active .profile-drawer-close:focus-visible {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.85rem;
+  align-items: stretch;
+  grid-auto-rows: 1fr;
 }
 
 .student-v2-quick-card {
@@ -5480,11 +5487,13 @@ body.backoffice-palette-active .profile-drawer-close:focus-visible {
   border-radius: 16px;
   background: #ffffff !important;
   box-shadow: 0 16px 28px -24px rgba(11, 45, 114, 0.88);
-  padding: 0.9rem;
+  padding: 0.78rem 0.82rem;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0.7rem;
   text-align: left;
+  align-self: stretch;
+  height: 100%;
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
 
@@ -5525,6 +5534,13 @@ body.backoffice-palette-active .profile-drawer-close:focus-visible {
   color: #0b2d72;
 }
 
+.student-v2-quick-main {
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  align-content: start;
+  gap: 0.08rem;
+}
+
 .student-v2-quick-main strong {
   margin-top: 0.15rem;
   display: block;
@@ -5532,16 +5548,22 @@ body.backoffice-palette-active .profile-drawer-close:focus-visible {
 }
 
 .student-v2-quick-main p {
-  margin: 0.2rem 0;
+  margin: 0.14rem 0 0.02rem;
   color: #4f6f8f;
   font-size: 0.8rem;
+  line-height: 1.24;
+}
+
+body.profile-glass-expanded .student-v2-quick-grid,
+body.profile-glass-editing .student-v2-quick-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .student-v2-quick-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 0.2rem;
+  margin-top: 0.08rem;
   border-radius: 999px;
   padding: 0.26rem 0.58rem;
   background: rgba(10, 196, 224, 0.16);
@@ -5590,10 +5612,48 @@ body.backoffice-palette-active .profile-drawer-close:focus-visible {
   margin-top: 0.2rem;
 }
 
+.student-v2-enrolled-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.student-v2-enrolled-search,
+.student-v2-enrolled-filter {
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(11, 45, 114, 0.25);
+  background: rgba(255, 255, 255, 0.92);
+  color: #0b2d72;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.student-v2-enrolled-search::placeholder {
+  color: #5f7da3;
+}
+
 .student-v2-course-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 0.85rem;
+}
+
+.student-v2-course-grid.student-v2-course-grid-paged {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.student-v2 .pagination-bar .action-btn.action-page {
+  border: 1px solid #bfd5ed !important;
+  border-color: #bfd5ed !important;
+}
+
+.student-v2 .pagination-bar .action-btn.action-page:hover:not(:disabled),
+.student-v2 .pagination-bar .action-btn.action-page:focus-visible:not(:disabled) {
+  border: 1px solid #a9c8ea !important;
+  border-color: #a9c8ea !important;
 }
 
 .student-v2-course-card {
@@ -5722,6 +5782,13 @@ body.backoffice-palette-active .profile-drawer-close:focus-visible {
   font-size: 0.84rem;
 }
 
+.student-v2-meta-line.student-v2-meta-line-ghost {
+  opacity: 0;
+  visibility: hidden;
+  min-height: 1rem;
+  pointer-events: none;
+}
+
 .student-v2-inline-icon {
   width: 16px;
   height: 16px;
@@ -5815,6 +5882,11 @@ body.backoffice-palette-active .profile-drawer-close:focus-visible {
 .student-v2-open-content-btn .student-v2-inline-icon {
   color: #ffffff;
   filter: drop-shadow(0 1px 1px rgba(6, 31, 66, 0.55));
+}
+
+.student-v2-enroll-btn {
+  font-size: 0.81rem;
+  text-shadow: 0 1px 2px rgba(6, 31, 66, 0.45);
 }
 
 .student-v2-doc-link {
@@ -6569,6 +6641,14 @@ body.backoffice-palette-active .formation-manage-stack button.content-delete-btn
   .student-v2-invoice-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .student-v2-course-grid.student-v2-course-grid-paged {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .student-v2-enrolled-controls {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 780px) {
@@ -6611,6 +6691,10 @@ body.backoffice-palette-active .formation-manage-stack button.content-delete-btn
 
   .student-v2-quick-grid,
   .student-v2-invoice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-v2-course-grid.student-v2-course-grid-paged {
     grid-template-columns: 1fr;
   }
 }
@@ -7362,6 +7446,50 @@ body.backoffice-palette-active .formateur-dashboard-page button.action-btn.actio
 body.backoffice-palette-active .formateur-dashboard-page button.action-btn.action-publish:not(.profile-drawer-toggle):not(.profile-drawer-backdrop):not(.profile-drawer-close):not(.formateur-analytics-modal-close):not(.admin-modal-backdrop):not(.admin-modal-close):focus-visible:not(:disabled) {
   background: linear-gradient(130deg, #0b2d72 0%, #0f56a7 44%, #0cc6e0 76%, #e5bcda 100%) !important;
   background-image: linear-gradient(130deg, #0b2d72 0%, #0f56a7 44%, #0cc6e0 76%, #e5bcda 100%) !important;
+  color: #ffffff !important;
+}
+
+/* Force pending formations table actions colors (all themes) */
+.formateur-dashboard-page .pending-formations-table .action-btn.action-publish:not(:disabled),
+body .formateur-dashboard-page .pending-formations-table .action-btn.action-publish:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page .pending-formations-table .action-btn.action-publish:not(:disabled) {
+  background: linear-gradient(130deg, #0b2d72 0%, #1160b8 48%, #0ac4e0 78%, #ddaed3 100%) !important;
+  background-image: linear-gradient(130deg, #0b2d72 0%, #1160b8 48%, #0ac4e0 78%, #ddaed3 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-color: transparent !important;
+}
+
+.formateur-dashboard-page .pending-formations-table .action-btn.action-publish:hover:not(:disabled),
+.formateur-dashboard-page .pending-formations-table .action-btn.action-publish:focus-visible:not(:disabled),
+body .formateur-dashboard-page .pending-formations-table .action-btn.action-publish:hover:not(:disabled),
+body .formateur-dashboard-page .pending-formations-table .action-btn.action-publish:focus-visible:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page .pending-formations-table .action-btn.action-publish:hover:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page .pending-formations-table .action-btn.action-publish:focus-visible:not(:disabled) {
+  background: linear-gradient(130deg, #0b2d72 0%, #0f56a7 44%, #0cc6e0 76%, #e5bcda 100%) !important;
+  background-image: linear-gradient(130deg, #0b2d72 0%, #0f56a7 44%, #0cc6e0 76%, #e5bcda 100%) !important;
+  color: #ffffff !important;
+}
+
+.formateur-dashboard-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:not(:disabled),
+body .formateur-dashboard-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:not(:disabled) {
+  background: linear-gradient(140deg, #ef5a5a 0%, #de3f3f 100%) !important;
+  background-image: linear-gradient(140deg, #ef5a5a 0%, #de3f3f 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #c93838 !important;
+  border-color: #c93838 !important;
+}
+
+.formateur-dashboard-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:hover:not(:disabled),
+.formateur-dashboard-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:focus-visible:not(:disabled),
+body .formateur-dashboard-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:hover:not(:disabled),
+body .formateur-dashboard-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:focus-visible:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:hover:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:focus-visible:not(:disabled) {
+  background: linear-gradient(140deg, #f46868 0%, #e24a4a 100%) !important;
+  background-image: linear-gradient(140deg, #f46868 0%, #e24a4a 100%) !important;
+  border-color: #bf3333 !important;
   color: #ffffff !important;
 }
 
@@ -8549,5 +8677,564 @@ body.backoffice-palette-active .admin-skin-page .admin-edit-course-row .action-b
   .admin-saas-quick-actions {
     justify-content: flex-start;
   }
+}
+
+/* Student/Formateur profile glass sidebar */
+.profile-glass-sidebar {
+  position: fixed;
+  top: 94px;
+  left: 12px;
+  transform: none;
+  z-index: 92;
+  width: 74px;
+  height: calc(100vh - 110px);
+  max-height: calc(100vh - 110px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: 22px;
+  border: 1px solid rgba(184, 212, 241, 0.32);
+  background:
+    linear-gradient(145deg, rgba(9, 27, 58, 0.72) 0%, rgba(16, 45, 88, 0.62) 54%, rgba(82, 46, 96, 0.6) 100%);
+  backdrop-filter: blur(13px) saturate(130%);
+  box-shadow:
+    0 16px 34px rgba(7, 24, 52, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  transition: width 300ms ease, box-shadow 260ms ease, border-color 260ms ease;
+  --profile-glass-shift-collapsed: 96px;
+  --profile-glass-shift-expanded: 274px;
+  --profile-glass-shift-editing: 322px;
+}
+
+.profile-glass-sidebar:hover,
+.profile-glass-sidebar.is-editing {
+  width: 252px;
+  border-color: rgba(182, 212, 244, 0.5);
+  box-shadow:
+    0 20px 40px rgba(6, 22, 49, 0.4),
+    0 0 0 1px rgba(165, 203, 239, 0.32),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.profile-glass-sidebar.is-editing {
+  width: 300px;
+}
+
+/* Push dashboard content instead of overlapping it when the sidebar expands */
+.formateur-dashboard-page.admin-skin-page,
+.admin-skin-page:not(.admin-embedded-content) {
+  --profile-content-offset: 0px;
+  padding-left: var(--profile-content-offset);
+  transition: padding-left 300ms ease;
+}
+
+body.profile-glass-expanded .student-v2,
+body.profile-glass-expanded .formateur-dashboard-page.admin-skin-page,
+body.profile-glass-expanded .admin-skin-page:not(.admin-embedded-content) {
+  --profile-content-offset: 130px;
+}
+
+body.profile-glass-editing .student-v2,
+body.profile-glass-editing .formateur-dashboard-page.admin-skin-page,
+body.profile-glass-editing .admin-skin-page:not(.admin-embedded-content) {
+  --profile-content-offset: 170px;
+}
+
+@media (max-width: 1100px) {
+  body.profile-glass-expanded .student-v2,
+  body.profile-glass-expanded .formateur-dashboard-page.admin-skin-page,
+  body.profile-glass-expanded .admin-skin-page:not(.admin-embedded-content),
+  body.profile-glass-editing .student-v2,
+  body.profile-glass-editing .formateur-dashboard-page.admin-skin-page,
+  body.profile-glass-editing .admin-skin-page:not(.admin-embedded-content) {
+    --profile-content-offset: 0px;
+  }
+}
+
+.profile-glass-content {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: grid;
+  gap: 8px;
+  scrollbar-width: none;
+}
+
+.profile-glass-content::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.profile-glass-items-list {
+  display: grid;
+  gap: 8px;
+}
+
+body .profile-glass-sidebar .profile-glass-item,
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  background-image: none !important;
+  color: #e8f3ff !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease,
+    box-shadow 220ms ease;
+  position: relative;
+}
+
+body .profile-glass-sidebar .profile-glass-item::before,
+body .profile-glass-sidebar .profile-glass-item::after,
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-item::before,
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-item::after {
+  display: none !important;
+  content: none !important;
+}
+
+.profile-glass-avatar-item {
+  margin-bottom: 4px;
+  cursor: default !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  pointer-events: none;
+  transform: none !important;
+}
+
+.profile-glass-avatar-item .profile-avatar-circle {
+  margin-left: -4px;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.profile-glass-avatar-item:hover,
+.profile-glass-avatar-item:focus-visible,
+.profile-glass-sidebar:hover .profile-glass-avatar-item:hover,
+.profile-glass-sidebar:hover .profile-glass-avatar-item:focus-visible {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+.profile-glass-item:hover,
+.profile-glass-item:focus-visible {
+  background:
+    linear-gradient(115deg, rgba(22, 86, 172, 0.44) 0%, rgba(22, 118, 208, 0.34) 52%, rgba(215, 161, 204, 0.34) 100%) !important;
+  border-color: rgba(216, 236, 252, 0.96) !important;
+  color: #ffffff !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    0 0 0 1px rgba(176, 216, 248, 0.72),
+    0 0 14px rgba(150, 202, 246, 0.48),
+    0 10px 20px rgba(8, 29, 61, 0.34) !important;
+  border-radius: 14px !important;
+}
+
+.profile-glass-sidebar:hover .profile-glass-item:hover,
+.profile-glass-sidebar:hover .profile-glass-item:focus-visible {
+  border-color: rgba(229, 244, 255, 1) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+    0 0 0 1px rgba(190, 223, 250, 0.82),
+    0 0 16px rgba(162, 209, 248, 0.56),
+    0 12px 22px rgba(8, 29, 61, 0.36) !important;
+}
+
+.profile-glass-item.is-active {
+  background: rgba(18, 70, 138, 0.18) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body .profile-glass-sidebar .profile-glass-settings:not(:hover):not(:focus-visible):not(.is-active),
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-settings:not(:hover):not(:focus-visible):not(.is-active) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.profile-glass-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  color: #9fc9ff;
+  transition: color 220ms ease, filter 220ms ease;
+}
+
+.profile-glass-item:hover .profile-glass-icon,
+.profile-glass-item:focus-visible .profile-glass-icon,
+.profile-glass-item.is-active .profile-glass-icon {
+  color: #ffffff;
+  filter: drop-shadow(0 0 7px rgba(255, 255, 255, 0.48));
+}
+
+.profile-glass-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.profile-glass-icon svg path,
+.profile-glass-icon svg rect,
+.profile-glass-icon svg circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.profile-glass-item-text {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+  opacity: 0;
+  transform: translateX(-10px);
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition:
+    opacity 240ms ease,
+    transform 280ms ease,
+    max-width 280ms ease;
+}
+
+.profile-glass-item-text strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.profile-glass-item-text small {
+  font-size: 0.71rem;
+  color: rgba(226, 240, 255, 0.86);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-glass-sidebar:hover .profile-glass-item-text,
+.profile-glass-sidebar.is-editing .profile-glass-item-text {
+  opacity: 1;
+  transform: translateX(0);
+  max-width: 190px;
+}
+
+.profile-avatar-circle.profile-avatar-circle-identity {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.profile-glass-avatar-text small {
+  text-transform: capitalize;
+}
+
+.profile-glass-bottom {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid rgba(190, 216, 242, 0.22);
+}
+
+.profile-glass-edit-panel {
+  display: grid;
+  gap: 8px;
+  border: none;
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.profile-glass-edit-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-glass-edit-avatar-row .profile-avatar-circle {
+  width: 42px;
+  height: 42px;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body .profile-glass-sidebar .profile-glass-upload-btn,
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-upload-btn {
+  border-radius: 10px;
+  padding: 4px 8px;
+  min-width: 100px;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  background-image: none !important;
+  color: #e9f3ff !important;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: filter 180ms ease, color 180ms ease, text-shadow 180ms ease;
+}
+
+body .profile-glass-sidebar .profile-glass-upload-btn::before,
+body .profile-glass-sidebar .profile-glass-upload-btn::after,
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-upload-btn::before,
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-upload-btn::after {
+  display: none !important;
+  content: none !important;
+}
+
+body .profile-glass-sidebar .profile-glass-upload-btn:hover:not(:disabled),
+body .profile-glass-sidebar .profile-glass-upload-btn:focus-visible:not(:disabled),
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-upload-btn:hover:not(:disabled),
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-upload-btn:focus-visible:not(:disabled) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  filter: brightness(1.08);
+  transform: none !important;
+}
+
+.profile-glass-upload-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.profile-glass-upload-text {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  text-transform: lowercase;
+  color: rgba(231, 243, 255, 0.94);
+}
+
+.profile-glass-upload-btn:hover .profile-glass-upload-icon,
+.profile-glass-upload-btn:focus-visible .profile-glass-upload-icon,
+.profile-glass-upload-btn:hover .profile-glass-upload-text,
+.profile-glass-upload-btn:focus-visible .profile-glass-upload-text {
+  filter: drop-shadow(0 0 6px rgba(188, 225, 255, 0.7));
+  text-shadow: 0 0 7px rgba(188, 225, 255, 0.58);
+}
+
+.profile-glass-edit-panel .profile-edit-field {
+  display: grid;
+  gap: 4px;
+}
+
+.profile-glass-edit-panel .profile-edit-field > span {
+  color: #eaf3ff;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.profile-glass-edit-panel .profile-edit-field input,
+.profile-glass-edit-panel .profile-edit-field textarea {
+  border-radius: 9px;
+  border: 1px solid rgba(185, 216, 243, 0.56);
+  background: rgba(255, 255, 255, 0.92);
+  color: #173d6c;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+}
+
+.profile-glass-edit-panel .profile-edit-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(185, 216, 243, 0.56);
+  background: rgba(255, 255, 255, 0.94);
+  padding: 4px 8px;
+}
+
+.profile-glass-edit-panel .profile-edit-input-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  color: #1f3f5c !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-glass-edit-panel .profile-edit-input-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.profile-glass-edit-panel .profile-edit-input-icon svg path,
+.profile-glass-edit-panel .profile-edit-input-icon svg rect,
+.profile-glass-edit-panel .profile-edit-input-icon svg circle {
+  fill: none;
+  stroke: currentColor !important;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.profile-glass-edit-panel .profile-edit-input-wrap input {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 100%;
+  min-height: 24px;
+  color: #173d6c;
+  font-size: 0.8rem;
+}
+
+.profile-glass-edit-panel .profile-edit-input-wrap:focus-within {
+  border-color: #4f8fd9;
+  box-shadow: 0 0 0 2px rgba(79, 143, 217, 0.16);
+}
+
+.profile-glass-edit-panel .profile-edit-field textarea {
+  resize: vertical;
+}
+
+.profile-glass-edit-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 2px;
+}
+
+body .profile-glass-sidebar .profile-save-btn,
+body.backoffice-palette-active .profile-glass-sidebar .profile-save-btn {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  border-radius: 11px;
+  border: 1px solid #1fbc76 !important;
+  background: linear-gradient(140deg, #22c57a 0%, #14a368 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  padding: 6px 10px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 8px 18px -14px rgba(18, 139, 87, 0.9) !important;
+}
+
+body .profile-glass-sidebar .profile-glass-cancel-btn,
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-cancel-btn {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  border-radius: 11px;
+  border: 1px solid rgba(100, 197, 208, 0.6) !important;
+  background: linear-gradient(145deg, rgba(22, 29, 41, 0.92) 0%, rgba(33, 40, 56, 0.88) 100%) !important;
+  color: #d2dbe5 !important;
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  padding: 6px 10px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 8px 16px -14px rgba(8, 14, 24, 0.86) !important;
+}
+
+body .profile-glass-sidebar .profile-save-btn:hover:not(:disabled),
+body .profile-glass-sidebar .profile-save-btn:focus-visible:not(:disabled),
+body.backoffice-palette-active .profile-glass-sidebar .profile-save-btn:hover:not(:disabled),
+body.backoffice-palette-active .profile-glass-sidebar .profile-save-btn:focus-visible:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+body .profile-glass-sidebar .profile-glass-cancel-btn:hover:not(:disabled),
+body .profile-glass-sidebar .profile-glass-cancel-btn:focus-visible:not(:disabled),
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-cancel-btn:hover:not(:disabled),
+body.backoffice-palette-active .profile-glass-sidebar .profile-glass-cancel-btn:focus-visible:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.profile-glass-note {
+  margin: 0;
+  padding: 0 4px 2px;
+  color: #e7f2ff;
+  font-size: 0.72rem;
+}
+
+@media (max-width: 860px) {
+  .profile-glass-sidebar {
+    left: 8px;
+    width: 68px;
+    top: 92px;
+    height: calc(100vh - 108px);
+    max-height: calc(100vh - 108px);
+  }
+
+  .profile-glass-sidebar:hover,
+  .profile-glass-sidebar.is-editing {
+    width: 232px;
+  }
+
+  .profile-glass-sidebar.is-editing {
+    width: min(92vw, 290px);
+  }
+}
+
+/* Final force: pending formations table action colors (wins over admin-skin defaults) */
+body .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-publish:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-publish:not(:disabled) {
+  background: linear-gradient(130deg, #0b2d72 0%, #1160b8 48%, #0ac4e0 78%, #ddaed3 100%) !important;
+  background-image: linear-gradient(130deg, #0b2d72 0%, #1160b8 48%, #0ac4e0 78%, #ddaed3 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-color: transparent !important;
+}
+
+body .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-publish:hover:not(:disabled),
+body .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-publish:focus-visible:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-publish:hover:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-publish:focus-visible:not(:disabled) {
+  background: linear-gradient(130deg, #0b2d72 0%, #0f56a7 44%, #0cc6e0 76%, #e5bcda 100%) !important;
+  background-image: linear-gradient(130deg, #0b2d72 0%, #0f56a7 44%, #0cc6e0 76%, #e5bcda 100%) !important;
+  color: #ffffff !important;
+}
+
+body .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:not(:disabled) {
+  background: linear-gradient(140deg, #ef5a5a 0%, #de3f3f 100%) !important;
+  background-image: linear-gradient(140deg, #ef5a5a 0%, #de3f3f 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #c93838 !important;
+  border-color: #c93838 !important;
+}
+
+body .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:hover:not(:disabled),
+body .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:focus-visible:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:hover:not(:disabled),
+body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .pending-formations-table .action-btn.action-delete.pending-formation-delete-btn:focus-visible:not(:disabled) {
+  background: linear-gradient(140deg, #f46868 0%, #e24a4a 100%) !important;
+  background-image: linear-gradient(140deg, #f46868 0%, #e24a4a 100%) !important;
+  border-color: #bf3333 !important;
+  color: #ffffff !important;
 }
 
