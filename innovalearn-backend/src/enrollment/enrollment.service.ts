@@ -35,6 +35,13 @@ export class EnrollmentService {
       include: {
         formation: {
           include: {
+            formateur: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
             results: {
               where: { studentId },
               select: {

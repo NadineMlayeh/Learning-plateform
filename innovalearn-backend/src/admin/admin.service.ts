@@ -411,6 +411,7 @@ export class AdminService {
 
     const where: Prisma.UserWhereInput = {
       role: 'FORMATEUR',
+      formateurStatus: 'APPROVED',
       ...(search
         ? {
             OR: [
@@ -686,6 +687,58 @@ export class AdminService {
         name: true,
         email: true,
         isSuspended: true,
+        formateurStatus: true,
+      },
+    });
+  }
+
+  async resolveRejectedFormateur(
+    formateurId: number,
+    targetRole: Role,
+  ) {
+    const formateur = await this.prisma.user.findFirst({
+      where: { id: formateurId, role: Role.FORMATEUR },
+      select: { id: true, formateurStatus: true },
+    });
+
+    if (!formateur) {
+      throw new NotFoundException('Formateur not found');
+    }
+
+    if (formateur.formateurStatus !== 'REJECTED') {
+      throw new BadRequestException(
+        'Only rejected formateurs can be approved from this action',
+      );
+    }
+
+    if (targetRole === Role.STUDENT) {
+      return this.prisma.user.update({
+        where: { id: formateurId },
+        data: {
+          role: Role.STUDENT,
+          formateurStatus: null,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          formateurStatus: true,
+        },
+      });
+    }
+
+    return this.prisma.user.update({
+      where: { id: formateurId },
+      data: {
+        role: Role.FORMATEUR,
+        formateurStatus: FormateurStatus.APPROVED,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
         formateurStatus: true,
       },
     });

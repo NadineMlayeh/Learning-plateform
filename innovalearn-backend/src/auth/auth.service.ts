@@ -24,11 +24,24 @@ export class AuthService {
       throw new UnauthorizedException('Your account has been suspended');
     }
 
-    // Block unapproved formateurs
-    if (user.role === Role.FORMATEUR && user.formateurStatus !== 'APPROVED') {
-      throw new UnauthorizedException(
-        'Your formateur account is not approved by admin',
-      );
+    if (user.role === Role.FORMATEUR) {
+      if (user.formateurStatus === 'PENDING') {
+        throw new UnauthorizedException(
+          'Your formateur request is still pending admin approval',
+        );
+      }
+
+      if (user.formateurStatus === 'REJECTED') {
+        throw new UnauthorizedException(
+          'Your formateur request has been rejected by admin',
+        );
+      }
+
+      if (user.formateurStatus !== 'APPROVED') {
+        throw new UnauthorizedException(
+          'Your formateur account is not approved by admin',
+        );
+      }
     }
 
     return user;

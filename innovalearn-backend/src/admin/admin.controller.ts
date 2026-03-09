@@ -70,6 +70,16 @@ export class AdminController {
     });
   }
 
+  @Patch('formateur/:id/resolve-rejected')
+  resolveRejectedFormateur(
+    @Param('id') id: string,
+    @Body() body: { role?: Role },
+  ) {
+    const targetRole =
+      body?.role === Role.STUDENT ? Role.STUDENT : Role.FORMATEUR;
+    return this.adminService.resolveRejectedFormateur(Number(id), targetRole);
+  }
+
   @Get('students')
   getStudents(@Query() query: Record<string, unknown>) {
     return this.adminService.getStudents(query);

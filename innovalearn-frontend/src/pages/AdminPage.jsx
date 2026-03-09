@@ -40,10 +40,16 @@ export default function AdminPage({ pushToast }) {
   const [enrollmentSearch, setEnrollmentSearch] = useState('');
   const [enrollmentSort, setEnrollmentSort] = useState('newest');
   const [enrollmentPage, setEnrollmentPage] = useState(1);
+  const [confirmRejectEnrollment, setConfirmRejectEnrollment] = useState(null);
 
   const [formateurSearch, setFormateurSearch] = useState('');
   const [formateurSort, setFormateurSort] = useState('newest');
   const [formateurPage, setFormateurPage] = useState(1);
+  const [formateurPreview, setFormateurPreview] = useState(null);
+  const [confirmRejectFormateur, setConfirmRejectFormateur] = useState(null);
+  const [confirmResolveFormateur, setConfirmResolveFormateur] = useState(null);
+  const [confirmDeleteRejectedFormateur, setConfirmDeleteRejectedFormateur] =
+    useState(null);
 
   const [invoiceSearch, setInvoiceSearch] = useState('');
   const [invoiceGroupSort, setInvoiceGroupSort] = useState('newest');
@@ -118,6 +124,49 @@ export default function AdminPage({ pushToast }) {
         token: user.token,
       });
       pushToast(`Formateur #${id} rejected.`, 'success');
+      setConfirmRejectFormateur(null);
+      await loadFormateurs();
+      await loadOverview();
+    } catch (err) {
+      pushToast(err.message, 'error');
+    } finally {
+      setProcessingFormateurId(null);
+    }
+  }
+
+  async function resolveRejectedFormateur(id, role) {
+    setProcessingFormateurId(id);
+    try {
+      await apiRequest(`/admin/formateur/${id}/resolve-rejected`, {
+        method: 'PATCH',
+        token: user.token,
+        body: { role },
+      });
+      pushToast(
+        role === 'STUDENT'
+          ? `Formateur #${id} approved as student.`
+          : `Formateur #${id} approved as formateur.`,
+        'success',
+      );
+      setConfirmResolveFormateur(null);
+      await loadFormateurs();
+      await loadOverview();
+    } catch (err) {
+      pushToast(err.message, 'error');
+    } finally {
+      setProcessingFormateurId(null);
+    }
+  }
+
+  async function deleteRejectedFormateur(id) {
+    setProcessingFormateurId(id);
+    try {
+      await apiRequest(`/admin/formateurs/${id}`, {
+        method: 'DELETE',
+        token: user.token,
+      });
+      pushToast(`Rejected formateur #${id} deleted.`, 'success');
+      setConfirmDeleteRejectedFormateur(null);
       await loadFormateurs();
       await loadOverview();
     } catch (err) {
@@ -140,6 +189,10 @@ export default function AdminPage({ pushToast }) {
         `Enrollment #${enrollmentId} ${action}d successfully.`,
         'success',
       );
+
+      if (action === 'reject') {
+        setConfirmRejectEnrollment(null);
+      }
 
       await loadEnrollments();
       await loadAdminInvoices();
@@ -348,6 +401,11 @@ export default function AdminPage({ pushToast }) {
     return currentAdminPath === path
       ? 'admin-saas-nav-item is-active'
       : 'admin-saas-nav-item';
+  }
+
+  function previewImageUrl(entry) {
+    if (!entry?.profileImageUrl) return '/images/student.png';
+    return resolveApiAssetUrl(entry.profileImageUrl);
   }
 
   return (
@@ -572,9 +630,7 @@ export default function AdminPage({ pushToast }) {
                               type="button"
                               className="action-btn action-reject"
                               disabled={!isPending || isProcessing}
-                              onClick={() =>
-                                updateEnrollmentStatus(entry.id, 'reject')
-                              }
+                              onClick={() => setConfirmRejectEnrollment(entry)}
                             >
                               Reject
                             </button>
@@ -680,44 +736,68 @@ export default function AdminPage({ pushToast }) {
                     />
                   </td>
                   <td>
-                    {(entry.formateurStatus || 'PENDING') === 'PENDING' ? (
-                      <div className="row action-btn-group">
-                        <button
-                          type="button"
-                          className="action-btn action-approve"
-                          disabled={processingFormateurId === entry.id}
-                          onClick={() => approveFormateur(entry.id)}
-                        >
-                          {processingFormateurId === entry.id
-                            ? 'Working...'
-                            : 'Approve'}
-                        </button>
-                        <button
-                          type="button"
-                          className="action-btn action-reject"
-                          disabled={processingFormateurId === entry.id}
-                          onClick={() => rejectFormateur(entry.id)}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    ) : (
-                      <span
-                        className={`admin-enrollment-result ${
-                          (entry.formateurStatus || 'PENDING') === 'APPROVED'
-                            ? 'is-approved'
-                            : (entry.formateurStatus || 'PENDING') === 'REJECTED'
-                              ? 'is-rejected'
-                              : ''
-                        }`}
+                    <div className="row action-btn-group">
+                      <button
+                        type="button"
+                        className="action-btn action-view-lite"
+                        onClick={() => setFormateurPreview(entry)}
                       >
-                        {(entry.formateurStatus || 'PENDING') === 'APPROVED'
-                          ? 'Approved ✔'
-                          : (entry.formateurStatus || 'PENDING') === 'REJECTED'
-                            ? 'Refused ✖'
-                            : entry.formateurStatus || 'PENDING'}
-                      </span>
-                    )}
+                        View
+                      </button>
+                      {(entry.formateurStatus || 'PENDING') === 'PENDING' ? (
+                        <>
+                          <button
+                            type="button"
+                            className="action-btn action-approve"
+                            disabled={processingFormateurId === entry.id}
+                            onClick={() => approveFormateur(entry.id)}
+                          >
+                            {processingFormateurId === entry.id
+                              ? 'Working...'
+                              : 'Approve'}
+                          </button>
+                          <button
+                            type="button"
+                            className="action-btn action-reject"
+                            disabled={processingFormateurId === entry.id}
+                            onClick={() => setConfirmRejectFormateur(entry)}
+                          >
+                            Reject
+                          </button>
+                        </>
+                      ) : (entry.formateurStatus || 'PENDING') === 'REJECTED' ? (
+                        <>
+                          <button
+                            type="button"
+                            className="action-btn action-approve action-approve-as"
+                            disabled={processingFormateurId === entry.id}
+                            onClick={() =>
+                              setConfirmResolveFormateur({
+                                entry,
+                                role: 'FORMATEUR',
+                              })
+                            }
+                          >
+                            Approve as
+                          </button>
+                          <button
+                            type="button"
+                            className="action-btn admin-circular-delete-btn"
+                            disabled={processingFormateurId === entry.id}
+                            onClick={() =>
+                              setConfirmDeleteRejectedFormateur(entry)
+                            }
+                            aria-label="Delete rejected formateur"
+                          >
+                            <img
+                              src="/images/trash.png"
+                              alt=""
+                              className="admin-circular-delete-icon"
+                            />
+                          </button>
+                        </>
+                      ) : null}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -921,6 +1001,365 @@ export default function AdminPage({ pushToast }) {
           </div>
         )}
       </div>
+
+      {formateurPreview && (
+        <div className="admin-modal-overlay" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="admin-modal-backdrop"
+            aria-label="Close formateur preview"
+            onClick={() => setFormateurPreview(null)}
+          />
+          <article className="admin-modal-card admin-formateur-preview-card">
+            <div className="admin-modal-head">
+              <h2>Formateur Preview</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => setFormateurPreview(null)}
+                aria-label="Close"
+              >
+                x
+              </button>
+            </div>
+            <div className="admin-modal-body">
+              <div className="admin-formateur-preview-hero">
+                <div className="admin-formateur-preview-avatar">
+                  <img
+                    src={previewImageUrl(formateurPreview)}
+                    alt={formateurPreview.name || 'Formateur'}
+                  />
+                </div>
+                <div className="admin-formateur-preview-main">
+                  <h3>{formateurPreview.name || '-'}</h3>
+                  <p>Formateur</p>
+                  <StatusBadge
+                    label={formateurPreview.formateurStatus || 'PENDING'}
+                    tone={statusTone(formateurPreview.formateurStatus || 'PENDING')}
+                  />
+                </div>
+              </div>
+
+              <div className="admin-metric-grid admin-user-detail-cards">
+                <article className="admin-metric-card">
+                  <p className="hint">Email</p>
+                  <strong>{formateurPreview.email || '-'}</strong>
+                </article>
+                <article className="admin-metric-card">
+                  <p className="hint">Phone Number</p>
+                  <strong>{formateurPreview.phoneNumber || '-'}</strong>
+                </article>
+                <article className="admin-metric-card">
+                  <p className="hint">Date of Birth</p>
+                  <strong>
+                    {formateurPreview.dateOfBirth
+                      ? new Date(formateurPreview.dateOfBirth).toLocaleDateString()
+                      : '-'}
+                  </strong>
+                </article>
+                <article className="admin-metric-card">
+                  <p className="hint">Member Since</p>
+                  <strong>
+                    {formateurPreview.createdAt
+                      ? new Date(formateurPreview.createdAt).toLocaleDateString()
+                      : '-'}
+                  </strong>
+                </article>
+                <article className="admin-metric-card admin-formateur-preview-bio-card">
+                  <p className="hint">Bio</p>
+                  <strong>{formateurPreview.bio?.trim() || '-'}</strong>
+                </article>
+              </div>
+            </div>
+          </article>
+        </div>
+      )}
+
+      {confirmRejectEnrollment && (
+        <div className="admin-modal-overlay" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="admin-modal-backdrop"
+            aria-label="Close enrollment reject confirmation"
+            onClick={() => setConfirmRejectEnrollment(null)}
+            disabled={Boolean(processingEnrollmentId)}
+          />
+          <article className="admin-modal-card confirm-delete-modal">
+            <div className="admin-modal-head">
+              <h2>Reject Student</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => setConfirmRejectEnrollment(null)}
+                aria-label="Close enrollment reject confirmation"
+                disabled={Boolean(processingEnrollmentId)}
+              >
+                x
+              </button>
+            </div>
+            <div className="admin-modal-body">
+              <p>
+                Are you sure you want to reject this student
+                {confirmRejectEnrollment?.student?.name
+                  ? ` "${confirmRejectEnrollment.student.name}"`
+                  : ''}
+                ?
+              </p>
+              <div className="row confirm-delete-actions">
+                <button
+                  type="button"
+                  className="action-btn modal-cancel-btn"
+                  onClick={() => setConfirmRejectEnrollment(null)}
+                  disabled={Boolean(processingEnrollmentId)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="action-btn action-delete"
+                  onClick={() =>
+                    updateEnrollmentStatus(confirmRejectEnrollment.id, 'reject')
+                  }
+                  disabled={processingEnrollmentId === confirmRejectEnrollment.id}
+                >
+                  {processingEnrollmentId === confirmRejectEnrollment.id
+                    ? 'Rejecting...'
+                    : 'Reject'}
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      )}
+
+      {confirmRejectFormateur && (
+        <div className="admin-modal-overlay" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="admin-modal-backdrop"
+            aria-label="Close reject confirmation"
+            onClick={() => setConfirmRejectFormateur(null)}
+            disabled={Boolean(processingFormateurId)}
+          />
+          <article className="admin-modal-card confirm-delete-modal">
+            <div className="admin-modal-head">
+              <h2>Reject Formateur</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => setConfirmRejectFormateur(null)}
+                aria-label="Close reject confirmation"
+                disabled={Boolean(processingFormateurId)}
+              >
+                x
+              </button>
+            </div>
+            <div className="admin-modal-body">
+              <p>
+                Are you sure you want to reject this formateur
+                {confirmRejectFormateur?.name
+                  ? ` "${confirmRejectFormateur.name}"`
+                  : ''}
+                ?
+              </p>
+              <div className="row confirm-delete-actions">
+                <button
+                  type="button"
+                  className="action-btn modal-cancel-btn"
+                  onClick={() => setConfirmRejectFormateur(null)}
+                  disabled={Boolean(processingFormateurId)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="action-btn action-delete"
+                  onClick={() => rejectFormateur(confirmRejectFormateur.id)}
+                  disabled={processingFormateurId === confirmRejectFormateur.id}
+                >
+                  {processingFormateurId === confirmRejectFormateur.id
+                    ? 'Rejecting...'
+                    : 'Reject'}
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      )}
+
+      {confirmResolveFormateur && (
+        <div className="admin-modal-overlay" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="admin-modal-backdrop"
+            aria-label="Close approval confirmation"
+            onClick={() => setConfirmResolveFormateur(null)}
+            disabled={Boolean(processingFormateurId)}
+          />
+          <article className="admin-modal-card confirm-delete-modal">
+            <div className="admin-modal-head">
+              <h2>Approve Rejected Formateur</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => setConfirmResolveFormateur(null)}
+                aria-label="Close approval confirmation"
+                disabled={Boolean(processingFormateurId)}
+              >
+                x
+              </button>
+            </div>
+            <div className="admin-modal-body">
+              <p>
+                Choose how you want to approve this previously rejected
+                formateur
+                {confirmResolveFormateur?.entry?.name
+                  ? ` "${confirmResolveFormateur.entry.name}"`
+                  : ''}
+                .
+              </p>
+              <div className="admin-approve-role-options">
+                <label
+                  className={`admin-approve-role-option${
+                    confirmResolveFormateur?.role === 'FORMATEUR'
+                      ? ' is-active'
+                      : ''
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="resolve-formateur-role"
+                    value="FORMATEUR"
+                    checked={confirmResolveFormateur?.role === 'FORMATEUR'}
+                    onChange={() =>
+                      setConfirmResolveFormateur((current) =>
+                        current
+                          ? { ...current, role: 'FORMATEUR' }
+                          : current,
+                      )
+                    }
+                    disabled={Boolean(processingFormateurId)}
+                  />
+                  <span className="admin-approve-role-radio" aria-hidden="true" />
+                  <span>Approve as formateur</span>
+                </label>
+                <label
+                  className={`admin-approve-role-option${
+                    confirmResolveFormateur?.role === 'STUDENT'
+                      ? ' is-active'
+                      : ''
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="resolve-formateur-role"
+                    value="STUDENT"
+                    checked={confirmResolveFormateur?.role === 'STUDENT'}
+                    onChange={() =>
+                      setConfirmResolveFormateur((current) =>
+                        current ? { ...current, role: 'STUDENT' } : current,
+                      )
+                    }
+                    disabled={Boolean(processingFormateurId)}
+                  />
+                  <span className="admin-approve-role-radio" aria-hidden="true" />
+                  <span>Approve as student</span>
+                </label>
+              </div>
+              <div className="row confirm-delete-actions">
+                <button
+                  type="button"
+                  className="action-btn modal-cancel-btn"
+                  onClick={() => setConfirmResolveFormateur(null)}
+                  disabled={Boolean(processingFormateurId)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="action-btn action-approve"
+                  onClick={() =>
+                    resolveRejectedFormateur(
+                      confirmResolveFormateur.entry.id,
+                      confirmResolveFormateur.role,
+                    )
+                  }
+                  disabled={
+                    processingFormateurId === confirmResolveFormateur.entry.id
+                  }
+                >
+                  {processingFormateurId === confirmResolveFormateur.entry.id
+                    ? 'Approving...'
+                    : 'Confirm'}
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      )}
+
+      {confirmDeleteRejectedFormateur && (
+        <div className="admin-modal-overlay" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="admin-modal-backdrop"
+            aria-label="Close delete rejected formateur confirmation"
+            onClick={() => setConfirmDeleteRejectedFormateur(null)}
+            disabled={Boolean(processingFormateurId)}
+          />
+          <article className="admin-modal-card confirm-delete-modal">
+            <div className="admin-modal-head">
+              <h2>Delete Rejected Formateur</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => setConfirmDeleteRejectedFormateur(null)}
+                aria-label="Close delete rejected formateur confirmation"
+                disabled={Boolean(processingFormateurId)}
+              >
+                x
+              </button>
+            </div>
+            <div className="admin-modal-body">
+              <p>
+                Are you sure you want to delete the rejected instructor
+                {confirmDeleteRejectedFormateur?.name
+                  ? ` ${confirmDeleteRejectedFormateur.name}`
+                  : ''}
+                ?
+                <br />
+                Deleting this instructor will remove the email restriction,
+                allowing them to submit a new request for a Formateur account
+                through the signup form.
+              </p>
+              <div className="row confirm-delete-actions">
+                <button
+                  type="button"
+                  className="action-btn modal-cancel-btn"
+                  onClick={() => setConfirmDeleteRejectedFormateur(null)}
+                  disabled={Boolean(processingFormateurId)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="action-btn action-delete"
+                  onClick={() =>
+                    deleteRejectedFormateur(confirmDeleteRejectedFormateur.id)
+                  }
+                  disabled={
+                    processingFormateurId === confirmDeleteRejectedFormateur.id
+                  }
+                >
+                  {processingFormateurId === confirmDeleteRejectedFormateur.id
+                    ? 'Deleting...'
+                    : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      )}
     </section>
   );
 }

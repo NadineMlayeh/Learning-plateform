@@ -47,7 +47,7 @@ export class FormationService {
       orderBy: { createdAt: 'desc' },
       include: {
         formateur: {
-          select: { id: true, email: true },
+          select: { id: true, name: true, email: true },
         },
       },
     });

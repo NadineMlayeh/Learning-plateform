@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
@@ -7,6 +7,7 @@ import StatusBadge from '../components/StatusBadge';
 
 const INVOICE_PAGE_SIZE = 3;
 const COURSE_CARDS_PAGE_SIZE = 6;
+const ACHIEVEMENT_PAGE_SIZE = 3;
 const STREAK_TARGET_DAYS = 5;
 const DASH_SECTIONS = {
   COURSES: 'courses',
@@ -120,6 +121,105 @@ function IconCalendar() {
       <rect x="3.5" y="4.5" width="17" height="16" rx="2.5" />
       <path d="M7.5 2.8v3.4M16.5 2.8v3.4M3.5 9h17" />
     </svg>
+  );
+}
+
+function SearchableFormateurSelect({
+  value,
+  onChange,
+  options,
+  placeholder,
+  allLabel = 'All formateurs',
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState(value || '');
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    setQuery(value || '');
+  }, [value]);
+
+  useEffect(() => {
+    function handleOutside(event) {
+      if (!rootRef.current?.contains(event.target)) {
+        setOpen(false);
+        setQuery(value || '');
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [value]);
+
+  const filteredOptions = useMemo(() => {
+    const safeQuery = String(query || '').trim().toLowerCase();
+    if (!safeQuery) return options;
+    return options.filter((option) =>
+      String(option || '').toLowerCase().includes(safeQuery),
+    );
+  }, [options, query]);
+
+  function selectOption(nextValue) {
+    onChange(nextValue);
+    setQuery(nextValue || '');
+    setOpen(false);
+  }
+
+  return (
+    <div
+      ref={rootRef}
+      className={`student-v2-searchable-select ${open ? 'is-open' : ''}`}
+    >
+      <div className="student-v2-searchable-toggle">
+        <input
+          type="text"
+          className="student-v2-searchable-input"
+          placeholder={placeholder}
+          value={query}
+          onFocus={() => setOpen(true)}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setOpen(true);
+          }}
+        />
+        <button
+          type="button"
+          className="student-v2-searchable-trigger"
+          onClick={() => setOpen((current) => !current)}
+          aria-label={placeholder}
+        >
+          <span className="student-v2-searchable-caret" aria-hidden="true">
+            ▾
+          </span>
+        </button>
+      </div>
+      {open && (
+        <div className="student-v2-searchable-menu">
+          <button
+            type="button"
+            className="student-v2-searchable-option"
+            onClick={() => selectOption('')}
+          >
+            {allLabel}
+          </button>
+          {filteredOptions.map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={`student-v2-searchable-option${
+                value === option ? ' is-active' : ''
+              }`}
+              onClick={() => selectOption(option)}
+            >
+              {option}
+            </button>
+          ))}
+          {filteredOptions.length === 0 && (
+            <div className="student-v2-searchable-empty">No formateur found</div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -239,10 +339,22 @@ export default function StudentPage({ pushToast }) {
   const [invoices, setInvoices] = useState([]);
   const [loadingInvoices, setLoadingInvoices] = useState(false);
   const [invoicePage, setInvoicePage] = useState(1);
+  const [invoiceSearch, setInvoiceSearch] = useState('');
+  const [invoiceSort, setInvoiceSort] = useState('MOST_RECENT');
+  const [achievementPage, setAchievementPage] = useState(1);
+  const [achievementSearch, setAchievementSearch] = useState('');
+  const [achievementSort, setAchievementSort] = useState('MOST_RECENT');
+  const [pendingPage, setPendingPage] = useState(1);
+  const [pendingSearch, setPendingSearch] = useState('');
+  const [pendingSort, setPendingSort] = useState('MOST_RECENT');
   const [enrolledPage, setEnrolledPage] = useState(1);
   const [discoverPage, setDiscoverPage] = useState(1);
   const [enrolledSearch, setEnrolledSearch] = useState('');
+  const [enrolledFormateurSearch, setEnrolledFormateurSearch] = useState('');
   const [enrolledTypeFilter, setEnrolledTypeFilter] = useState('ALL');
+  const [discoverSearch, setDiscoverSearch] = useState('');
+  const [discoverFormateurSearch, setDiscoverFormateurSearch] = useState('');
+  const [discoverTypeFilter, setDiscoverTypeFilter] = useState('ALL');
   const [enrollingFormationId, setEnrollingFormationId] = useState(null);
   const [activeSection, setActiveSection] = useState(DASH_SECTIONS.COURSES);
   const [streakDays, setStreakDays] = useState(1);
@@ -372,16 +484,33 @@ export default function StudentPage({ pushToast }) {
 
   const filteredEnrolledRows = useMemo(() => {
     const query = enrolledSearch.trim().toLowerCase();
+    const formateurQuery = enrolledFormateurSearch.trim().toLowerCase();
     return enrolledDisplayRows.filter((entry) => {
       const title = String(
         entry?.formation?.title || `Formation #${entry?.formationId || '-'}`,
       ).toLowerCase();
       const type = String(entry?.formation?.type || '').toUpperCase();
+      const formateurName = String(entry?.formation?.formateur?.name || '').toLowerCase();
       const matchesName = !query || title.includes(query);
+      const matchesFormateur =
+        !formateurQuery || formateurName === formateurQuery;
       const matchesType = enrolledTypeFilter === 'ALL' || type === enrolledTypeFilter;
-      return matchesName && matchesType;
+      return matchesName && matchesFormateur && matchesType;
     });
-  }, [enrolledDisplayRows, enrolledSearch, enrolledTypeFilter]);
+  }, [
+    enrolledDisplayRows,
+    enrolledSearch,
+    enrolledFormateurSearch,
+    enrolledTypeFilter,
+  ]);
+
+  const enrolledFormateurOptions = useMemo(() => {
+    return [...new Set(
+      enrolledDisplayRows
+        .map((entry) => String(entry?.formation?.formateur?.name || '').trim())
+        .filter(Boolean),
+    )].sort((a, b) => a.localeCompare(b));
+  }, [enrolledDisplayRows]);
 
   const pendingEnrollments = useMemo(
     () =>
@@ -393,22 +522,92 @@ export default function StudentPage({ pushToast }) {
     [enrollments],
   );
 
-  const sortedInvoices = useMemo(
-    () =>
-      [...invoices].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      ),
-    [invoices],
-  );
+  const filteredSortedPendingEnrollments = useMemo(() => {
+    const query = pendingSearch.trim().toLowerCase();
+
+    return [...pendingEnrollments]
+      .filter((entry) => {
+        const title = String(
+          entry?.formation?.title || `Formation #${entry?.formationId || '-'}`,
+        ).toLowerCase();
+        return !query || title.includes(query);
+      })
+      .sort((a, b) => {
+        if (pendingSort === 'OLDEST') {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        }
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+  }, [pendingEnrollments, pendingSearch, pendingSort]);
+
+  const filteredSortedInvoices = useMemo(() => {
+    const query = invoiceSearch.trim().toLowerCase();
+
+    return [...invoices]
+      .filter((invoice) => {
+        const formationTitle = String(
+          invoice?.enrollment?.formation?.title ||
+            `Formation #${invoice?.enrollment?.formation?.id || '-'} `,
+        ).toLowerCase();
+        return !query || formationTitle.includes(query);
+      })
+      .sort((a, b) => {
+        if (invoiceSort === 'OLDEST') {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        }
+
+        if (invoiceSort === 'HIGHEST_AMOUNT') {
+          return Number(b.amount || 0) - Number(a.amount || 0);
+        }
+
+        if (invoiceSort === 'LEAST_AMOUNT') {
+          return Number(a.amount || 0) - Number(b.amount || 0);
+        }
+
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+  }, [invoices, invoiceSearch, invoiceSort]);
 
   const invoiceTotalPages = Math.max(
     1,
-    Math.ceil(sortedInvoices.length / INVOICE_PAGE_SIZE),
+    Math.ceil(filteredSortedInvoices.length / INVOICE_PAGE_SIZE),
   );
-  const invoicePageRows = sortedInvoices.slice(
+  const invoicePageRows = filteredSortedInvoices.slice(
     (invoicePage - 1) * INVOICE_PAGE_SIZE,
     invoicePage * INVOICE_PAGE_SIZE,
   );
+
+  const filteredDiscoverRows = useMemo(() => {
+    const query = discoverSearch.trim().toLowerCase();
+    const formateurQuery = discoverFormateurSearch.trim().toLowerCase();
+
+    return unenrolledFormations.filter((formation) => {
+      const title = String(formation?.title || '').toLowerCase();
+      const formateurName = String(formation?.formateur?.name || '').toLowerCase();
+      const type = String(formation?.type || '').toUpperCase();
+      const matchesTitle = !query || title.includes(query);
+      const matchesFormateur =
+        !formateurQuery || formateurName === formateurQuery;
+      const matchesType =
+        discoverTypeFilter === 'ALL' || type === discoverTypeFilter;
+      return matchesTitle && matchesFormateur && matchesType;
+    });
+  }, [
+    unenrolledFormations,
+    discoverSearch,
+    discoverFormateurSearch,
+    discoverTypeFilter,
+  ]);
+
+  const discoverFormateurOptions = useMemo(() => {
+    return [
+      ...new Set(
+        unenrolledFormations
+          .map((formation) => String(formation?.formateur?.name || '').trim())
+          .filter(Boolean),
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+  }, [unenrolledFormations]);
 
   const enrolledTotalPages = Math.max(
     1,
@@ -421,9 +620,9 @@ export default function StudentPage({ pushToast }) {
 
   const discoverTotalPages = Math.max(
     1,
-    Math.ceil(unenrolledFormations.length / COURSE_CARDS_PAGE_SIZE),
+    Math.ceil(filteredDiscoverRows.length / COURSE_CARDS_PAGE_SIZE),
   );
-  const discoverPageRows = unenrolledFormations.slice(
+  const discoverPageRows = filteredDiscoverRows.slice(
     (discoverPage - 1) * COURSE_CARDS_PAGE_SIZE,
     discoverPage * COURSE_CARDS_PAGE_SIZE,
   );
@@ -480,6 +679,7 @@ export default function StudentPage({ pushToast }) {
             courseId: course.id,
             courseTitle: course.title,
             badgeUrl: course.results?.[0]?.badgeUrl || null,
+            createdAt: course.results?.[0]?.createdAt || null,
           }))
           .filter((badge) => badge.badgeUrl);
 
@@ -491,10 +691,50 @@ export default function StudentPage({ pushToast }) {
           formationTitle: formation?.title || `Formation #${entry.formationId}`,
           certificateUrl: formationResult?.certificateUrl || null,
           badges: earnedBadges,
+          createdAt:
+            formationResult?.createdAt ||
+            earnedBadges[0]?.createdAt ||
+            entry.createdAt ||
+            formation?.createdAt ||
+            null,
         };
       })
       .filter(Boolean);
   }, [approvedEnrollments]);
+
+  const filteredSortedAchievements = useMemo(() => {
+    const query = achievementSearch.trim().toLowerCase();
+
+    return [...achievementRows]
+      .filter((row) => {
+        const formationTitle = String(row?.formationTitle || '').toLowerCase();
+        return !query || formationTitle.includes(query);
+      })
+      .sort((a, b) => {
+        const left = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const right = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+        if (achievementSort === 'OLDEST') return left - right;
+        return right - left;
+      });
+  }, [achievementRows, achievementSearch, achievementSort]);
+
+  const achievementTotalPages = Math.max(
+    1,
+    Math.ceil(filteredSortedAchievements.length / ACHIEVEMENT_PAGE_SIZE),
+  );
+  const achievementPageRows = filteredSortedAchievements.slice(
+    (achievementPage - 1) * ACHIEVEMENT_PAGE_SIZE,
+    achievementPage * ACHIEVEMENT_PAGE_SIZE,
+  );
+
+  const pendingTotalPages = Math.max(
+    1,
+    Math.ceil(filteredSortedPendingEnrollments.length / INVOICE_PAGE_SIZE),
+  );
+  const pendingPageRows = filteredSortedPendingEnrollments.slice(
+    (pendingPage - 1) * INVOICE_PAGE_SIZE,
+    pendingPage * INVOICE_PAGE_SIZE,
+  );
 
   const quickCards = [
     {
@@ -520,7 +760,7 @@ export default function StudentPage({ pushToast }) {
       iconSrc: '/images/facture.png',
       iconAlt: 'Payments',
       title: 'My Payments',
-      metric: `${sortedInvoices.length} invoices`,
+      metric: `${invoices.length} invoices`,
       subtitle: `${pendingInvoicesCount} pending`,
       cta: 'View Invoices',
     },
@@ -551,7 +791,7 @@ export default function StudentPage({ pushToast }) {
         {approvedEnrollments.length > 0 && (
           <div className="student-v2-group student-v2-enrolled-group">
             <div className="student-v2-group-head">
-              <h3>Enrolled Courses</h3>
+              <h3>Enrolled Formations</h3>
               <p className="hint">Open online content and continue where you left off.</p>
             </div>
             <div className="student-v2-enrolled-controls">
@@ -561,6 +801,12 @@ export default function StudentPage({ pushToast }) {
                 placeholder="Search by formation name"
                 value={enrolledSearch}
                 onChange={(event) => setEnrolledSearch(event.target.value)}
+              />
+              <SearchableFormateurSelect
+                value={enrolledFormateurSearch}
+                onChange={setEnrolledFormateurSearch}
+                options={enrolledFormateurOptions}
+                placeholder="Search by formateur name"
               />
               <select
                 className="student-v2-enrolled-filter"
@@ -608,6 +854,15 @@ export default function StudentPage({ pushToast }) {
 
                         {formation?.description && (
                           <p className="hint">{shortText(formation.description, 108)}</p>
+                        )}
+
+                        {formation?.formateur?.name && (
+                          <div className="student-v2-meta-line">
+                            <span className="student-v2-inline-icon">
+                              <IconSpark />
+                            </span>
+                            <span>Formateur: {formation.formateur.name}</span>
+                          </div>
                         )}
 
                         <div className="student-v2-meta-line">
@@ -704,12 +959,36 @@ export default function StudentPage({ pushToast }) {
             <h3>Discover New Formations</h3>
             <p className="hint">Explore and enroll in newly published formations.</p>
           </div>
-          {unenrolledFormations.length === 0 ? (
+          <div className="student-v2-enrolled-controls">
+            <input
+              type="text"
+              className="student-v2-enrolled-search"
+              placeholder="Search by formation name"
+              value={discoverSearch}
+              onChange={(event) => setDiscoverSearch(event.target.value)}
+            />
+            <SearchableFormateurSelect
+              value={discoverFormateurSearch}
+              onChange={setDiscoverFormateurSearch}
+              options={discoverFormateurOptions}
+              placeholder="Search by formateur name"
+            />
+            <select
+              className="student-v2-enrolled-filter"
+              value={discoverTypeFilter}
+              onChange={(event) => setDiscoverTypeFilter(event.target.value)}
+            >
+              <option value="ALL">All types</option>
+              <option value="ONLINE">Online only</option>
+              <option value="PRESENTIEL">Presentiel only</option>
+            </select>
+          </div>
+          {filteredDiscoverRows.length === 0 ? (
             <p className="hint">You are already enrolled in all currently published formations.</p>
           ) : (
             <>
               <div className="student-v2-course-grid student-v2-course-grid-paged">
-	              {discoverPageRows.map((formation) => (
+		              {discoverPageRows.map((formation) => (
 	                <article key={formation.id} className="student-v2-course-card">
                   <div className="student-v2-course-thumb">
                     <img src={thumbnailFor(formation.id)} alt={formation.title} />
@@ -723,12 +1002,21 @@ export default function StudentPage({ pushToast }) {
                       />
                     </div>
 
-	                    <p className="hint">{shortText(formation.description, 100)}</p>
+		                    <p className="hint">{shortText(formation.description, 100)}</p>
 
-	                    <div className="student-v2-meta-line">
-	                      <span className="student-v2-inline-icon">
-	                        <IconCoin />
-	                      </span>
+		                    {formation?.formateur?.name && (
+		                      <div className="student-v2-meta-line">
+		                        <span className="student-v2-inline-icon">
+		                          <IconSpark />
+		                        </span>
+		                        <span>Formateur: {formation.formateur.name}</span>
+		                      </div>
+		                    )}
+
+		                    <div className="student-v2-meta-line">
+		                      <span className="student-v2-inline-icon">
+		                        <IconCoin />
+		                      </span>
 	                      <span>Price: {formation.price}</span>
 	                    </div>
 
@@ -787,8 +1075,8 @@ export default function StudentPage({ pushToast }) {
 	                </article>
               ))}
             </div>
-              {unenrolledFormations.length > COURSE_CARDS_PAGE_SIZE && (
-                <div className="pagination-bar">
+	              {filteredDiscoverRows.length > COURSE_CARDS_PAGE_SIZE && (
+	                <div className="pagination-bar">
                   <button
                     type="button"
                     className="action-btn action-page"
@@ -830,68 +1118,117 @@ export default function StudentPage({ pushToast }) {
             </p>
           </div>
 
+          {achievementRows.length > 0 && (
+            <div className="student-v2-achievement-controls">
+              <input
+                type="text"
+                className="student-v2-achievement-search"
+                placeholder="Search by formation name"
+                value={achievementSearch}
+                onChange={(event) => setAchievementSearch(event.target.value)}
+              />
+              <select
+                className="student-v2-achievement-filter"
+                value={achievementSort}
+                onChange={(event) => setAchievementSort(event.target.value)}
+              >
+                <option value="MOST_RECENT">Most recent certifs</option>
+                <option value="OLDEST">Oldest certifs</option>
+              </select>
+            </div>
+          )}
+
           {achievementRows.length === 0 ? (
             <p className="hint">No certificates or badges earned yet. Keep going!</p>
+          ) : filteredSortedAchievements.length === 0 ? (
+            <p className="hint">No certificate or badge matches your search/filter.</p>
           ) : (
-            <div className="student-v2-achievement-grid">
-              {achievementRows.map((row) => (
-                <article key={row.enrollmentId} className="student-v2-achievement-card">
-                  <h4>{row.formationTitle}</h4>
+            <>
+              <div className="student-v2-achievement-grid student-v2-achievement-grid-paged">
+                {achievementPageRows.map((row) => (
+                  <article key={row.enrollmentId} className="student-v2-achievement-card">
+                    <h4>{row.formationTitle}</h4>
 
-                  <div className="student-v2-achievement-block">
-                    <p className="student-v2-achievement-block-title">
-                      <img
-                        src="/images/certificate.png"
-                        alt=""
-                        className="student-v2-achievement-title-icon student-v2-achievement-title-icon-cert"
-                      />
-                      <span>Certificate Section</span>
-                    </p>
-                    {row.certificateUrl ? (
-                      <a
-                        className="student-v2-doc-link student-v2-doc-link-cert"
-                        href={resolveApiAssetUrl(row.certificateUrl)}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Open Certificate
-                      </a>
-                    ) : (
-                      <span className="student-v2-soft-pill">
-                        Final certificate not generated yet
-                      </span>
-                    )}
-                  </div>
+                    <div className="student-v2-achievement-block">
+                      <p className="student-v2-achievement-block-title">
+                        <img
+                          src="/images/certificate.png"
+                          alt=""
+                          className="student-v2-achievement-title-icon student-v2-achievement-title-icon-cert"
+                        />
+                        <span>Certificate Section</span>
+                      </p>
+                      {row.certificateUrl ? (
+                        <a
+                          className="student-v2-doc-link student-v2-doc-link-cert"
+                          href={resolveApiAssetUrl(row.certificateUrl)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Download Certificate
+                        </a>
+                      ) : (
+                        <span className="student-v2-soft-pill">
+                          Final certificate not generated yet
+                        </span>
+                      )}
+                    </div>
 
-                  <div className="student-v2-achievement-block">
-                    <p className="student-v2-achievement-block-title">
-                      <span className="student-v2-achievement-title-emoji" aria-hidden="true">
-                        🏆
-                      </span>
-                      <span>Badges Earned :</span>
-                    </p>
-                    {row.badges.length > 0 ? (
-                      <div className="student-v2-achievement-badge-row">
-                        {row.badges.map((badge) => (
-                          <a
-                            key={`${row.enrollmentId}-${badge.courseId}`}
-                            className="student-v2-doc-link-badge-bg"
-                            href={resolveApiAssetUrl(badge.badgeUrl)}
-                            target="_blank"
-                            rel="noreferrer"
-                            title={badge.courseTitle}
-                          >
-                            Badge
-                          </a>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="student-v2-soft-pill">No badge earned yet</span>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
+                    <div className="student-v2-achievement-block">
+                      <p className="student-v2-achievement-block-title">
+                        <span className="student-v2-achievement-title-emoji" aria-hidden="true">
+                          🏆
+                        </span>
+                        <span>Badges Earned :</span>
+                      </p>
+                      {row.badges.length > 0 ? (
+                        <div className="student-v2-achievement-badge-row">
+                          {row.badges.map((badge) => (
+                            <a
+                              key={`${row.enrollmentId}-${badge.courseId}`}
+                              className="student-v2-doc-link-badge-bg"
+                              href={resolveApiAssetUrl(badge.badgeUrl)}
+                              target="_blank"
+                              rel="noreferrer"
+                              title={badge.courseTitle}
+                            >
+                              Badge
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="student-v2-soft-pill">No badge earned yet</span>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+              {filteredSortedAchievements.length > ACHIEVEMENT_PAGE_SIZE && (
+                <div className="pagination-bar">
+                  <button
+                    type="button"
+                    className="action-btn action-page"
+                    onClick={() => setAchievementPage((prev) => Math.max(1, prev - 1))}
+                    disabled={achievementPage === 1}
+                  >
+                    Prev
+                  </button>
+                  <span>
+                    Page {achievementPage} / {achievementTotalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="action-btn action-page"
+                    onClick={() =>
+                      setAchievementPage((prev) => Math.min(achievementTotalPages, prev + 1))
+                    }
+                    disabled={achievementPage === achievementTotalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -909,61 +1246,87 @@ export default function StudentPage({ pushToast }) {
 
           {loadingInvoices && <p className="hint">Loading invoices...</p>}
 
-          {!loadingInvoices && sortedInvoices.length === 0 && (
+          {!loadingInvoices && invoices.length === 0 && (
             <p className="hint">No invoice available yet. It appears after admin approval.</p>
           )}
 
-          {!loadingInvoices && sortedInvoices.length > 0 && (
+          {!loadingInvoices && invoices.length > 0 && (
             <>
-              <div className="student-v2-invoice-grid">
-                {invoicePageRows.map((invoice) => (
-                  <article key={invoice.id} className="student-v2-invoice-card">
-                    <h4>
-                      {invoice.enrollment?.formation?.title ||
-                        `Formation #${invoice.enrollment?.formation?.id || '-'}`}
-                    </h4>
-                    <p className="hint student-v2-invoice-meta">
-                      Amount: {Number(invoice.amount || 0).toFixed(2)} TND
-                    </p>
-                    <p className="hint student-v2-invoice-meta">
-                      Issued: {toDateLabel(invoice.createdAt)}
-                    </p>
-                    <a
-                      className="student-v2-doc-link student-v2-invoice-open-btn"
-                      href={resolveApiAssetUrl(invoice.pdfUrl)}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <span className="student-v2-inline-icon" aria-hidden="true">
-                        <IconCloudDownload />
-                      </span>
-                      <span>Open Invoice</span>
-                    </a>
-                  </article>
-                ))}
+              <div className="student-v2-invoice-controls">
+                <input
+                  type="text"
+                  className="student-v2-invoice-search"
+                  placeholder="Search by formation name"
+                  value={invoiceSearch}
+                  onChange={(event) => setInvoiceSearch(event.target.value)}
+                />
+                <select
+                  className="student-v2-invoice-filter"
+                  value={invoiceSort}
+                  onChange={(event) => setInvoiceSort(event.target.value)}
+                >
+                  <option value="MOST_RECENT">Most recent invoice</option>
+                  <option value="OLDEST">Oldest invoice</option>
+                  <option value="HIGHEST_AMOUNT">Highest amount</option>
+                  <option value="LEAST_AMOUNT">Least amount</option>
+                </select>
               </div>
 
-              <div className="pagination-bar">
-                <button
-                  type="button"
-                  className="action-btn action-page"
-                  onClick={() => setInvoicePage((prev) => Math.max(1, prev - 1))}
-                  disabled={invoicePage === 1}
-                >
-                  Prev
-                </button>
-                <span>
-                  Page {invoicePage} / {invoiceTotalPages}
-                </span>
-                <button
-                  type="button"
-                  className="action-btn action-page"
-                  onClick={() => setInvoicePage((prev) => Math.min(invoiceTotalPages, prev + 1))}
-                  disabled={invoicePage === invoiceTotalPages}
-                >
-                  Next
-                </button>
-              </div>
+              {filteredSortedInvoices.length === 0 ? (
+                <p className="hint">No invoice matches your search/filter.</p>
+              ) : (
+                <>
+                  <div className="student-v2-invoice-grid">
+                    {invoicePageRows.map((invoice) => (
+                      <article key={invoice.id} className="student-v2-invoice-card">
+                        <h4>
+                          {invoice.enrollment?.formation?.title ||
+                            `Formation #${invoice.enrollment?.formation?.id || '-'} `}
+                        </h4>
+                        <p className="hint student-v2-invoice-meta">
+                          Amount: {Number(invoice.amount || 0).toFixed(2)} TND
+                        </p>
+                        <p className="hint student-v2-invoice-meta">
+                          Issued: {toDateLabel(invoice.createdAt)}
+                        </p>
+                        <a
+                          className="student-v2-doc-link student-v2-invoice-open-btn"
+                          href={resolveApiAssetUrl(invoice.pdfUrl)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <span className="student-v2-invoice-btn-icon" aria-hidden="true">
+                            <img src="/images/import.png" alt="" />
+                          </span>
+                          <span>Download Invoice</span>
+                        </a>
+                      </article>
+                    ))}
+                  </div>
+
+                  <div className="pagination-bar">
+                    <button
+                      type="button"
+                      className="action-btn action-page"
+                      onClick={() => setInvoicePage((prev) => Math.max(1, prev - 1))}
+                      disabled={invoicePage === 1}
+                    >
+                      Prev
+                    </button>
+                    <span>
+                      Page {invoicePage} / {invoiceTotalPages}
+                    </span>
+                    <button
+                      type="button"
+                      className="action-btn action-page"
+                      onClick={() => setInvoicePage((prev) => Math.min(invoiceTotalPages, prev + 1))}
+                      disabled={invoicePage === invoiceTotalPages}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>
@@ -982,27 +1345,90 @@ export default function StudentPage({ pushToast }) {
 
           {pendingEnrollments.length === 0 ? (
             <p className="hint">No pending requests right now.</p>
+          ) : filteredSortedPendingEnrollments.length === 0 ? (
+            <>
+              <div className="student-v2-pending-controls">
+                <input
+                  type="text"
+                  className="student-v2-pending-search"
+                  placeholder="Search by formation name"
+                  value={pendingSearch}
+                  onChange={(event) => setPendingSearch(event.target.value)}
+                />
+                <select
+                  className="student-v2-pending-filter"
+                  value={pendingSort}
+                  onChange={(event) => setPendingSort(event.target.value)}
+                >
+                  <option value="MOST_RECENT">Most recent enrollment request</option>
+                  <option value="OLDEST">Oldest enrollment request</option>
+                </select>
+              </div>
+              <p className="hint">No pending request matches your search/filter.</p>
+            </>
           ) : (
-            <div className="student-v2-pending-grid">
-              {pendingEnrollments.map((entry) => (
-                <article key={entry.id} className="student-v2-pending-card">
-                  <div className="student-v2-pending-thumb">
-                    <img
-                      src={thumbnailFor(entry.formation?.id || entry.formationId)}
-                      alt={entry.formation?.title || 'Pending formation'}
-                    />
-                  </div>
-                  <div className="student-v2-pending-body">
-                    <div className="student-v2-course-head">
-                      <h4>{entry.formation?.title || `Formation #${entry.formationId}`}</h4>
-                      <StatusBadge label="PENDING" tone="orange" />
+            <>
+              <div className="student-v2-pending-controls">
+                <input
+                  type="text"
+                  className="student-v2-pending-search"
+                  placeholder="Search by formation name"
+                  value={pendingSearch}
+                  onChange={(event) => setPendingSearch(event.target.value)}
+                />
+                <select
+                  className="student-v2-pending-filter"
+                  value={pendingSort}
+                  onChange={(event) => setPendingSort(event.target.value)}
+                >
+                  <option value="MOST_RECENT">Most recent enrollment request</option>
+                  <option value="OLDEST">Oldest enrollment request</option>
+                </select>
+              </div>
+              <div className="student-v2-pending-grid student-v2-pending-grid-paged">
+                {pendingPageRows.map((entry) => (
+                  <article key={entry.id} className="student-v2-pending-card">
+                    <div className="student-v2-pending-thumb">
+                      <img
+                        src={thumbnailFor(entry.formation?.id || entry.formationId)}
+                        alt={entry.formation?.title || 'Pending formation'}
+                      />
                     </div>
-                    <p className="hint">Type: {entry.formation?.type || '-'}</p>
-                    <p className="hint">Requested: {toDateLabel(entry.createdAt)}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
+                    <div className="student-v2-pending-body">
+                      <div className="student-v2-course-head">
+                        <h4>{entry.formation?.title || `Formation #${entry.formationId}`}</h4>
+                        <StatusBadge label="PENDING" tone="orange" />
+                      </div>
+                      <p className="hint">Type: {entry.formation?.type || '-'}</p>
+                      <p className="hint">Requested: {toDateLabel(entry.createdAt)}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              {filteredSortedPendingEnrollments.length > INVOICE_PAGE_SIZE && (
+                <div className="pagination-bar">
+                  <button
+                    type="button"
+                    className="action-btn action-page"
+                    onClick={() => setPendingPage((prev) => Math.max(1, prev - 1))}
+                    disabled={pendingPage === 1}
+                  >
+                    Prev
+                  </button>
+                  <span>
+                    Page {pendingPage} / {pendingTotalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="action-btn action-page"
+                    onClick={() => setPendingPage((prev) => Math.min(pendingTotalPages, prev + 1))}
+                    disabled={pendingPage === pendingTotalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -1064,7 +1490,7 @@ export default function StudentPage({ pushToast }) {
 
   useEffect(() => {
     setInvoicePage(1);
-  }, [sortedInvoices.length]);
+  }, [invoices.length, invoiceSearch, invoiceSort]);
 
   useEffect(() => {
     if (invoicePage > invoiceTotalPages) {
@@ -1074,7 +1500,12 @@ export default function StudentPage({ pushToast }) {
 
   useEffect(() => {
     setEnrolledPage(1);
-  }, [enrolledDisplayRows.length, enrolledSearch, enrolledTypeFilter]);
+  }, [
+    enrolledDisplayRows.length,
+    enrolledSearch,
+    enrolledFormateurSearch,
+    enrolledTypeFilter,
+  ]);
 
   useEffect(() => {
     if (enrolledPage > enrolledTotalPages) {
@@ -1084,13 +1515,38 @@ export default function StudentPage({ pushToast }) {
 
   useEffect(() => {
     setDiscoverPage(1);
-  }, [unenrolledFormations.length]);
+  }, [
+    unenrolledFormations.length,
+    discoverSearch,
+    discoverFormateurSearch,
+    discoverTypeFilter,
+  ]);
 
   useEffect(() => {
     if (discoverPage > discoverTotalPages) {
       setDiscoverPage(discoverTotalPages);
     }
   }, [discoverPage, discoverTotalPages]);
+
+  useEffect(() => {
+    setAchievementPage(1);
+  }, [achievementRows.length, achievementSearch, achievementSort]);
+
+  useEffect(() => {
+    if (achievementPage > achievementTotalPages) {
+      setAchievementPage(achievementTotalPages);
+    }
+  }, [achievementPage, achievementTotalPages]);
+
+  useEffect(() => {
+    setPendingPage(1);
+  }, [pendingEnrollments.length, pendingSearch, pendingSort]);
+
+  useEffect(() => {
+    if (pendingPage > pendingTotalPages) {
+      setPendingPage(pendingTotalPages);
+    }
+  }, [pendingPage, pendingTotalPages]);
 
   return (
     <section className="student-v2 stack">
@@ -1182,3 +1638,5 @@ export default function StudentPage({ pushToast }) {
     </section>
   );
 }
+
+

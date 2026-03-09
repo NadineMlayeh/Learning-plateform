@@ -1142,12 +1142,62 @@ button {
   color: var(--ink-1);
 }
 
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  padding-right: 2.7rem;
+  border-radius: 18px;
+  border: 1px solid rgba(133, 165, 210, 0.9);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(243, 248, 255, 0.96) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6.5l4 4 4-4' fill='none' stroke='%23294369' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat;
+  background-position: 0 0, right 1rem center;
+  background-size: 100% 100%, 15px 15px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 8px 18px -16px rgba(57, 87, 134, 0.42);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+select:hover {
+  border-color: rgba(114, 154, 214, 0.98);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 10px 20px -16px rgba(67, 101, 153, 0.52);
+}
+
 input:focus,
 textarea:focus,
 select:focus {
   outline: none;
   border-color: #4f8fd9;
   box-shadow: 0 0 0 3px rgba(79, 143, 217, 0.18);
+}
+
+select:focus {
+  box-shadow:
+    0 0 0 3px rgba(79, 143, 217, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 12px 22px -18px rgba(67, 101, 153, 0.52);
+}
+
+select option {
+  background: #fdfefe;
+  color: #213b63;
+}
+
+select option:checked,
+select option[selected] {
+  background: #eef4ff;
+  color: #17345e;
+  font-weight: 700;
 }
 
 textarea {
@@ -1328,6 +1378,8 @@ button:disabled {
 
 .table-toolbar select {
   min-width: 180px;
+  min-height: 48px;
+  border-radius: 18px;
 }
 
 table {
@@ -1377,6 +1429,7 @@ tr:last-child td {
   display: flex;
   flex-wrap: nowrap !important;
   align-items: center;
+  position: relative;
 }
 
 .action-btn-group .action-btn {
@@ -1467,6 +1520,86 @@ tr:last-child td {
 .action-reject:hover {
   background: #ffe8e8;
   border-color: #e9a6a6;
+}
+
+.action-view-lite {
+  background: #ffffff;
+  border-color: #bfd5ed;
+  color: #1d4f82;
+}
+
+.action-view-lite:hover {
+  background: #f6fbff;
+  border-color: #aac8ea;
+  color: #1d4f82;
+}
+
+.admin-approve-role-options {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.admin-approve-role-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.8rem;
+  min-height: 46px;
+  padding: 0.82rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(191, 213, 237, 0.95);
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbff 100%);
+  color: #1d4f82;
+  font-size: 0.94rem;
+  font-weight: 700;
+  text-align: left;
+  box-shadow: 10px 10px 20px 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.admin-approve-role-option:hover,
+.admin-approve-role-option:focus-visible {
+  border-color: rgba(118, 171, 224, 0.95);
+  background: linear-gradient(180deg, #f8fcff 0%, #edf6ff 100%);
+  color: #173f6f;
+}
+
+.admin-approve-role-option.is-active {
+  border-color: rgba(31, 171, 103, 0.95);
+  background: linear-gradient(180deg, #f5fff9 0%, #e9fff2 100%);
+  color: #12633c;
+  box-shadow: 0 0 0 1px rgba(31, 171, 103, 0.12);
+}
+
+.admin-approve-role-option input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.admin-approve-role-radio {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 2px solid #8eb5dd;
+  background: #ffffff;
+  position: relative;
+}
+
+.admin-approve-role-option.is-active .admin-approve-role-radio {
+  border-color: #1fab67;
+}
+
+.admin-approve-role-option.is-active .admin-approve-role-radio::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 999px;
+  background: #1fab67;
 }
 
 .action-page {
@@ -2404,6 +2537,62 @@ tr:last-child td {
 
 .admin-modal-body .row .modal-cancel-btn:only-child {
   margin-left: auto;
+}
+
+.admin-formateur-preview-card {
+  width: min(760px, calc(100vw - 1.2rem));
+}
+
+.admin-formateur-preview-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 2px 2px 14px;
+}
+
+.admin-formateur-preview-avatar {
+  width: 82px;
+  height: 82px;
+  flex: 0 0 82px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #d9e6f4;
+  background: linear-gradient(145deg, #ffffff 0%, #eef6ff 100%);
+  box-shadow: 0 12px 24px rgba(25, 52, 87, 0.12);
+}
+
+.admin-formateur-preview-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.admin-formateur-preview-main {
+  display: grid;
+  gap: 6px;
+  align-content: center;
+}
+
+.admin-formateur-preview-main h3 {
+  margin: 0;
+  color: #17365d;
+  font-size: 24px;
+}
+
+.admin-formateur-preview-main p {
+  margin: 0;
+  color: #68809b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.admin-formateur-preview-bio-card {
+  grid-column: 1 / -1;
+}
+
+.admin-formateur-preview-bio-card strong {
+  line-height: 1.4;
 }
 
 .admin-analytics-grid {
@@ -4589,6 +4778,8 @@ code {
 .auth-field input[type='date'],
 .auth-field select {
   background-color: rgba(255, 255, 255, 0.9);
+  background-position: 0 0, right 1rem center;
+  background-size: 100% 100%, 15px 15px;
 }
 
 .auth-field select option {
@@ -5599,7 +5790,7 @@ body.profile-glass-editing .student-v2-quick-grid {
       rgba(255, 255, 255, 0.74) 52%,
       rgba(250, 246, 239, 0.78) 100%
     ),
-    url('/images/inovice.jpg') center center / cover no-repeat;
+    url('/images/invoiceback.png') center center / cover no-repeat;
   box-shadow: 0 18px 28px -24px rgba(11, 45, 114, 0.44);
 }
 
@@ -5612,15 +5803,24 @@ body.profile-glass-editing .student-v2-quick-grid {
   margin-top: 0.2rem;
 }
 
-.student-v2-enrolled-controls {
+.student-v2-enrolled-controls,
+.student-v2-invoice-controls,
+.student-v2-achievement-controls,
+.student-v2-pending-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 220px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 220px;
   gap: 0.65rem;
   align-items: center;
 }
 
 .student-v2-enrolled-search,
-.student-v2-enrolled-filter {
+.student-v2-enrolled-filter,
+.student-v2-invoice-search,
+.student-v2-invoice-filter,
+.student-v2-achievement-search,
+.student-v2-achievement-filter,
+.student-v2-pending-search,
+.student-v2-pending-filter {
   height: 40px;
   border-radius: 10px;
   border: 1px solid rgba(11, 45, 114, 0.25);
@@ -5631,7 +5831,131 @@ body.profile-glass-editing .student-v2-quick-grid {
   font-weight: 600;
 }
 
-.student-v2-enrolled-search::placeholder {
+.student-v2-searchable-select {
+  position: relative;
+}
+
+.student-v2-searchable-toggle {
+  width: 100%;
+  height: 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 10px;
+  border: 1px solid rgba(11, 45, 114, 0.25);
+  background: rgba(255, 255, 255, 0.92);
+  color: #0b2d72;
+  padding: 0 0.75rem;
+  box-shadow: none;
+}
+
+.student-v2-searchable-toggle:hover,
+.student-v2-searchable-toggle:focus-visible,
+.student-v2-searchable-toggle:focus-within,
+.student-v2-searchable-select.is-open .student-v2-searchable-toggle {
+  background: rgba(255, 255, 255, 0.98);
+  color: #0b2d72;
+  box-shadow: none;
+}
+
+.student-v2-searchable-input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.student-v2-searchable-trigger {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  box-shadow: none;
+  min-width: auto;
+  width: 18px;
+  height: 18px;
+}
+
+.student-v2-searchable-trigger:hover,
+.student-v2-searchable-trigger:focus-visible {
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+  transform: none;
+}
+
+.student-v2-searchable-input::placeholder {
+  color: #5f7da3;
+}
+
+.student-v2-searchable-caret {
+  font-size: 0.95rem;
+  line-height: 1;
+  color: #2a4e82;
+}
+
+.student-v2-searchable-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: grid;
+  gap: 0;
+  border-radius: 16px;
+  border: 1px solid rgba(191, 213, 237, 0.95);
+  background: #ffffff;
+  box-shadow: 0 16px 28px -18px rgba(35, 64, 107, 0.35);
+  overflow: hidden;
+}
+
+.student-v2-searchable-option,
+.student-v2-searchable-empty {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.8rem 1rem;
+  border: 0;
+  border-top: 1px solid rgba(225, 235, 246, 0.95);
+  background: #ffffff;
+  color: #244671;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  box-shadow: none;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.student-v2-searchable-option:first-child,
+.student-v2-searchable-empty:first-child {
+  border-top: 0;
+}
+
+.student-v2-searchable-option:hover,
+.student-v2-searchable-option:focus-visible,
+.student-v2-searchable-option.is-active {
+  background: #eef2f7;
+  color: #1f3f69;
+}
+
+.student-v2-searchable-empty {
+  color: #6b84a5;
+}
+
+.student-v2-enrolled-search::placeholder,
+.student-v2-invoice-search::placeholder,
+.student-v2-achievement-search::placeholder,
+.student-v2-pending-search::placeholder {
   color: #5f7da3;
 }
 
@@ -5901,26 +6225,26 @@ body.profile-glass-editing .student-v2-quick-grid {
 }
 
 .student-v2-doc-link:hover {
-  background: #eef7ff;
+  background: red;
 }
 
 .student-v2-invoice-open-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   position: relative;
   overflow: hidden;
   isolation: isolate;
   border-radius: 10px;
-  padding: 0.48rem 0.72rem;
-  border: 1px solid #565f6b;
-  background: linear-gradient(135deg, #7c8591 0%, #414852 44%, #0f1319 100%);
+  padding: 0.52rem 0.84rem;
+  border: 1px solid rgba(122, 77, 210, 0.4);
+  background: linear-gradient(135deg, #3b0764 0%, #581c87 50%, #7e22ce 100%);
   color: #ffffff;
   font-weight: 700;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 10px 18px -14px rgba(0, 0, 0, 0.6);
+    0 12px 22px -16px rgba(98, 62, 176, 0.8);
   transition: box-shadow 180ms ease, border-color 180ms ease, filter 180ms ease, background 180ms ease;
 }
 
@@ -5929,36 +6253,40 @@ body.profile-glass-editing .student-v2-quick-grid {
   position: absolute;
   inset: 0 auto 0 -44%;
   width: 34%;
-  background: linear-gradient(
+    background: linear-gradient(
     110deg,
     rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.58) 50%,
+    rgba(255, 255, 255, 0.62) 50%,
     rgba(255, 255, 255, 0) 100%
   );
-  transform: skewX(-20deg);
+  transform: skewX(-18deg);
   pointer-events: none;
 }
 
-.student-v2-invoice-open-btn .student-v2-inline-icon {
-  color: #ffffff;
-  width: 15px;
-  height: 15px;
+.student-v2-invoice-btn-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 16px;
 }
 
-.student-v2-invoice-open-btn .student-v2-inline-icon svg {
-  width: 15px;
-  height: 15px;
-  fill: currentColor;
-  stroke: none;
+.student-v2-invoice-btn-icon img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
+  filter: brightness(0) invert(1);
 }
 
 .student-v2-invoice-open-btn:hover {
-  background: linear-gradient(135deg, #8a93a0 0%, #4a525e 40%, #141922 100%);
-  border-color: #626b77;
+  background: linear-gradient(135deg, #3b0764 0%, #581c87 50%, #7e22ce 100%);
+  border-color: rgba(136, 93, 226, 0.55);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.25),
-    0 12px 20px -14px rgba(0, 0, 0, 0.68),
-    0 0 14px rgba(255, 255, 255, 0.2);
+    0 14px 24px -16px rgba(102, 67, 180, 0.9),
+    0 0 18px rgba(173, 132, 255, 0.22);
 }
 
 .student-v2-invoice-open-btn:hover::after {
@@ -6023,6 +6351,10 @@ body.profile-glass-editing .student-v2-quick-grid {
   gap: 0.72rem;
 }
 
+.student-v2-achievement-grid.student-v2-achievement-grid-paged {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .student-v2-achievement-card {
   border: 1px solid rgba(138, 111, 70, 0.24);
   border-radius: 16px;
@@ -6033,7 +6365,7 @@ body.profile-glass-editing .student-v2-quick-grid {
       rgba(255, 255, 255, 0.34) 56%,
       rgba(252, 246, 236, 0.4) 100%
     ),
-    url('/images/ai.png') center center / cover no-repeat;
+    url('/images/invoiceback.png') center center / cover no-repeat;
   padding: 0.85rem;
   display: grid;
   gap: 0.62rem;
@@ -6103,6 +6435,11 @@ body.profile-glass-editing .student-v2-quick-grid {
 }
 
 .student-v2-doc-link-cert {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   border-radius: 8px;
   padding: 0.48rem 0.92rem;
   background:
@@ -6287,8 +6624,8 @@ body.profile-glass-editing .student-v2-quick-grid {
 
 .student-v2-invoice-card {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.88) 0%, rgba(241, 248, 255, 0.4) 100%),
-    url('/images/inovice.jpg');
+    linear-gradient(145deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.08) 100%),
+    url('/images/invoiceback.png') center center / cover no-repeat;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -6345,6 +6682,10 @@ body.profile-glass-editing .student-v2-quick-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 0.72rem;
+}
+
+.student-v2-pending-grid.student-v2-pending-grid-paged {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 button:disabled,
@@ -6642,11 +6983,19 @@ body.backoffice-palette-active .formation-manage-stack button.content-delete-btn
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .student-v2-achievement-grid.student-v2-achievement-grid-paged,
+  .student-v2-pending-grid.student-v2-pending-grid-paged {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .student-v2-course-grid.student-v2-course-grid-paged {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .student-v2-enrolled-controls {
+  .student-v2-enrolled-controls,
+  .student-v2-invoice-controls,
+  .student-v2-achievement-controls,
+  .student-v2-pending-controls {
     grid-template-columns: 1fr;
   }
 }
@@ -6690,7 +7039,9 @@ body.backoffice-palette-active .formation-manage-stack button.content-delete-btn
   }
 
   .student-v2-quick-grid,
-  .student-v2-invoice-grid {
+  .student-v2-invoice-grid,
+  .student-v2-achievement-grid.student-v2-achievement-grid-paged,
+  .student-v2-pending-grid.student-v2-pending-grid-paged {
     grid-template-columns: 1fr;
   }
 
@@ -7657,6 +8008,100 @@ body.backoffice-palette-active .admin-skin-page .action-btn.action-approve:not(:
   border: 2px solid #16814f !important;
 }
 
+body .admin-skin-page .action-btn.action-approve-as:not(:disabled),
+body.backoffice-palette-active .admin-skin-page .action-btn.action-approve-as:not(:disabled) {
+  background: linear-gradient(140deg, #34c96c 0%, #1ea85a 100%) !important;
+  background-image: linear-gradient(140deg, #34c96c 0%, #1ea85a 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #1c9b56 !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+    0 2px 0 #17884a,
+    0 10px 16px -14px rgba(36, 131, 74, 0.42) !important;
+}
+
+body .student-v2 .student-v2-searchable-trigger,
+body.backoffice-palette-active .student-v2 .student-v2-searchable-trigger,
+body .student-v2 .student-v2-searchable-option,
+body.backoffice-palette-active .student-v2 .student-v2-searchable-option {
+  background-image: none !important;
+}
+
+body .student-v2 .student-v2-searchable-trigger::before,
+body .student-v2 .student-v2-searchable-trigger::after,
+body.backoffice-palette-active .student-v2 .student-v2-searchable-trigger::before,
+body.backoffice-palette-active .student-v2 .student-v2-searchable-trigger::after,
+body .student-v2 .student-v2-searchable-option::before,
+body .student-v2 .student-v2-searchable-option::after,
+body.backoffice-palette-active .student-v2 .student-v2-searchable-option::before,
+body.backoffice-palette-active .student-v2 .student-v2-searchable-option::after {
+  display: none !important;
+  content: none !important;
+}
+
+body .student-v2 .student-v2-searchable-trigger:not(:disabled),
+body.backoffice-palette-active .student-v2 .student-v2-searchable-trigger:not(:disabled) {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  min-width: auto !important;
+  width: 18px !important;
+  height: 18px !important;
+  padding: 0 !important;
+}
+
+body .student-v2 .student-v2-searchable-trigger:hover:not(:disabled),
+body .student-v2 .student-v2-searchable-trigger:focus-visible:not(:disabled),
+body.backoffice-palette-active .student-v2 .student-v2-searchable-trigger:hover:not(:disabled),
+body.backoffice-palette-active .student-v2 .student-v2-searchable-trigger:focus-visible:not(:disabled) {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  transform: none !important;
+}
+
+body .student-v2 .student-v2-searchable-input,
+body.backoffice-palette-active .student-v2 .student-v2-searchable-input,
+body .student-v2 .student-v2-searchable-input:hover,
+body .student-v2 .student-v2-searchable-input:focus,
+body .student-v2 .student-v2-searchable-input:focus-visible,
+body.backoffice-palette-active .student-v2 .student-v2-searchable-input:hover,
+body.backoffice-palette-active .student-v2 .student-v2-searchable-input:focus,
+body.backoffice-palette-active .student-v2 .student-v2-searchable-input:focus-visible {
+  background: transparent !important;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+body .student-v2 .student-v2-searchable-option:not(:disabled),
+body.backoffice-palette-active .student-v2 .student-v2-searchable-option:not(:disabled) {
+  background: #ffffff !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(225, 235, 246, 0.95) !important;
+  box-shadow: none !important;
+  color: #244671 !important;
+  border-radius: 0 !important;
+}
+
+body .student-v2 .student-v2-searchable-option:hover:not(:disabled),
+body .student-v2 .student-v2-searchable-option:focus-visible:not(:disabled),
+body.backoffice-palette-active .student-v2 .student-v2-searchable-option:hover:not(:disabled),
+body.backoffice-palette-active .student-v2 .student-v2-searchable-option:focus-visible:not(:disabled),
+body .student-v2 .student-v2-searchable-option.is-active:not(:disabled),
+body.backoffice-palette-active .student-v2 .student-v2-searchable-option.is-active:not(:disabled) {
+  background: #eef2f7 !important;
+  color: #1f3f69 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  animation: none !important;
+  transition: background-color 160ms ease, color 160ms ease !important;
+  transform: none !important;
+}
+
 body .admin-skin-page .action-btn.action-analytics:not(:disabled),
 body.backoffice-palette-active .admin-skin-page .action-btn.action-analytics:not(:disabled) {
   background: linear-gradient(135deg, #1b5fb8 0%, #2e86d7 48%, #58b8ef 100%) !important;
@@ -7684,10 +8129,12 @@ body.backoffice-palette-active .admin-skin-page .action-btn.action-analytics:foc
 /* Keep Details/Edit/View Analytics same size in action columns */
 body .admin-skin-page .action-btn-group > .action-btn.action-page,
 body .admin-skin-page .action-btn-group > .action-btn.action-approve,
+body .admin-skin-page .action-btn-group > .action-btn.action-approve-as,
 body .admin-skin-page .action-btn-group > .action-btn.action-analytics,
 body .admin-skin-page .action-btn-group > .action-btn.action-suspend,
 body.backoffice-palette-active .admin-skin-page .action-btn-group > .action-btn.action-page,
 body.backoffice-palette-active .admin-skin-page .action-btn-group > .action-btn.action-approve,
+body.backoffice-palette-active .admin-skin-page .action-btn-group > .action-btn.action-approve-as,
 body.backoffice-palette-active .admin-skin-page .action-btn-group > .action-btn.action-analytics,
 body.backoffice-palette-active .admin-skin-page .action-btn-group > .action-btn.action-suspend {
   width: 108px !important;
@@ -7696,6 +8143,38 @@ body.backoffice-palette-active .admin-skin-page .action-btn-group > .action-btn.
   height: 32px !important;
   min-height: 32px !important;
   justify-content: center !important;
+}
+
+body .admin-skin-page .action-btn-group > .action-btn.admin-circular-delete-btn,
+body.backoffice-palette-active .admin-skin-page .action-btn-group > .action-btn.admin-circular-delete-btn {
+  width: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+body .admin-skin-page .action-btn.admin-circular-delete-btn::before,
+body .admin-skin-page .action-btn.admin-circular-delete-btn::after,
+body.backoffice-palette-active .admin-skin-page .action-btn.admin-circular-delete-btn::before,
+body.backoffice-palette-active .admin-skin-page .action-btn.admin-circular-delete-btn::after {
+  display: none !important;
+  content: none !important;
+}
+
+.admin-circular-delete-icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.3);
 }
 
 /* Admin action rows: slightly more spacing between buttons */
@@ -8393,7 +8872,7 @@ body.backoffice-palette-active .container .admin-saas-quick-actions .link-btn:fo
 .admin-saas-page .table-toolbar select {
   min-height: 42px;
   height: 42px;
-  border-radius: 10px;
+  border-radius: 18px;
   border: 1px solid #d7e4f2;
   background: #ffffff;
 }
@@ -9237,4 +9716,6 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .pendin
   border-color: #bf3333 !important;
   color: #ffffff !important;
 }
+
+
 

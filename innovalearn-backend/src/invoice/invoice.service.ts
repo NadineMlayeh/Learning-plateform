@@ -60,7 +60,7 @@ export class InvoiceService {
     const doc = new PDFDocument({ size: 'A4', margin: 0 });
     const issueDate = new Date();
     const amount = Number(enrollment.formation.price);
-    const amountFormatted = `${amount.toFixed(2)} EUR`;
+    const amountFormatted = `${amount.toFixed(2)} TND`;
 
     doc.rect(0, 0, doc.page.width, doc.page.height).fill('#f7faff');
 
@@ -113,13 +113,11 @@ export class InvoiceService {
       .fillColor('#264d77')
       .fontSize(10.5)
       .text(`Student: ${enrollment.student.name}`, 58, 188)
-      .text(`Email: ${enrollment.student.email}`, 58, 205)
-      .text(`Student ID: ${enrollment.student.id}`, 58, 222);
+      .text(`Email: ${enrollment.student.email}`, 58, 205);
 
     doc
       .text(`Formation: ${enrollment.formation.title}`, 318, 188)
-      .text(`Type: ${enrollment.formation.type}`, 318, 205)
-      .text(`Enrollment ID: ${enrollment.id}`, 318, 222);
+      .text(`Type: ${enrollment.formation.type}`, 318, 205);
 
     doc.roundedRect(44, 290, 508, 34, 8).fill('#0f62b2');
 
@@ -137,7 +135,7 @@ export class InvoiceService {
       .font('Helvetica')
       .fillColor('#1c4f83')
       .fontSize(10.5)
-      .text(`Enrollment fee - ${enrollment.formation.title}`, 58, 345)
+      .text('Enrollment fee', 58, 345)
       .text(amountFormatted, 398, 345, { width: 80, align: 'right' })
       .text(amountFormatted, 480, 345, { width: 58, align: 'right' });
 
@@ -150,7 +148,7 @@ export class InvoiceService {
       .text('Subtotal', 346, 424)
       .text(amountFormatted, 458, 424, { width: 80, align: 'right' })
       .text('Tax', 346, 444)
-      .text('0.00 EUR', 458, 444, { width: 80, align: 'right' });
+      .text('0.00 TND', 458, 444, { width: 80, align: 'right' });
 
     doc
       .moveTo(344, 463)
