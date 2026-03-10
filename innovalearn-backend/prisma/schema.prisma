@@ -56,6 +56,7 @@ model Formation {
   title       String
   description String
   price       Float
+  profileImageUrl String?
   published   Boolean       @default(false)
   publishedAt DateTime?
   type        FormationType

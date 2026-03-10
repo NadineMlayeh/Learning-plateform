@@ -31,4 +31,8 @@ export class CreateFormationDto {
   @IsOptional()
   @IsDateString()
   endDate?: string;
+
+  @IsOptional()
+  @IsString()
+  profileImageUrl?: string;
 }

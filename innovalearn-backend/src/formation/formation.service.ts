@@ -37,6 +37,7 @@ export class FormationService {
         endDate: dto.endDate ? new Date(dto.endDate) : undefined,
         formateurId,
         published: false,
+        profileImageUrl: dto.profileImageUrl || null,
       },
     });
   }
@@ -48,6 +49,9 @@ export class FormationService {
       include: {
         formateur: {
           select: { id: true, name: true, email: true },
+        },
+        _count: {
+          select: { courses: true },
         },
       },
     });
@@ -326,6 +330,7 @@ export class FormationService {
       select: {
         id: true,
         published: true,
+        type: true,
       },
     });
 
@@ -345,6 +350,10 @@ export class FormationService {
       title?: string;
       description?: string;
       price?: number;
+      profileImageUrl?: string | null;
+      location?: string | null;
+      startDate?: Date | null;
+      endDate?: Date | null;
     } = {};
 
     if (dto.title !== undefined) {
@@ -373,6 +382,49 @@ export class FormationService {
       data.price = nextPrice;
     }
 
+    if (dto.profileImageUrl !== undefined) {
+      const nextImage = String(dto.profileImageUrl || '').trim();
+      data.profileImageUrl = nextImage || null;
+    }
+
+    if (dto.location !== undefined) {
+      const nextLocation = String(dto.location || '').trim();
+      data.location = nextLocation || null;
+    }
+
+    if (
+      (dto.startDate !== undefined || dto.endDate !== undefined || dto.location !== undefined) &&
+      formation.type !== 'PRESENTIEL'
+    ) {
+      throw new BadRequestException(
+        'Only presentiel formations can update location or dates',
+      );
+    }
+
+    if (dto.startDate !== undefined) {
+      if (!dto.startDate) {
+        data.startDate = null;
+      } else {
+        const parsed = new Date(dto.startDate);
+        if (Number.isNaN(parsed.getTime())) {
+          throw new BadRequestException('Start date is invalid');
+        }
+        data.startDate = parsed;
+      }
+    }
+
+    if (dto.endDate !== undefined) {
+      if (!dto.endDate) {
+        data.endDate = null;
+      } else {
+        const parsed = new Date(dto.endDate);
+        if (Number.isNaN(parsed.getTime())) {
+          throw new BadRequestException('End date is invalid');
+        }
+        data.endDate = parsed;
+      }
+    }
+
     if (!Object.keys(data).length) {
       throw new BadRequestException(
         'At least one field is required (title, description, price)',
@@ -392,6 +444,7 @@ export class FormationService {
         location: true,
         startDate: true,
         endDate: true,
+        profileImageUrl: true,
       },
     });
   }

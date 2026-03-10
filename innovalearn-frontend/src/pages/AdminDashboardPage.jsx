@@ -16,6 +16,7 @@ const INITIAL_FORMATION_FORM = {
   location: '',
   startDate: '',
   endDate: '',
+  profileImageUrl: '',
 };
 
 function readPublishedAtFallbackMap() {
@@ -116,6 +117,9 @@ export default function AdminDashboardPage({ pushToast }) {
     INITIAL_FORMATION_FORM,
   );
   const [creatingFormation, setCreatingFormation] = useState(false);
+  const [createFormationThumbUploading, setCreateFormationThumbUploading] =
+    useState(false);
+  const [createFormationThumbName, setCreateFormationThumbName] = useState('');
 
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
@@ -338,6 +342,7 @@ export default function AdminDashboardPage({ pushToast }) {
 
   function openCreateFormationModal() {
     setCreateFormationForm(INITIAL_FORMATION_FORM);
+    setCreateFormationThumbName('');
     setIsCreateFormationModalOpen(true);
   }
 
@@ -353,6 +358,7 @@ export default function AdminDashboardPage({ pushToast }) {
         return {
           ...prev,
           type: value,
+          location: value === 'PRESENTIEL' ? prev.location : '',
           startDate: value === 'PRESENTIEL' ? prev.startDate : '',
           endDate: value === 'PRESENTIEL' ? prev.endDate : '',
         };
@@ -360,6 +366,30 @@ export default function AdminDashboardPage({ pushToast }) {
 
       return { ...prev, [name]: value };
     });
+  }
+
+  async function handleCreateFormationThumbnail(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setCreateFormationThumbUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const data = await apiRequest('/formations/thumbnail', {
+        method: 'POST',
+        token: user.token,
+        body: formData,
+      });
+      const url = data?.url || '';
+      setCreateFormationForm((prev) => ({ ...prev, profileImageUrl: url }));
+      setCreateFormationThumbName(file.name || 'thumbnail');
+      pushToast('Thumbnail uploaded.', 'success');
+    } catch (err) {
+      pushToast(err.message, 'error');
+    } finally {
+      setCreateFormationThumbUploading(false);
+      event.target.value = '';
+    }
   }
 
   async function createFormation(event) {
@@ -374,6 +404,9 @@ export default function AdminDashboardPage({ pushToast }) {
         type: createFormationForm.type,
       };
 
+      if (createFormationForm.profileImageUrl) {
+        payload.profileImageUrl = createFormationForm.profileImageUrl;
+      }
       if (createFormationForm.location) payload.location = createFormationForm.location;
       if (createFormationForm.type === 'PRESENTIEL') {
         if (createFormationForm.startDate) payload.startDate = createFormationForm.startDate;
@@ -390,6 +423,7 @@ export default function AdminDashboardPage({ pushToast }) {
       await loadAnalytics();
       setPendingPage(1);
       closeCreateFormationModal(true);
+      setCreateFormationThumbName('');
       pushToast('Formation created.', 'success');
     } catch (err) {
       pushToast(err.message, 'error');
@@ -950,6 +984,32 @@ export default function AdminDashboardPage({ pushToast }) {
             <div className="admin-modal-body">
               <form className="grid" onSubmit={createFormation}>
                 <input
+                  id="create-formation-thumb"
+                  className="formation-thumb-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCreateFormationThumbnail}
+                  disabled={creatingFormation || createFormationThumbUploading}
+                />
+                <label
+                  htmlFor="create-formation-thumb"
+                  className="formation-thumb-link"
+                >
+                  <img src="/images/gallery.png" alt="" />
+                  <span>
+                    {createFormationThumbUploading
+                      ? 'Uploading thumbnail...'
+                      : createFormationForm.profileImageUrl
+                      ? 'Change Thumbnail Photo'
+                      : 'Add Thumbnail Photo'}
+                  </span>
+                </label>
+                {createFormationThumbName ? (
+                  <p className="hint formation-thumb-name">
+                    {createFormationThumbName}
+                  </p>
+                ) : null}
+                <input
                   name="title"
                   value={createFormationForm.title}
                   onChange={updateCreateFormationField}
@@ -980,14 +1040,14 @@ export default function AdminDashboardPage({ pushToast }) {
                   <option value="ONLINE">ONLINE</option>
                   <option value="PRESENTIEL">PRESENTIEL</option>
                 </select>
-                <input
-                  name="location"
-                  value={createFormationForm.location}
-                  onChange={updateCreateFormationField}
-                  placeholder="Location (optional)"
-                />
                 {createFormationForm.type === 'PRESENTIEL' && (
                   <>
+                    <input
+                      name="location"
+                      value={createFormationForm.location}
+                      onChange={updateCreateFormationField}
+                      placeholder="Location (optional)"
+                    />
                     <input
                       name="startDate"
                       type="date"

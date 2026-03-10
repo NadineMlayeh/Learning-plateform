@@ -228,6 +228,12 @@ function thumbnailFor(itemId) {
   return COURSE_THUMBNAILS[safe % COURSE_THUMBNAILS.length];
 }
 
+function formationThumbnailFor(formation, fallbackId) {
+  const url = formation?.profileImageUrl;
+  if (url) return resolveApiAssetUrl(url);
+  return thumbnailFor(fallbackId);
+}
+
 function shortText(value, max = 120) {
   const text = String(value || '').trim();
   if (!text) return '';
@@ -835,7 +841,10 @@ export default function StudentPage({ pushToast }) {
                     <article key={entry.id} className="student-v2-course-card">
                       <div className="student-v2-course-thumb">
                         <img
-                          src={thumbnailFor(formation?.id || entry.formationId)}
+                          src={formationThumbnailFor(
+                            formation,
+                            formation?.id || entry.formationId,
+                          )}
                           alt={formation?.title || 'Course'}
                         />
                       </div>
@@ -991,7 +1000,10 @@ export default function StudentPage({ pushToast }) {
 		              {discoverPageRows.map((formation) => (
 	                <article key={formation.id} className="student-v2-course-card">
                   <div className="student-v2-course-thumb">
-                    <img src={thumbnailFor(formation.id)} alt={formation.title} />
+                    <img
+                      src={formationThumbnailFor(formation, formation.id)}
+                      alt={formation.title}
+                    />
                   </div>
                   <div className="student-v2-course-body">
                     <div className="student-v2-course-head">
@@ -1025,12 +1037,16 @@ export default function StudentPage({ pushToast }) {
 	                        <span className="student-v2-inline-icon">
 	                          <IconSpark />
 	                        </span>
-	                        <span>
-	                          Courses:{' '}
-	                          {Array.isArray(formation.courses)
-	                            ? formation.courses.length
-	                            : Number(formation.courseCount || 0)}
-	                        </span>
+                        <span>
+                          Courses:{' '}
+                          {Array.isArray(formation.courses)
+                            ? formation.courses.length
+                            : Number(
+                                formation._count?.courses ??
+                                  formation.courseCount ??
+                                  0,
+                              )}
+                        </span>
 		                      </div>
 		                    )}
 
@@ -1390,7 +1406,10 @@ export default function StudentPage({ pushToast }) {
                   <article key={entry.id} className="student-v2-pending-card">
                     <div className="student-v2-pending-thumb">
                       <img
-                        src={thumbnailFor(entry.formation?.id || entry.formationId)}
+                        src={formationThumbnailFor(
+                          entry.formation,
+                          entry.formation?.id || entry.formationId,
+                        )}
                         alt={entry.formation?.title || 'Pending formation'}
                       />
                     </div>

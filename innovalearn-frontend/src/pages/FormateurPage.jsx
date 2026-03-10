@@ -10,12 +10,15 @@ const initialFormation = {
   location: '',
   startDate: '',
   endDate: '',
+  profileImageUrl: '',
 };
 
 export default function FormateurPage() {
   const user = getCurrentUser();
   const [log, setLog] = useState('No action yet.');
   const [formation, setFormation] = useState(initialFormation);
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const [thumbnailName, setThumbnailName] = useState('');
   const [formationIdForCourse, setFormationIdForCourse] = useState('');
   const [courseTitle, setCourseTitle] = useState('');
   const [courseIdForLesson, setCourseIdForLesson] = useState('');
@@ -33,6 +36,30 @@ export default function FormateurPage() {
     setLog(`${title}\n${JSON.stringify(payload, null, 2)}`);
   }
 
+  async function handleThumbnailChange(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setThumbnailUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const data = await apiRequest('/formations/thumbnail', {
+        method: 'POST',
+        token: user.token,
+        body: formData,
+      });
+      const url = data?.url || '';
+      setFormation((prev) => ({ ...prev, profileImageUrl: url }));
+      setThumbnailName(file.name || 'thumbnail');
+      setApiLog('Thumbnail uploaded', data);
+    } catch (err) {
+      setApiLog('Thumbnail upload failed', { message: err.message });
+    } finally {
+      setThumbnailUploading(false);
+      event.target.value = '';
+    }
+  }
+
   async function createFormation(event) {
     event.preventDefault();
     try {
@@ -41,6 +68,7 @@ export default function FormateurPage() {
         price: Number(formation.price),
       };
 
+      if (!payload.profileImageUrl) delete payload.profileImageUrl;
       if (!payload.location) delete payload.location;
       if (payload.type !== 'PRESENTIEL') {
         delete payload.startDate;
@@ -59,6 +87,7 @@ export default function FormateurPage() {
       setFormationIdForCourse(String(data.id));
       setFormationIdForPublish(String(data.id));
       setFormation(initialFormation);
+      setThumbnailName('');
     } catch (err) {
       setApiLog('Create formation failed', { message: err.message });
     }
@@ -181,6 +210,26 @@ export default function FormateurPage() {
 
       <form className="card grid" onSubmit={createFormation}>
         <h2>Create Formation</h2>
+        <input
+          id="formation-thumb-input"
+          className="formation-thumb-input"
+          type="file"
+          accept="image/*"
+          onChange={handleThumbnailChange}
+        />
+        <label htmlFor="formation-thumb-input" className="formation-thumb-link">
+          <img src="/images/gallery.png" alt="" />
+          <span>
+            {thumbnailUploading
+              ? 'Uploading thumbnail...'
+              : formation.profileImageUrl
+              ? 'Change Thumbnail Photo'
+              : 'Add Thumbnail Photo'}
+          </span>
+        </label>
+        {thumbnailName ? (
+          <p className="hint formation-thumb-name">{thumbnailName}</p>
+        ) : null}
         <input placeholder="Title" value={formation.title} onChange={(e) => setFormation({ ...formation, title: e.target.value })} required />
         <textarea placeholder="Description" value={formation.description} onChange={(e) => setFormation({ ...formation, description: e.target.value })} required />
         <input type="number" placeholder="Price" value={formation.price} onChange={(e) => setFormation({ ...formation, price: e.target.value })} required />
@@ -253,7 +302,7 @@ export default function FormateurPage() {
         <input placeholder="Formation ID" value={formationIdForPublish} onChange={(e) => setFormationIdForPublish(e.target.value)} required />
         <button type="submit" className="action-publish">
           <img src="/images/send.png" alt="" className="btn-inline-icon" />
-          Publish formation
+          Publish 
         </button>
       </form>
 

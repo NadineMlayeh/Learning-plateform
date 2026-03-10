@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { apiRequest } from '../api';
+import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
 import StatusBadge from '../components/StatusBadge';
 import LoadingButton from '../components/LoadingButton';
@@ -51,6 +51,20 @@ function toDateOnlyLabel(value) {
   }
 }
 
+function toDateInputValue(value) {
+  if (!value) return '';
+  try {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  } catch {
+    return '';
+  }
+}
+
 export default function AdminFormationPage({ pushToast }) {
   const user = getCurrentUser();
   const navigate = useNavigate();
@@ -81,6 +95,8 @@ export default function AdminFormationPage({ pushToast }) {
   const [editingFormationField, setEditingFormationField] = useState(null);
   const [formationFieldValue, setFormationFieldValue] = useState('');
   const [savingFormationField, setSavingFormationField] = useState(false);
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const [thumbnailName, setThumbnailName] = useState('');
   const [addingLessonCourseId, setAddingLessonCourseId] = useState(null);
   const [newLessonForm, setNewLessonForm] = useState({
     title: '',
@@ -212,6 +228,9 @@ export default function AdminFormationPage({ pushToast }) {
       title: formation.title || '',
       description: formation.description || '',
       price: String(formation.price ?? ''),
+      location: formation.location || '',
+      startDate: toDateInputValue(formation.startDate),
+      endDate: toDateInputValue(formation.endDate),
     };
 
     setEditingFormationField(field);
@@ -224,12 +243,54 @@ export default function AdminFormationPage({ pushToast }) {
     setFormationFieldValue('');
   }
 
+  async function handleFormationThumbnailChange(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setThumbnailUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const upload = await apiRequest('/formations/thumbnail', {
+        method: 'POST',
+        token: user.token,
+        body: formData,
+      });
+      const url = upload?.url || '';
+      if (!url) {
+        throw new Error('Thumbnail upload failed');
+      }
+
+      const updated = await apiRequest(`/formations/${formation.id}`, {
+        method: 'PATCH',
+        token: user.token,
+        body: { profileImageUrl: url },
+      });
+
+      setFormation((prev) => ({ ...prev, ...updated, profileImageUrl: url }));
+      setThumbnailName(file.name || 'thumbnail');
+      pushToast('Thumbnail updated.', 'success');
+    } catch (err) {
+      pushToast(err.message, 'error');
+    } finally {
+      setThumbnailUploading(false);
+      event.target.value = '';
+    }
+  }
+
   async function saveFormationField(event) {
     event.preventDefault();
     if (!editingFormationField) return;
 
     const nextRaw = String(formationFieldValue || '').trim();
-    if (!nextRaw) {
+    const isDateField =
+      editingFormationField === 'startDate' ||
+      editingFormationField === 'endDate';
+
+    if (
+      (editingFormationField === 'title' ||
+        editingFormationField === 'description') &&
+      !nextRaw
+    ) {
       pushToast('This field cannot be empty.', 'error');
       return;
     }
@@ -242,6 +303,10 @@ export default function AdminFormationPage({ pushToast }) {
         return;
       }
       payload = { price: parsed };
+    } else if (isDateField) {
+      payload = { [editingFormationField]: nextRaw || null };
+    } else if (editingFormationField === 'location') {
+      payload = { location: nextRaw || null };
     } else {
       payload = { [editingFormationField]: nextRaw };
     }
@@ -727,6 +792,48 @@ export default function AdminFormationPage({ pushToast }) {
     <section className="stack formation-manage-stack admin-skin-page">
       <div className="card panel-head">
         <div className="formation-meta-stack">
+          <div className="formation-thumb-block">
+            <div className="formation-thumb-image">
+              {formation.profileImageUrl ? (
+                <img
+                  src={resolveApiAssetUrl(formation.profileImageUrl)}
+                  alt={formation.title}
+                />
+              ) : (
+                <div className="formation-thumb-placeholder">
+                  <img src="/images/gallery.png" alt="" />
+                </div>
+              )}
+            </div>
+            {!formation.published && (
+              <>
+                <input
+                  id="formation-thumb-input"
+                  className="formation-thumb-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFormationThumbnailChange}
+                  disabled={thumbnailUploading}
+                />
+                <label
+                  htmlFor="formation-thumb-input"
+                  className="formation-thumb-link formation-thumb-link-compact"
+                >
+                  <img src="/images/gallery.png" alt="" />
+                  <span>
+                    {thumbnailUploading
+                      ? 'Uploading thumbnail...'
+                      : formation.profileImageUrl
+                      ? 'Change Thumbnail Photo'
+                      : 'Add Thumbnail Photo'}
+                  </span>
+                </label>
+                {thumbnailName ? (
+                  <p className="hint formation-thumb-name">{thumbnailName}</p>
+                ) : null}
+              </>
+            )}
+          </div>
           <h1 className="formation-meta-line formation-meta-line-title">
             <span title={formation.title}>{formation.title}</span>
             {!formation.published && (
@@ -770,12 +877,44 @@ export default function AdminFormationPage({ pushToast }) {
             <>
               <p className="hint formation-meta-line">
                 <span>Location: {formation.location || '-'}</span>
+                {!formation.published && (
+                  <button
+                    type="button"
+                    className="formation-edit-icon-btn"
+                    onClick={() => openFormationFieldEditor('location')}
+                    aria-label="Edit formation location"
+                  >
+                    <span aria-hidden="true">{'\u270E'}</span>
+                  </button>
+                )}
               </p>
               <p className="hint formation-meta-line">
                 <span>
-                  Dates: {toDateOnlyLabel(formation.startDate)} -{' '}
-                  {toDateOnlyLabel(formation.endDate)}
+                  Start: {toDateOnlyLabel(formation.startDate)}
                 </span>
+                {!formation.published && (
+                  <button
+                    type="button"
+                    className="formation-edit-icon-btn"
+                    onClick={() => openFormationFieldEditor('startDate')}
+                    aria-label="Edit formation start date"
+                  >
+                    <span aria-hidden="true">{'\u270E'}</span>
+                  </button>
+                )}
+              </p>
+              <p className="hint formation-meta-line">
+                <span>End: {toDateOnlyLabel(formation.endDate)}</span>
+                {!formation.published && (
+                  <button
+                    type="button"
+                    className="formation-edit-icon-btn"
+                    onClick={() => openFormationFieldEditor('endDate')}
+                    aria-label="Edit formation end date"
+                  >
+                    <span aria-hidden="true">{'\u270E'}</span>
+                  </button>
+                )}
               </p>
             </>
           )}
@@ -832,7 +971,15 @@ export default function AdminFormationPage({ pushToast }) {
                   ? 'Title'
                   : editingFormationField === 'description'
                     ? 'Description'
-                    : 'Price'}
+                    : editingFormationField === 'price'
+                      ? 'Price'
+                      : editingFormationField === 'location'
+                        ? 'Location'
+                        : editingFormationField === 'startDate'
+                          ? 'Start Date'
+                          : editingFormationField === 'endDate'
+                            ? 'End Date'
+                            : 'Field'}
               </h2>
               <button
                 type="button"
@@ -856,7 +1003,14 @@ export default function AdminFormationPage({ pushToast }) {
                   />
                 ) : (
                   <input
-                    type={editingFormationField === 'price' ? 'number' : 'text'}
+                    type={
+                      editingFormationField === 'price'
+                        ? 'number'
+                        : editingFormationField === 'startDate' ||
+                            editingFormationField === 'endDate'
+                          ? 'date'
+                          : 'text'
+                    }
                     min={editingFormationField === 'price' ? '0' : undefined}
                     step={editingFormationField === 'price' ? '0.01' : undefined}
                     value={formationFieldValue}
