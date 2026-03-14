@@ -113,7 +113,7 @@ export default function SignupPage() {
             />
           </label>
 
-          <label className="auth-field auth-select-field">
+          <label className="auth-field">
             <span className="auth-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
                 <path d="M12 3l8 4-8 4-8-4 8-4z" />

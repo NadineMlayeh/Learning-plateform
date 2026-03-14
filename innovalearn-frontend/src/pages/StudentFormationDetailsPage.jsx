@@ -159,6 +159,9 @@ export default function StudentFormationDetailsPage({ pushToast }) {
   const [formation, setFormation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeCourseIndex, setActiveCourseIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState('lessons');
+  const [activeLessonIdByCourse, setActiveLessonIdByCourse] = useState({});
+  const [lessonViewByCourse, setLessonViewByCourse] = useState({});
   const [showQuizzesByCourse, setShowQuizzesByCourse] = useState({});
   const [quizIndexByCourse, setQuizIndexByCourse] = useState({});
   const [selectedChoiceByQuestion, setSelectedChoiceByQuestion] = useState({});
@@ -178,6 +181,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
       });
       setFormation(data);
       setActiveCourseIndex(0);
+      setActiveTab('lessons');
 
       const initialLocks = {};
       const initialCourseResults = {};
@@ -465,6 +469,27 @@ export default function StudentFormationDetailsPage({ pushToast }) {
     loadDetails();
   }, [formationId]);
 
+  useEffect(() => {
+    if (!formation?.courses?.length) return;
+    const safeCourseIndex = Math.min(
+      activeCourseIndex,
+      formation.courses.length - 1,
+    );
+    const course = formation.courses[safeCourseIndex];
+    if (!course) return;
+
+    if (activeTab === 'quizzes') {
+      if (!showQuizzesByCourse[course.id] && course.quizzes.length > 0) {
+        toggleQuizzes(course, false);
+      }
+    } else if (showQuizzesByCourse[course.id]) {
+      setShowQuizzesByCourse((prev) => ({
+        ...prev,
+        [course.id]: false,
+      }));
+    }
+  }, [activeTab, activeCourseIndex, formation, showQuizzesByCourse]);
+
   if (isLoading || !formation) {
     return (
       <section className="card">
@@ -475,201 +500,285 @@ export default function StudentFormationDetailsPage({ pushToast }) {
 
   return (
     <section className="stack student-details-page">
-      <div className="card student-details-hero">
-        <div className="card-head-row">
-          <h1>{formation.title}</h1>
-          <StatusBadge
-            label={
-              formationResult
-                ? formationResult.completed
-                  ? 'Completed (Success)'
-                  : 'Completed (Fail)'
-                : 'In progress'
-            }
-            tone={
-              formationResult
-                ? formationResult.completed
-                  ? 'green'
-                  : 'red'
-                : 'orange'
-            }
-          />
-        </div>
-        <p>{formation.description}</p>
-        <p className="hint">Price: {formation.price}</p>
-        {formationResult?.certificateUrl && (
-          <a
-            className="student-doc-link"
-            href={resolveApiAssetUrl(formationResult.certificateUrl)}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Download Final Certificate
-          </a>
-        )}
-      </div>
-
-      <div className="stack">
-        {formation.courses.length > 0 && (
-          <div className="card student-course-switcher">
-            <h2>Courses</h2>
-            <div className="student-course-switcher-controls">
-              <button
-                type="button"
-                className="student-quiz-nav-btn"
-                onClick={() =>
-                  navigateCourse(-1, formation.courses.length)
-                }
-                disabled={activeCourseIndex === 0}
-              >
-                &lt;
-              </button>
-              <span className="student-quiz-indicator">
-                {Math.min(activeCourseIndex + 1, formation.courses.length)}/{formation.courses.length}
-              </span>
-              <button
-                type="button"
-                className="student-quiz-nav-btn"
-                onClick={() =>
-                  navigateCourse(1, formation.courses.length)
-                }
-                disabled={activeCourseIndex >= formation.courses.length - 1}
-              >
-                &gt;
-              </button>
-            </div>
+      <div className="student-formation-shell">
+        <div className="card student-details-hero student-details-glass">
+          <div className="card-head-row">
+            <h1>{formation.title}</h1>
+            <StatusBadge
+              label={
+                formationResult
+                  ? formationResult.completed
+                    ? 'Completed (Success)'
+                    : 'Completed (Fail)'
+                  : 'In progress'
+              }
+              tone={
+                formationResult
+                  ? formationResult.completed
+                    ? 'green'
+                    : 'red'
+                  : 'orange'
+              }
+            />
           </div>
-        )}
-
-        {formation.courses.length > 0 && (() => {
-          const safeCourseIndex = Math.min(
-            activeCourseIndex,
-            formation.courses.length - 1,
-          );
-          const course = formation.courses[safeCourseIndex];
-          const activeLesson = course.lessons?.[0];
-          const hasQuizzes = course.quizzes.length > 0;
-          const totalQuizzes = course.quizzes.length;
-          const showQuizzes = Boolean(showQuizzesByCourse[course.id]);
-          const quizIndex = Math.min(
-            quizIndexByCourse[course.id] ?? 0,
-            Math.max(totalQuizzes - 1, 0),
-          );
-          const activeQuiz =
-            totalQuizzes > 0 ? course.quizzes[quizIndex] : null;
-          const isLastQuiz =
-            totalQuizzes > 0 && quizIndex === totalQuizzes - 1;
-          const loadingAnswers = course.quizzes.some(
-            (quiz) => loadingAnswersByQuiz[quiz.id],
-          );
-          const courseLocked = isCourseLocked(course.id);
-          const courseResult = courseResultByCourse[course.id] || null;
-
-          return (
-            <article
-              key={course.id}
-              className="card course-card student-course-shell"
+          <p>{formation.description}</p>
+          <p className="hint">Price: {formation.price}</p>
+          {formationResult?.certificateUrl && (
+            <a
+              className="student-doc-link"
+              href={resolveApiAssetUrl(formationResult.certificateUrl)}
+              target="_blank"
+              rel="noreferrer"
             >
-              <div className="card-head-row">
-                <h2>Course: {course.title}</h2>
-                {courseResult && (
-                  <StatusBadge
-                    label={`${formatScore(courseResult.score)}%`}
-                    tone={courseResult.passed ? 'green' : 'orange'}
-                  />
-                )}
+              Download Final Certificate
+            </a>
+          )}
+        </div>
+
+        {formation.courses.length > 0 ? (
+          <div className="student-formation-layout">
+            <aside className="card student-details-glass student-course-sidebar">
+              <div className="student-course-sidebar-head">
+                <div className="student-course-sidebar-title">
+                  <span className="student-course-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M4 6.5h16M4 12h16M4 17.5h10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                    </svg>
+                  </span>
+                  <h3>Courses</h3>
+                </div>
+                <span className="hint">
+                  {Math.min(activeCourseIndex + 1, formation.courses.length)}/{formation.courses.length}
+                </span>
               </div>
-
-              {courseResult?.badgeUrl && (
-                <a
-                  className="student-doc-link"
-                  href={resolveApiAssetUrl(courseResult.badgeUrl)}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Download Badge
-                </a>
-              )}
-
-              <section className="student-viewer-center">
-                <h3>Lesson Viewer</h3>
-                {!activeLesson && (
-                  <p className="hint">
-                    No lesson available for this course yet.
-                  </p>
-                )}
-
-                {activeLesson && (
-                  <div className="student-pdf-shell">
-                    <div className="student-pdf-head">
-                      <div>
-                        <p className="student-pdf-title">
-                          {activeLesson.title}
-                        </p>
-                        <p className="hint">
-                          Scroll the document here, then start quizzes.
-                        </p>
-                        {course.lessons.length > 1 && (
-                          <p className="hint">
-                            Showing lesson 1 of {course.lessons.length}.
-                          </p>
-                        )}
-                      </div>
-                      <div className="row">
-                        <button
-                          type="button"
-                          className="student-doc-link student-doc-link-placeholder"
-                          aria-hidden="true"
-                          tabIndex={-1}
-                        >
-                          Placeholder
-                        </button>
-                        <a
-                          className="student-doc-link"
-                          href={getLessonPdfLinks(activeLesson.pdfUrl).downloadUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Download PDF
-                        </a>
-                      </div>
+                    <div className="student-course-list">
+                      {formation.courses.map((course, index) => {
+                        const courseResult = courseResultByCourse[course.id] || null;
+                        const statusClass = courseResult
+                          ? courseResult.passed
+                            ? 'is-pass'
+                            : 'is-fail'
+                          : 'is-pending';
+                        return (
+                          <div
+                            key={course.id}
+                            className={`student-course-item ${index === activeCourseIndex ? 'is-active' : ''}`}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => {
+                              setActiveCourseIndex(index);
+                              setActiveTab('lessons');
+                            }}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                setActiveCourseIndex(index);
+                                setActiveTab('lessons');
+                              }
+                            }}
+                          >
+                            <span className="student-course-title">{course.title}</span>
+                            <span className={`student-course-status ${statusClass}`}>
+                              {statusClass === 'is-pass' && (
+                                <svg viewBox="0 0 16 16" aria-hidden="true">
+                                  <path d="M3.2 8.4l2.6 2.6 6.2-6.2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              )}
+                              {statusClass === 'is-fail' && (
+                                <svg viewBox="0 0 16 16" aria-hidden="true">
+                                  <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              )}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
+            </aside>
 
-                    <div className="student-pdf-container">
-                      <iframe
-                        className="student-pdf-frame"
-                        src={getLessonPdfLinks(activeLesson.pdfUrl).viewUrl}
-                        title={`PDF ${activeLesson.title}`}
-                        loading="lazy"
-                      />
-                    </div>
+            {(() => {
+              const safeCourseIndex = Math.min(
+                activeCourseIndex,
+                formation.courses.length - 1,
+              );
+              const course = formation.courses[safeCourseIndex];
+              const activeLessonId =
+                activeLessonIdByCourse[course.id] ?? course.lessons?.[0]?.id ?? null;
+              const activeLesson = course.lessons?.find(
+                (lesson) => lesson.id === activeLessonId,
+              );
+              const hasQuizzes = course.quizzes.length > 0;
+              const totalQuizzes = course.quizzes.length;
+              const showQuizzes = activeTab === 'quizzes' && Boolean(showQuizzesByCourse[course.id]);
+              const quizIndex = Math.min(
+                quizIndexByCourse[course.id] ?? 0,
+                Math.max(totalQuizzes - 1, 0),
+              );
+              const activeQuiz =
+                totalQuizzes > 0 ? course.quizzes[quizIndex] : null;
+              const isLastQuiz =
+                totalQuizzes > 0 && quizIndex === totalQuizzes - 1;
+              const loadingAnswers = course.quizzes.some(
+                (quiz) => loadingAnswersByQuiz[quiz.id],
+              );
+              const courseLocked = isCourseLocked(course.id);
+              const courseResult = courseResultByCourse[course.id] || null;
+              const lessonViewActive = Boolean(lessonViewByCourse[course.id]);
 
-                    {getLessonPdfLinks(activeLesson.pdfUrl).isDrive && (
-                      <p className="hint">
-                        Google Drive preview mode is used for inline view.
-                      </p>
-                    )}
-
+              return (
+                <main className="card student-details-glass student-course-content">
+                  <div className="student-tab-switcher" data-active={activeTab}>
                     <button
                       type="button"
-                      className="student-start-quiz-btn"
-                      onClick={() => toggleQuizzes(course, showQuizzes)}
-                      disabled={!hasQuizzes || loadingAnswers}
+                      className={`student-tab-btn ${activeTab === 'lessons' ? 'is-active' : ''}`}
+                      onClick={() => setActiveTab('lessons')}
                     >
-                      {loadingAnswers
-                        ? 'Loading quizzes...'
-                        : showQuizzes
-                          ? 'Cancel'
-                          : courseLocked
-                            ? 'View Submitted Quizzes'
-                            : 'Start the Quizzes'}
+                      Lessons
                     </button>
+                    <button
+                      type="button"
+                      className={`student-tab-btn ${activeTab === 'quizzes' ? 'is-active' : ''}`}
+                      onClick={() => setActiveTab('quizzes')}
+                    >
+                      Quizzes
+                    </button>
+                    <span className="student-tab-indicator" aria-hidden="true" />
                   </div>
-                )}
-              </section>
 
-              {showQuizzes && (
-                <section className="student-quiz-stack">
+                  <div className="student-course-head">
+                    <div>
+                      <h2>{course.title}</h2>
+                      
+                    </div>
+                    {courseResult && (
+                      <StatusBadge
+                        label={`${formatScore(courseResult.score)}%`}
+                        tone={courseResult.passed ? 'green' : 'orange'}
+                      />
+                    )}
+                  </div>
+
+                  {courseResult?.badgeUrl && (
+                    <a
+                      className="student-doc-link"
+                      href={resolveApiAssetUrl(courseResult.badgeUrl)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Download Badge
+                    </a>
+                  )}
+
+
+                  {activeTab === 'lessons' && (
+                    <div className="student-tab-panel student-lessons-panel">
+                      <div className={`student-lesson-deck ${lessonViewActive ? 'is-viewer' : ''}`}>
+                        <div className="student-lesson-list">
+                          {course.lessons.length === 0 && (
+                            <p className="hint">No lesson available for this course yet.</p>
+                          )}
+                          {course.lessons.map((lesson) => (
+                            <article key={lesson.id} className="student-lesson-card">
+                              <div className="student-lesson-card-text">
+                                <h4>{lesson.title}</h4>
+                                {lesson.description && (
+                                  <p className="hint">{lesson.description}</p>
+                                )}
+                              </div>
+                              <button
+                                type="button"
+                                className="student-open-content-btn"
+                                onClick={() => {
+                                  setActiveLessonIdByCourse((prev) => ({
+                                    ...prev,
+                                    [course.id]: lesson.id,
+                                  }));
+                                  setLessonViewByCourse((prev) => ({
+                                    ...prev,
+                                    [course.id]: true,
+                                  }));
+                                }}
+                              >
+                                Open Content
+                              </button>
+                            </article>
+                          ))}
+                        </div>
+
+                        <div className="student-lesson-viewer">
+                          {activeLesson && (
+                            <div className="student-pdf-shell">
+                              <div className="student-pdf-head">
+                                <div>
+                                  <p className="student-pdf-title">
+                                    {activeLesson.title}
+                                  </p>
+                                  <p className="hint">Scroll the document here.</p>
+                                  {course.lessons.length > 1 && (
+                                    <p className="hint">
+                                      Showing lesson {course.lessons.findIndex((l) => l.id === activeLesson.id) + 1} of {course.lessons.length}.
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="row">
+                                  <a
+                                    className="student-doc-link"
+                                    href={getLessonPdfLinks(activeLesson.pdfUrl).downloadUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    Download PDF
+                                  </a>
+                                </div>
+                              </div>
+
+                              <div className="student-pdf-container">
+                                <iframe
+                                  className="student-pdf-frame"
+                                  src={getLessonPdfLinks(activeLesson.pdfUrl).viewUrl}
+                                  title={`PDF ${activeLesson.title}`}
+                                  loading="lazy"
+                                />
+                              </div>
+
+                              {getLessonPdfLinks(activeLesson.pdfUrl).isDrive && (
+                                <p className="hint">
+                                  Google Drive preview mode is used for inline view.
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          <div className="student-lesson-actions">
+                            <button
+                              type="button"
+                              className="student-back-btn"
+                              onClick={() =>
+                                setLessonViewByCourse((prev) => ({
+                                  ...prev,
+                                  [course.id]: false,
+                                }))
+                              }
+                            >
+                              Back to lessons
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'quizzes' && (
+                    <div className="student-tab-panel student-quizzes-panel">
+                      {loadingAnswers && !showQuizzes && (
+                        <p className="hint">Loading quizzes...</p>
+                      )}
+                      {!hasQuizzes && (
+                        <p className="hint">No quizzes in this course.</p>
+                      )}
+
+                      {showQuizzes && (
+                        <section className="student-quiz-stack">
                   <div className="student-quiz-toolbar">
                     <h3>Quizzes for this lesson</h3>
                     {totalQuizzes > 0 && (
@@ -830,14 +939,16 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                       </article>
                     );
                   })()}
-                </section>
-              )}
-            </article>
-          );
-        })()}
-
-        {formation.courses.length === 0 && (
-          <div className="card">
+                        </section>
+                      )}
+                    </div>
+                  )}
+                </main>
+              );
+            })()}
+          </div>
+        ) : (
+          <div className="card student-details-glass">
             <p className="hint">No published online courses yet.</p>
           </div>
         )}

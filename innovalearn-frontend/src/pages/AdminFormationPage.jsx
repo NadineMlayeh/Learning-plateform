@@ -97,6 +97,15 @@ export default function AdminFormationPage({ pushToast }) {
   const [savingFormationField, setSavingFormationField] = useState(false);
   const [thumbnailUploading, setThumbnailUploading] = useState(false);
   const [thumbnailName, setThumbnailName] = useState('');
+  const [formationDraftForm, setFormationDraftForm] = useState({
+    title: '',
+    description: '',
+    price: '',
+    location: '',
+    startDate: '',
+    endDate: '',
+  });
+  const [savingFormationDraft, setSavingFormationDraft] = useState(false);
   const [addingLessonCourseId, setAddingLessonCourseId] = useState(null);
   const [newLessonForm, setNewLessonForm] = useState({
     title: '',
@@ -127,6 +136,18 @@ export default function AdminFormationPage({ pushToast }) {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function syncDraftForm(nextFormation) {
+    if (!nextFormation) return;
+    setFormationDraftForm({
+      title: nextFormation.title || '',
+      description: nextFormation.description || '',
+      price: String(nextFormation.price ?? ''),
+      location: nextFormation.location || '',
+      startDate: toDateInputValue(nextFormation.startDate),
+      endDate: toDateInputValue(nextFormation.endDate),
+    });
   }
 
   async function refreshFormation() {
@@ -742,6 +763,12 @@ export default function AdminFormationPage({ pushToast }) {
     loadFormation();
   }, [formationId]);
 
+  useEffect(() => {
+    if (formation) {
+      syncDraftForm(formation);
+    }
+  }, [formation]);
+
   const courses = formation?.courses ?? [];
   const canAddCourses =
     formation?.type === 'ONLINE' && !formation?.published;
@@ -780,6 +807,56 @@ export default function AdminFormationPage({ pushToast }) {
         .find((quiz) => quiz.id === confirmDeleteQuizId)
     : null;
 
+  function handleDraftFieldChange(event) {
+    const { name, value } = event.target;
+    setFormationDraftForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function resetDraftForm() {
+    syncDraftForm(formation);
+  }
+
+  async function saveDraftForm(event) {
+    event.preventDefault();
+    if (!formation || formation.published) return;
+
+    const payload = {
+      title: formationDraftForm.title.trim(),
+      description: formationDraftForm.description.trim(),
+      price: Number(formationDraftForm.price),
+    };
+
+    if (!payload.title || !payload.description) {
+      pushToast('Title and description are required.', 'error');
+      return;
+    }
+    if (!Number.isFinite(payload.price) || payload.price < 0) {
+      pushToast('Price must be a valid non-negative number.', 'error');
+      return;
+    }
+
+    if (formation.type === 'PRESENTIEL') {
+      payload.location = formationDraftForm.location.trim();
+      payload.startDate = formationDraftForm.startDate || null;
+      payload.endDate = formationDraftForm.endDate || null;
+    }
+
+    setSavingFormationDraft(true);
+    try {
+      const updated = await apiRequest(`/formations/${formation.id}`, {
+        method: 'PATCH',
+        token: user.token,
+        body: payload,
+      });
+      setFormation((prev) => ({ ...prev, ...updated }));
+      pushToast('Formation updated.', 'success');
+    } catch (err) {
+      pushToast(err.message, 'error');
+    } finally {
+      setSavingFormationDraft(false);
+    }
+  }
+
   if (isLoading || !formation) {
     return (
       <section className="card">
@@ -791,167 +868,192 @@ export default function AdminFormationPage({ pushToast }) {
   return (
     <section className="stack formation-manage-stack admin-skin-page">
       <div className="card panel-head">
-        <div className="formation-meta-stack">
-          <div className="formation-thumb-block">
-            <div className="formation-thumb-image">
-              {formation.profileImageUrl ? (
-                <img
-                  src={resolveApiAssetUrl(formation.profileImageUrl)}
-                  alt={formation.title}
-                />
-              ) : (
-                <div className="formation-thumb-placeholder">
-                  <img src="/images/gallery.png" alt="" />
-                </div>
+        <div className="formation-edit-layout">
+          <aside className="formation-edit-summary">
+            <div className="formation-thumb-block">
+              <div className="formation-thumb-image">
+                {formation.profileImageUrl ? (
+                  <img
+                    src={resolveApiAssetUrl(formation.profileImageUrl)}
+                    alt={formation.title}
+                  />
+                ) : (
+                  <div className="formation-thumb-placeholder">
+                    <img src="/images/gallery.png" alt="" />
+                  </div>
+                )}
+              </div>
+              {!formation.published && (
+                <>
+                  <input
+                    id="formation-thumb-input"
+                    className="formation-thumb-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFormationThumbnailChange}
+                    disabled={thumbnailUploading}
+                  />
+                  <label
+                    htmlFor="formation-thumb-input"
+                    className="formation-thumb-link formation-thumb-link-compact"
+                  >
+                    <img src="/images/gallery.png" alt="" />
+                    <span>
+                      {thumbnailUploading
+                        ? 'Uploading thumbnail...'
+                        : formation.profileImageUrl
+                        ? 'Change Thumbnail Photo'
+                        : 'Add Thumbnail Photo'}
+                    </span>
+                  </label>
+                  {thumbnailName ? (
+                    <p className="hint formation-thumb-name">{thumbnailName}</p>
+                  ) : null}
+                </>
               )}
             </div>
-            {!formation.published && (
-              <>
-                <input
-                  id="formation-thumb-input"
-                  className="formation-thumb-input"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFormationThumbnailChange}
-                  disabled={thumbnailUploading}
+            <div className="formation-summary-text">
+              <h2>{formation.title}</h2>
+              <p className="hint">{formation.description}</p>
+              <p className="hint">Price: {formation.price}</p>
+              {formation.type === 'PRESENTIEL' && (
+                <>
+                  <p className="hint">Location: {formation.location || '-'}</p>
+                  <p className="hint">
+                    Start: {toDateOnlyLabel(formation.startDate)}
+                  </p>
+                  <p className="hint">End: {toDateOnlyLabel(formation.endDate)}</p>
+                </>
+              )}
+              <div className="row">
+                <StatusBadge
+                  label={formation.type}
+                  tone={formation.type === 'ONLINE' ? 'blue' : 'orange'}
                 />
-                <label
-                  htmlFor="formation-thumb-input"
-                  className="formation-thumb-link formation-thumb-link-compact"
+              </div>
+            </div>
+          </aside>
+
+          <div className="formation-edit-fields">
+            <div className="formation-edit-head">
+              {canAddCourses && (
+                <button
+                  type="button"
+                  className="formation-head-action-left formation-head-action-single"
+                  onClick={openAddCourseModal}
                 >
-                  <img src="/images/gallery.png" alt="" />
-                  <span>
-                    {thumbnailUploading
-                      ? 'Uploading thumbnail...'
-                      : formation.profileImageUrl
-                      ? 'Change Thumbnail Photo'
-                      : 'Add Thumbnail Photo'}
-                  </span>
+                  <img src="/images/courses.png" alt="" className="btn-inline-icon" />
+                  Add Course
+                </button>
+              )}
+              {formation.published ? (
+                <div className="formation-head-published-status">
+                  <StatusBadge label="Published" tone="green" />
+                </div>
+              ) : (
+                <LoadingButton
+                  className="btn-publish-formation formation-head-action-right"
+                  type="button"
+                  isLoading={publishingFormation}
+                  loadingText="Publishing..."
+                  disabled={false}
+                  onClick={publishFormation}
+                >
+                  <img src="/images/send.png" alt="" className="btn-inline-icon" />
+                  Publish Formation
+                </LoadingButton>
+              )}
+            </div>
+
+            <form className="formation-edit-form" onSubmit={saveDraftForm}>
+              <div className="formation-edit-row">
+                <label>
+                  <span>Title</span>
+                  <input
+                    name="title"
+                    value={formationDraftForm.title}
+                    onChange={handleDraftFieldChange}
+                    disabled={formation.published || savingFormationDraft}
+                    required
+                  />
                 </label>
-                {thumbnailName ? (
-                  <p className="hint formation-thumb-name">{thumbnailName}</p>
-                ) : null}
-              </>
-            )}
+              </div>
+              <div className="formation-edit-row">
+                <label>
+                  <span>Description</span>
+                  <textarea
+                    name="description"
+                    rows={4}
+                    value={formationDraftForm.description}
+                    onChange={handleDraftFieldChange}
+                    disabled={formation.published || savingFormationDraft}
+                    required
+                  />
+                </label>
+              </div>
+              <div className="formation-edit-row formation-edit-row-split">
+                <label>
+                  <span>Price</span>
+                  <input
+                    name="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formationDraftForm.price}
+                    onChange={handleDraftFieldChange}
+                    disabled={formation.published || savingFormationDraft}
+                    required
+                  />
+                </label>
+                {formation.type === 'PRESENTIEL' && (
+                  <label>
+                    <span>Location</span>
+                    <input
+                      name="location"
+                      value={formationDraftForm.location}
+                      onChange={handleDraftFieldChange}
+                      disabled={formation.published || savingFormationDraft}
+                    />
+                  </label>
+                )}
+              </div>
+              {formation.type === 'PRESENTIEL' && (
+                <div className="formation-edit-row formation-edit-row-split">
+                  <label>
+                    <span>Start Date</span>
+                    <input
+                      name="startDate"
+                      type="date"
+                      value={formationDraftForm.startDate}
+                      onChange={handleDraftFieldChange}
+                      disabled={formation.published || savingFormationDraft}
+                    />
+                  </label>
+                  <label>
+                    <span>End Date</span>
+                    <input
+                      name="endDate"
+                      type="date"
+                      value={formationDraftForm.endDate}
+                      onChange={handleDraftFieldChange}
+                      disabled={formation.published || savingFormationDraft}
+                    />
+                  </label>
+                </div>
+              )}
+              {!formation.published && (
+                <div className="formation-edit-actions">
+                  <button
+                    type="submit"
+                    className="modal-save-btn"
+                    disabled={savingFormationDraft}
+                  >
+                    {savingFormationDraft ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              )}
+            </form>
           </div>
-          <h1 className="formation-meta-line formation-meta-line-title">
-            <span title={formation.title}>{formation.title}</span>
-            {!formation.published && (
-              <button
-                type="button"
-                className="formation-edit-icon-btn"
-                onClick={() => openFormationFieldEditor('title')}
-                aria-label="Edit formation title"
-              >
-                <span aria-hidden="true">{'\u270E'}</span>
-              </button>
-            )}
-          </h1>
-          <p className="formation-meta-line formation-meta-line-desc">
-            <span title={formation.description}>{formation.description}</span>
-            {!formation.published && (
-              <button
-                type="button"
-                className="formation-edit-icon-btn"
-                onClick={() => openFormationFieldEditor('description')}
-                aria-label="Edit formation description"
-              >
-                <span aria-hidden="true">{'\u270E'}</span>
-              </button>
-            )}
-          </p>
-          <p className="hint formation-meta-line">
-            <span>Price: {formation.price}</span>
-            {!formation.published && (
-              <button
-                type="button"
-                className="formation-edit-icon-btn"
-                onClick={() => openFormationFieldEditor('price')}
-                aria-label="Edit formation price"
-              >
-                <span aria-hidden="true">{'\u270E'}</span>
-              </button>
-            )}
-          </p>
-          {formation.type === 'PRESENTIEL' && (
-            <>
-              <p className="hint formation-meta-line">
-                <span>Location: {formation.location || '-'}</span>
-                {!formation.published && (
-                  <button
-                    type="button"
-                    className="formation-edit-icon-btn"
-                    onClick={() => openFormationFieldEditor('location')}
-                    aria-label="Edit formation location"
-                  >
-                    <span aria-hidden="true">{'\u270E'}</span>
-                  </button>
-                )}
-              </p>
-              <p className="hint formation-meta-line">
-                <span>
-                  Start: {toDateOnlyLabel(formation.startDate)}
-                </span>
-                {!formation.published && (
-                  <button
-                    type="button"
-                    className="formation-edit-icon-btn"
-                    onClick={() => openFormationFieldEditor('startDate')}
-                    aria-label="Edit formation start date"
-                  >
-                    <span aria-hidden="true">{'\u270E'}</span>
-                  </button>
-                )}
-              </p>
-              <p className="hint formation-meta-line">
-                <span>End: {toDateOnlyLabel(formation.endDate)}</span>
-                {!formation.published && (
-                  <button
-                    type="button"
-                    className="formation-edit-icon-btn"
-                    onClick={() => openFormationFieldEditor('endDate')}
-                    aria-label="Edit formation end date"
-                  >
-                    <span aria-hidden="true">{'\u270E'}</span>
-                  </button>
-                )}
-              </p>
-            </>
-          )}
-          <div className="row">
-            <StatusBadge label={formation.type} tone={formation.type === 'ONLINE' ? 'blue' : 'orange'} />
-          </div>
-        </div>
-        <div className="formation-head-actions">
-          {formation.published ? (
-            <div className="formation-head-published-status">
-              <StatusBadge label="Published" tone="green" />
-            </div>
-          ) : (
-            <LoadingButton
-              className="btn-publish-formation formation-head-action-right"
-              type="button"
-              isLoading={publishingFormation}
-              loadingText="Publishing..."
-              disabled={false}
-              onClick={publishFormation}
-            >
-              <img src="/images/send.png" alt="" className="btn-inline-icon" />
-              Publish Formation
-            </LoadingButton>
-          )}
-          {canAddCourses && (
-            <div className="formation-head-bottom-action">
-              <button
-                type="button"
-                className="formation-head-action-left formation-head-action-single"
-                onClick={openAddCourseModal}
-              >
-                <img src="/images/courses.png" alt="" className="btn-inline-icon" />
-                Add Course
-              </button>
-            </div>
-          )}
         </div>
       </div>
 

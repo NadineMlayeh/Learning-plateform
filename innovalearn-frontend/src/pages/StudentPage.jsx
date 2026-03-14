@@ -815,7 +815,7 @@ export default function StudentPage({ pushToast }) {
                 placeholder="Search by formateur name"
               />
               <select
-                className="student-v2-enrolled-filter"
+                className="student-v2-enrolled-filter auth-select-field"
                 value={enrolledTypeFilter}
                 onChange={(event) => setEnrolledTypeFilter(event.target.value)}
               >
@@ -983,7 +983,7 @@ export default function StudentPage({ pushToast }) {
               placeholder="Search by formateur name"
             />
             <select
-              className="student-v2-enrolled-filter"
+              className="student-v2-enrolled-filter auth-select-field"
               value={discoverTypeFilter}
               onChange={(event) => setDiscoverTypeFilter(event.target.value)}
             >
