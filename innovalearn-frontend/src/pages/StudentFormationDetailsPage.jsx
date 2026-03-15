@@ -72,6 +72,72 @@ function ResultPopup({ result, onClose }) {
 
   const passed = Boolean(result.passed);
 
+  useEffect(() => {
+    if (!passed || !result) return undefined;
+
+    const confettiFactory = window?.confetti;
+    if (typeof confettiFactory !== 'function') return undefined;
+
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.inset = '0';
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '999';
+    document.body.appendChild(canvas);
+
+    const confetti = confettiFactory.create(canvas, { resize: true, useWorker: true });
+    const colors = ['#60a5fa', '#f472b6', '#a78bfa', '#34d399', '#fbbf24', '#fb923c'];
+    const start = performance.now();
+    const duration = 2200;
+    let rafId = 0;
+    let centerBurstDone = false;
+
+    const frame = (now) => {
+      const elapsed = now - start;
+
+      confetti({
+        particleCount: 4,
+        angle: 60,
+        spread: 62,
+        scalar: 0.9,
+        origin: { x: 0, y: 0.6 },
+        colors,
+      });
+      confetti({
+        particleCount: 4,
+        angle: 120,
+        spread: 62,
+        scalar: 0.9,
+        origin: { x: 1, y: 0.6 },
+        colors,
+      });
+
+      if (!centerBurstDone && elapsed >= 400) {
+        centerBurstDone = true;
+        confetti({
+          particleCount: 60,
+          spread: 100,
+          scalar: 1.1,
+          origin: { y: 0.55 },
+          colors,
+        });
+      }
+
+      if (elapsed < duration) {
+        rafId = requestAnimationFrame(frame);
+      }
+    };
+
+    rafId = requestAnimationFrame(frame);
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      canvas.remove();
+    };
+  }, [passed, result]);
+
   return (
     <div className="result-modal-backdrop" onClick={onClose}>
       <div
@@ -79,7 +145,7 @@ function ResultPopup({ result, onClose }) {
         onClick={(event) => event.stopPropagation()}
       >
         <div className="card-head-row">
-          <h2>{passed ? 'Great Job!' : 'Keep Going!'}</h2>
+          <h2>{passed ? ' Great Job! 🎉' : 'Keep Going!'}</h2>
           <StatusBadge label={passed ? 'PASSED' : 'FAILED'} tone={passed ? 'green' : 'orange'} />
         </div>
 
@@ -105,40 +171,48 @@ function ResultPopup({ result, onClose }) {
         </div>
 
         {result.badgeUrl && (
-          <a
-            className="student-doc-link"
-            href={resolveApiAssetUrl(result.badgeUrl)}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Download Badge
-          </a>
+          <div className="result-doc-actions">
+            <a
+              className="student-v2-doc-link-badge-bg result-doc-btn"
+              href={resolveApiAssetUrl(result.badgeUrl)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <img
+                className="student-btn-icon"
+                src="/images/medal.png"
+                alt=""
+                aria-hidden="true"
+              />
+              Download Badge
+            </a>
+          </div>
         )}
 
         {result.formationResult?.allCoursesFinalized && (
           <div className="result-formation-note">
-            <p className="hint">
-              Formation is now marked as{' '}
-              <strong>
-                {result.formationResult.completed
-                  ? 'COMPLETED (SUCCESS)'
-                  : 'COMPLETED (FAIL)'}
-              </strong>
-              .
-            </p>
+
             {result.formationResult.certificateUrl && (
-              <a
-                className="student-doc-link"
-                href={resolveApiAssetUrl(result.formationResult.certificateUrl)}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Download Final Certificate
-              </a>
-            )}
+              <div className="result-doc-actions">
+                <a
+                  className="student-v2-doc-link-cert result-doc-btn"
+                  href={resolveApiAssetUrl(result.formationResult.certificateUrl)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <img
+                    className="student-btn-icon"
+                    src="/images/medal.png"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  Download Final Certificate
+                </a>
+              </div> 
+            )
+            }
           </div>
         )}
-
         <button
           type="button"
           className="student-final-submit-btn"
@@ -525,20 +599,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
           <p className="hint">Price: {formation.price}</p>
           {formationResult?.certificateUrl && (
             <div className="student-details-header-actions">
-              <a
-                className="student-doc-link student-v2-doc-link-cert student-details-cert-btn"
-                href={resolveApiAssetUrl(formationResult.certificateUrl)}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <img
-                  className="student-btn-icon"
-                  src="/images/medal.png"
-                  alt=""
-                  aria-hidden="true"
-                />
-                Download Final Certificate
-              </a>
+
             </div>
           )}
         </div>
@@ -668,20 +729,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
 
                   {courseResult?.badgeUrl && (
                     <div className="student-course-badge-row">
-                      <a
-                        className="student-doc-link student-v2-doc-link-badge-bg student-details-badge-btn"
-                        href={resolveApiAssetUrl(courseResult.badgeUrl)}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <img
-                          className="student-btn-icon"
-                          src="/images/medal.png"
-                          alt=""
-                          aria-hidden="true"
-                        />
-                        Download Badge
-                      </a>
+
                     </div>
                   )}
 

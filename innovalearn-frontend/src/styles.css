@@ -1986,7 +1986,7 @@ tr:last-child td {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 0.75rem 5rem;
+  padding: 0.75rem 6rem;
   margin: 0;
 
   display: grid;
@@ -2086,23 +2086,27 @@ tr:last-child td {
 }
 
 /* ── 4. GLASS BASE ──────────────────────────────────────────*/
+
 .student-details-glass {
   background:
-    radial-gradient(circle at 0% 0%, rgba(160,200,255,0.18), transparent 38%),
-    radial-gradient(circle at 100% 0%, rgba(255,180,220,0.15), transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(180,210,255,0.12), transparent 44%),
-    radial-gradient(circle at 0% 100%, rgba(255,200,220,0.10), transparent 38%),
-    linear-gradient(145deg,
-      rgba(255,255,255,0.72) 0%,
-      rgba(240,248,255,0.68) 55%,
-      rgba(255,238,248,0.68) 100%);
-  border: 1px solid rgba(200,218,245,0.55);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+    radial-gradient(circle at 10% 10%, rgba(120,180,255,0.20), transparent 45%),
+    radial-gradient(circle at 90% 20%, rgba(255,170,230,0.18), transparent 45%),
+    linear-gradient(140deg,
+      rgba(255,255,255,0.55) 0%,
+      rgba(240,247,255,0.45) 45%,
+      rgba(255,240,250,0.40) 100%);
+  border: 1px solid rgba(255,255,255,0.65);
+  border-bottom: 1px solid rgba(200,215,255,0.35);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border-radius: 14px;
   box-shadow:
-    0 18px 36px -20px rgba(80,100,180,0.22),
-    0 6px 18px -8px rgba(220,160,200,0.16),
-    inset 0 1px 0 rgba(255,255,255,0.82);
+    0 12px 28px -10px rgba(40,70,160,0.22),
+    0 4px 10px -2px rgba(180,140,220,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.85),
+    inset 0 -1px 0 rgba(210,220,255,0.25);
+  position: relative;
+  overflow: hidden;
 }
 
 /* Top accent line for header + columns */
@@ -2361,8 +2365,14 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   left: 5px;
   width: calc(50% - 5px);
   border-radius: 10px;
-  background: rgba(255,255,255,0.82);
-  border: 1px solid rgba(180,205,245,0.5);
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.92) 0%,
+    rgba(255,255,255,0.86) 35%,
+    rgba(248,252,255,0.80) 65%,
+    rgba(255,246,252,0.78) 100%
+  );
+  border: 1px solid rgba(180,205,245,0.35);
   box-shadow:
     0 4px 14px -8px rgba(100,130,230,0.20),
     inset 0 1px 0 rgba(255,255,255,0.9);
@@ -2466,15 +2476,11 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   box-shadow: 0 12px 22px -12px rgba(40,100,230,0.55);
 }
 
-/* ── 10. LESSON SLIDE DECK ───────────────────────────────────
-   Concrete height so the absolute-positioned viewer
-   has something to fill. min-height acts as the floor.
-   ---------------------------------------------------------- */
+/* ── 10. LESSON SLIDE DECK ── */
 .student-lesson-deck {
   position: relative;
-  overflow: hidden;
-  /* floor height so viewer is never zero */
   min-height: 480px;
+  /* ← remove overflow:hidden when viewer is active */
 }
 
 .student-lesson-deck > .student-lesson-list {
@@ -2486,44 +2492,60 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
 }
 
 .student-lesson-deck > .student-lesson-viewer {
+  /* ← NOT absolute anymore when active — flows naturally */
   position: absolute;
   inset: 0;
-  overflow-y: auto;  /* viewer scrolls if content is taller than deck */
+  overflow: visible;        /* ← no scroll here at all */
   transform: translateX(100%);
   opacity: 0;
   transition: transform 320ms cubic-bezier(0.4,0,0.2,1), opacity 240ms ease;
   will-change: transform;
+  pointer-events: none;
+}
+
+.student-lesson-deck.is-viewer {
+  overflow: visible;         /* ← let content flow out naturally */
 }
 
 .student-lesson-deck.is-viewer > .student-lesson-list {
+  position: absolute;        /* ← list hides behind */
+  inset: 0;
   transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
 }
 
 .student-lesson-deck.is-viewer > .student-lesson-viewer {
+  position: relative;        /* ← back in normal flow */
+  inset: auto;
   transform: translateX(0%);
   opacity: 1;
+  pointer-events: auto;
+  overflow: visible;
 }
 
-/* ── 11. LESSON VIEWER ───────────────────────────────────── */
+/* ── 11. LESSON VIEWER ── */
 .student-lesson-viewer {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  height: 100%;
+  width: 100%;
   box-sizing: border-box;
+  /* no height:100%, no overflow — flows naturally */
 }
 
-/* ── 12. PDF SHELL ───────────────────────────────────────────
-   flex-column so the container stretches to fill viewer.
-   ---------------------------------------------------------- */
+.student-lesson-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.2rem;
+}
+
+/* ── 12. PDF SHELL ── */
 .student-pdf-shell {
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
-  flex: 1 1 auto;   /* stretch inside .student-lesson-viewer */
-  min-height: 0;
+  width: 100%;
   padding: 0.85rem;
   border-radius: 16px;
   border: 1px solid rgba(160,195,240,0.35);
@@ -2552,10 +2574,10 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   font-size: 0.95rem;
 }
 
-/* PDF container: flexible, fills remaining shell height */
+/* PDF container — A4 ratio, single scroll source */
 .student-pdf-container {
-  flex: 1 1 auto;
-  min-height: 320px; /* floor so it's never tiny */
+  width: 100%;
+  aspect-ratio: 1 / 1.414;
   max-width: 100%;
   border-radius: 12px;
   border: 1px solid rgba(180,205,235,0.5);
@@ -2567,36 +2589,8 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
 .student-pdf-frame {
   width: 100%;
   height: 100%;
-  min-height: 320px;
   border: 0;
   display: block;
-}
-
-/* ── 13. LESSON ACTIONS ──────────────────────────────────── */
-.student-lesson-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 0.2rem;
-  flex-shrink: 0;
-}
-
-.student-back-btn {
-  border-radius: 22px;
-  border: 1.5px solid rgba(160,190,240,0.5);
-  background: linear-gradient(130deg, #0b2d72 0%, #0ac4e0 52%, #ddaed3 100%);
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 0.84rem;
-  padding: 0.38rem 1.1rem;
-  cursor: pointer;
-  transition: background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
-  font-family: inherit;
-}
-
-.student-back-btn:hover {
-  background: linear-gradient(130deg, #0b2d72 0%, #0ac4e0 52%, #ddaed3 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px -14px rgba(60,100,200,0.25);
 }
 
 /* ── 14. QUIZ SECTION ────────────────────────────────────── */
@@ -2762,7 +2756,9 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
 }
 
 .student-choice-card input {
-  accent-color: #3a7ef0;
+  accent-color: transparent;
+  background-color: transparent;
+  box-shadow: none;
 }
 
 .student-review-note {
@@ -2882,8 +2878,31 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   animation: result-pop 240ms ease-out;
 }
 
-.result-modal-card.is-pass { border-color: rgba(80,200,130,0.45); }
-.result-modal-card.is-fail { border-color: rgba(220,100,100,0.40); }
+.result-modal-card .card-head-row h2 {
+  font-size: 1.4rem;
+}
+
+
+.result-modal-card.is-pass {
+  border: 2px solid rgba(99, 179, 255, 0.95);
+  outline: 1px solid rgba(192, 132, 252, 0.55);
+  outline-offset: 2px;
+  box-shadow:
+    /* sharp blue inner edge */
+    inset 0 0 0 1px rgba(99, 179, 255, 0.25),
+    /* tight blue ring */
+    0 0 0 1px rgba(99, 179, 255, 0.70),
+    /* blue inner bloom */
+    0 0 10px rgba(99, 179, 255, 0.55),
+    /* purple mid halo */
+    0 0 24px rgba(192, 132, 252, 0.45),
+    /* pink outer diffuse */
+    0 0 48px rgba(244, 114, 182, 0.35),
+    /* deep blue ambient */
+    0 0 80px rgba(58, 126, 240, 0.22),
+    /* base depth shadow */
+    0 28px 52px -32px rgba(20, 40, 100, 0.55);
+}
 
 .result-stats-grid {
   display: grid;
@@ -2908,22 +2927,88 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   gap: 0.45rem;
 }
 
+.result-doc-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.result-doc-actions .result-doc-btn {
+  width: auto;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 0.82rem;
+  padding: 0.4rem 0.9rem;
+}
+
+.result-modal-card .student-v2-doc-link-cert {
+  font-size: 0.82rem;
+  padding: 0.4rem 0.9rem;
+}
+
+/* Force gold/brown styles inside the results popup */
+.result-modal-card .student-v2-doc-link-cert,
+.result-modal-card .student-v2-doc-link-cert:visited {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 52%),
+    linear-gradient(135deg, #fef4bf 0%, #f4d86a 34%, #d7ab33 74%, #b88919 100%) !important;
+  color: #5a430a !important;
+  border: 1px solid #ab7d17 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 214, 0.95),
+    inset 0 -1px 0 rgba(145, 104, 12, 0.42),
+    0 0 0 1px rgba(255, 227, 135, 0.52),
+    0 8px 16px -12px rgba(122, 89, 17, 0.72);
+}
+
+.result-modal-card .student-v2-doc-link-badge-bg,
+.result-modal-card .student-v2-doc-link-badge-bg:visited {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 48%),
+    linear-gradient(180deg, #31221b 0%, #341307 100%) !important;
+  color: #f2d7b0 !important;
+  border: 1px solid rgba(177, 155, 126, 0.82) !important;
+  box-shadow:
+    0 10px 18px -14px rgba(56, 35, 15, 0.72),
+    inset 0 1px 0 rgba(255, 236, 199, 0.28),
+    inset 0 -1px 0 rgba(25, 10, 5, 0.56);
+}
+
 /* ── 17. HERO OVERRIDES ──────────────────────────────────── */
 .student-details-page .student-details-glass {
   background:
-    radial-gradient(circle at 0% 0%, rgba(160,200,255,0.18), transparent 40%),
-    radial-gradient(circle at 100% 0%, rgba(255,180,220,0.15), transparent 42%),
-    radial-gradient(circle at 100% 100%, rgba(180,210,255,0.12), transparent 45%),
-    radial-gradient(circle at 0% 100%, rgba(255,200,220,0.10), transparent 40%),
-    linear-gradient(145deg,
-      rgba(255,255,255,0.72) 0%,
-      rgba(240,248,255,0.68) 55%,
-      rgba(255,238,248,0.68) 100%);
-  border: 1px solid rgba(200,218,245,0.50);
+    /* soft ambient light */
+    radial-gradient(circle at 12% 10%, rgba(130,190,255,0.18), transparent 55%),
+    radial-gradient(circle at 88% 15%, rgba(255,170,230,0.15), transparent 55%),
+
+    /* subtle glass color diffusion */
+    radial-gradient(circle at 50% 120%, rgba(200,220,255,0.18), transparent 65%),
+
+    /* glass lighting layer */
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.92) 0%,
+      rgba(255,255,255,0.86) 35%,
+      rgba(248,252,255,0.80) 65%,
+      rgba(255,246,252,0.78) 100%
+    );
+
+  border: 1px solid rgba(255,255,255,0.85);
+  border-bottom: 1px solid rgba(215,225,255,0.55);
+
+  backdrop-filter: blur(14px) saturate(170%) brightness(1.06);
+  -webkit-backdrop-filter: blur(14px) saturate(170%) brightness(1.06);
+
+  border-radius: 16px;
+
   box-shadow:
-    0 18px 36px -20px rgba(80,100,180,0.22),
-    0 6px 18px -8px rgba(220,160,200,0.14),
-    inset 0 1px 0 rgba(255,255,255,0.82);
+    0 18px 45px -14px rgba(60,90,190,0.18),
+    0 10px 22px -8px rgba(180,140,220,0.10),
+    0 2px 6px rgba(255,255,255,0.35),
+    inset 0 2px 0 rgba(255,255,255,0.96),
+    inset 0 -1px 0 rgba(225,230,255,0.50);
+
+  position: relative;
+  overflow: hidden;
 }
 
 .student-details-page .student-details-hero h1,
@@ -2953,6 +3038,18 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   display: inline-block;
   object-fit: contain;
   margin-right: 0.4rem;
+}
+
+.result-modal-card .student-btn-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 0.35rem;
+}
+
+.result-modal-card .student-final-submit-btn {
+  justify-self: end;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
 }
 
 /* Re-apply gold/brown skins over any global overrides */
