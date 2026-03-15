@@ -524,14 +524,22 @@ export default function StudentFormationDetailsPage({ pushToast }) {
           <p>{formation.description}</p>
           <p className="hint">Price: {formation.price}</p>
           {formationResult?.certificateUrl && (
-            <a
-              className="student-doc-link"
-              href={resolveApiAssetUrl(formationResult.certificateUrl)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Download Final Certificate
-            </a>
+            <div className="student-details-header-actions">
+              <a
+                className="student-doc-link student-v2-doc-link-cert student-details-cert-btn"
+                href={resolveApiAssetUrl(formationResult.certificateUrl)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img
+                  className="student-btn-icon"
+                  src="/images/medal.png"
+                  alt=""
+                  aria-hidden="true"
+                />
+                Download Final Certificate
+              </a>
+            </div>
           )}
         </div>
 
@@ -586,7 +594,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                               )}
                               {statusClass === 'is-fail' && (
                                 <svg viewBox="0 0 16 16" aria-hidden="true">
-                                  <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                  <path d="M3.2 8.4l2.6 2.6 6.2-6.2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                               )}
                             </span>
@@ -659,14 +667,22 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                   </div>
 
                   {courseResult?.badgeUrl && (
-                    <a
-                      className="student-doc-link"
-                      href={resolveApiAssetUrl(courseResult.badgeUrl)}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Download Badge
-                    </a>
+                    <div className="student-course-badge-row">
+                      <a
+                        className="student-doc-link student-v2-doc-link-badge-bg student-details-badge-btn"
+                        href={resolveApiAssetUrl(courseResult.badgeUrl)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <img
+                          className="student-btn-icon"
+                          src="/images/medal.png"
+                          alt=""
+                          aria-hidden="true"
+                        />
+                        Download Badge
+                      </a>
+                    </div>
                   )}
 
 
@@ -680,7 +696,15 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                           {course.lessons.map((lesson) => (
                             <article key={lesson.id} className="student-lesson-card">
                               <div className="student-lesson-card-text">
-                                <h4>{lesson.title}</h4>
+                                <h4 className="student-lesson-title">
+                                  <img
+                                    className="student-lesson-icon"
+                                    src="/images/booky.png"
+                                    alt=""
+                                    aria-hidden="true"
+                                  />
+                                  {lesson.title}
+                                </h4>
                                 {lesson.description && (
                                   <p className="hint">{lesson.description}</p>
                                 )}
@@ -760,6 +784,9 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                                 }))
                               }
                             >
+                              <span className="student-back-icon" aria-hidden="true">
+                                &lt;
+                              </span>
                               Back to lessons
                             </button>
                           </div>
