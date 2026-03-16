@@ -26,7 +26,22 @@ export default function AdminPage({ pushToast }) {
   const user = getCurrentUser();
   const location = useLocation();
   const currentAdminPath = location.pathname.replace(/\/+$/, '') || '/admin';
-  const isDashboardSection = currentAdminPath === '/admin';
+  const dashboardAnchorMap = {
+    '/admin/enrollments': 'students-enrollments',
+    '/admin/formateur-approvals': 'formateur-approvals',
+    '/admin/invoices': 'invoices',
+  };
+  const dashboardAnchor =
+    dashboardAnchorMap[currentAdminPath] || location.hash.replace('#', '');
+  const isDashboardSection =
+    currentAdminPath === '/admin' || Boolean(dashboardAnchorMap[currentAdminPath]);
+  const isStudentsGroupActive =
+    currentAdminPath === '/admin/students' ||
+    dashboardAnchor === 'students-enrollments';
+  const isFormateursGroupActive =
+    currentAdminPath === '/admin/formateurs' ||
+    dashboardAnchor === 'formateur-approvals';
+  const isInvoicesAnchorActive = dashboardAnchor === 'invoices';
 
   const [globalOverview, setGlobalOverview] = useState(null);
   const [formateurs, setFormateurs] = useState([]);
@@ -367,6 +382,15 @@ export default function AdminPage({ pushToast }) {
   }, [isDashboardSection]);
 
   useEffect(() => {
+    if (!isDashboardSection) return;
+    if (!dashboardAnchor) return;
+    const section = document.getElementById(dashboardAnchor);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [isDashboardSection, dashboardAnchor]);
+
+  useEffect(() => {
     setEnrollmentPage(1);
   }, [enrollmentSearch, enrollmentSort]);
 
@@ -432,18 +456,38 @@ export default function AdminPage({ pushToast }) {
             </span>
             Dashboard
           </Link>
-          <Link className={navItemClass('/admin/students')} to="/admin/students">
-            <span className="admin-saas-nav-icon" aria-hidden="true">
-              <img src="/images/person.png" alt="" className="admin-saas-nav-icon-img" />
-            </span>
-            Students
-          </Link>
-          <Link className={navItemClass('/admin/formateurs')} to="/admin/formateurs">
-            <span className="admin-saas-nav-icon" aria-hidden="true">
-              <img src="/images/userr.png" alt="" className="admin-saas-nav-icon-img" />
-            </span>
-            Formateurs
-          </Link>
+          <div className={`admin-saas-nav-group${isStudentsGroupActive ? ' is-active' : ''}`}>
+            <Link className="admin-saas-nav-item admin-saas-nav-parent" to="/admin/students">
+              <span className="admin-saas-nav-icon" aria-hidden="true">
+                <img src="/images/person.png" alt="" className="admin-saas-nav-icon-img" />
+              </span>
+              Students
+            </Link>
+            <div className="admin-saas-subnav">
+              <Link className="admin-saas-subnav-item" to="/admin/students">
+                Students management
+              </Link>
+              <Link className="admin-saas-subnav-item" to="/admin#students-enrollments">
+                Students enrollments
+              </Link>
+            </div>
+          </div>
+          <div className={`admin-saas-nav-group${isFormateursGroupActive ? ' is-active' : ''}`}>
+            <Link className="admin-saas-nav-item admin-saas-nav-parent" to="/admin/formateurs">
+              <span className="admin-saas-nav-icon" aria-hidden="true">
+                <img src="/images/userr.png" alt="" className="admin-saas-nav-icon-img" />
+              </span>
+              Formateurs
+            </Link>
+            <div className="admin-saas-subnav">
+              <Link className="admin-saas-subnav-item" to="/admin/formateurs">
+                Formateurs management
+              </Link>
+              <Link className="admin-saas-subnav-item" to="/admin#formateur-approvals">
+                Formateur enrollments
+              </Link>
+            </div>
+          </div>
           <Link className={navItemClass('/admin/formations')} to="/admin/formations">
             <span className="admin-saas-nav-icon" aria-hidden="true">
               <img src="/images/school.png" alt="" className="admin-saas-nav-icon-img" />
@@ -456,16 +500,18 @@ export default function AdminPage({ pushToast }) {
             </span>
             Revenue
           </Link>
+          <Link
+            className={`admin-saas-nav-item${isInvoicesAnchorActive ? ' is-active' : ''}`}
+            to="/admin#invoices"
+          >
+            <span className="admin-saas-nav-icon" aria-hidden="true">
+              <img src="/images/bill.png" alt="" className="admin-saas-nav-icon-img" />
+            </span>
+            Invoices
+          </Link>
         </nav>
 
-        <div className="admin-saas-sidebar-bottom">
-          <div className="admin-saas-nav-item admin-saas-settings-btn">
-            <span className="admin-saas-nav-icon" aria-hidden="true">
-              <img src="/images/gear.png" alt="" className="admin-saas-nav-icon-img" />
-            </span>
-            Settings
-          </div>
-        </div>
+
       </aside>
 
       <div className="admin-saas-main">
@@ -553,7 +599,7 @@ export default function AdminPage({ pushToast }) {
           </div>
         </div>
 
-        <div className="card admin-saas-section">
+        <div className="card admin-saas-section" id="students-enrollments">
           <div className="card-head-row">
             <h2>Student Enrollments</h2>
             <StatusBadge
@@ -691,7 +737,7 @@ export default function AdminPage({ pushToast }) {
           </div>
         </div>
 
-        <div className="card admin-saas-section">
+        <div className="card admin-saas-section" id="formateur-approvals">
           <h2>Formateur Approvals</h2>
         <div className="table-toolbar">
           <input
@@ -836,7 +882,7 @@ export default function AdminPage({ pushToast }) {
         </div>
         </div>
 
-        <div className="card admin-saas-section">
+        <div className="card admin-saas-section" id="invoices">
           <div className="card-head-row">
             <h2>Students Invoices</h2>
             <StatusBadge
