@@ -6116,10 +6116,7 @@ code {
    ========================= */
 
 body.backoffice-palette-active {
-  background:
-    radial-gradient(circle at 12% -10%, rgba(10, 196, 224, 0.14), transparent 34%),
-    radial-gradient(circle at 88% 0%, rgba(221, 174, 211, 0.22), transparent 40%),
-    linear-gradient(160deg, #f4fbff 0%, #eaf6ff 52%, #f8eff6 100%);
+  background: #ffffff;
 }
 
 body.backoffice-palette-active .topbar {
@@ -9338,6 +9335,11 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   margin: 0 0 0 -76px;
   padding-left: 10px;
   box-sizing: border-box;
+  background: #ffffff;
+}
+
+body .admin-skin-page {
+  background: #ffffff !important;
 }
 
 .admin-saas-page .card {
@@ -9353,6 +9355,8 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
 .admin-saas-page .card::before {
   display: none;
 }
+
+/* Admin dashboard: keep layout width while disabling all buttons/links */
 
 .admin-saas-sidebar {
   position: fixed;
@@ -9370,7 +9374,7 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   padding: 16px;
   border: 1px solid #e6edf6;
   border-radius: 0 16px 16px 0;
-  background: linear-gradient(180deg, #f8fbff 0%, #f1f6fd 100%);
+  background: linear-gradient(160deg, #ffffff 0%, #f4f9ff 50%, #cceaf7 100%);
   box-shadow: 0 18px 38px rgba(12, 34, 62, 0.2);
   scrollbar-width: thin;
   scrollbar-color: #c8d9ee transparent;
@@ -9390,6 +9394,7 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   gap: 18px;
   min-width: 0;
   margin-left: 284px;
+  background: #ffffff !important;
 }
 
 .admin-saas-profile {
@@ -9553,7 +9558,13 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px;
-  background: linear-gradient(180deg, #f8fbff 0%, #f1f6fd 100%) !important;
+  background: linear-gradient(160deg, #ffffff 0%, #eef5ff 60%, #8fd8f3 100%) !important;
+}
+
+/* Hide admin header buttons but keep layout width */
+.admin-skin-page .admin-saas-top-header .admin-saas-quick-actions {
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 @media (max-width: 1180px) {
@@ -9569,6 +9580,7 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
 
   .admin-saas-main {
     margin-left: 0;
+    
   }
 
   .admin-saas-page {
