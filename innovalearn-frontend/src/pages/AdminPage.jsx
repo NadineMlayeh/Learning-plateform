@@ -516,11 +516,22 @@ export default function AdminPage({ pushToast }) {
 
       <div className="admin-saas-main">
         <div className="card panel-head admin-saas-top-header">
-          <div>
-            <h1>Admin Dashboard</h1>
-            <p className="hint">
-              Manage approvals and use dedicated sections for users, formations, and revenue.
-            </p>
+          <span className="admin-saas-header-accent" aria-hidden="true" />
+          <div className="admin-saas-header-intro">
+            <span className="admin-saas-header-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#1263b9" strokeWidth="1.6" />
+                <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#1263b9" strokeWidth="1.6" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#1263b9" strokeWidth="1.6" />
+                <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#1263b9" strokeWidth="1.6" />
+              </svg>
+            </span>
+            <div className="admin-saas-header-copy">
+              <h1>Admin Dashboard</h1>
+              <p className="hint">
+                Manage approvals and use dedicated sections for all users .
+              </p>
+            </div>
           </div>
           <div className="admin-saas-quick-actions">
             <Link className="link-btn small-btn" to="/admin/students">

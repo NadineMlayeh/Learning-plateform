@@ -5,9 +5,11 @@ import { getCurrentUser } from '../auth';
 import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 
-const INVOICE_PAGE_SIZE = 3;
+const INVOICE_PAGE_SIZE = 4;
+const PENDING_PAGE_SIZE = 3;
 const COURSE_CARDS_PAGE_SIZE = 6;
-const ACHIEVEMENT_PAGE_SIZE = 3;
+const ACHIEVEMENT_PAGE_SIZE = 4;
+const BADGES_INLINE_PAGE_SIZE = 2;
 const STREAK_TARGET_DAYS = 5;
 const DASH_SECTIONS = {
   COURSES: 'courses',
@@ -350,6 +352,7 @@ export default function StudentPage({ pushToast }) {
   const [achievementPage, setAchievementPage] = useState(1);
   const [achievementSearch, setAchievementSearch] = useState('');
   const [achievementSort, setAchievementSort] = useState('MOST_RECENT');
+  const [badgeInlinePages, setBadgeInlinePages] = useState({});
   const [pendingPage, setPendingPage] = useState(1);
   const [pendingSearch, setPendingSearch] = useState('');
   const [pendingSort, setPendingSort] = useState('MOST_RECENT');
@@ -735,11 +738,11 @@ export default function StudentPage({ pushToast }) {
 
   const pendingTotalPages = Math.max(
     1,
-    Math.ceil(filteredSortedPendingEnrollments.length / INVOICE_PAGE_SIZE),
+    Math.ceil(filteredSortedPendingEnrollments.length / PENDING_PAGE_SIZE),
   );
   const pendingPageRows = filteredSortedPendingEnrollments.slice(
-    (pendingPage - 1) * INVOICE_PAGE_SIZE,
-    pendingPage * INVOICE_PAGE_SIZE,
+    (pendingPage - 1) * PENDING_PAGE_SIZE,
+    pendingPage * PENDING_PAGE_SIZE,
   );
 
   const quickCards = [
@@ -1185,7 +1188,7 @@ export default function StudentPage({ pushToast }) {
                         </a>
                       ) : (
                         <span className="student-v2-soft-pill">
-                          Final certificate not generated yet
+                          No certification
                         </span>
                       )}
                     </div>
@@ -1198,20 +1201,79 @@ export default function StudentPage({ pushToast }) {
                         <span>Badges Earned :</span>
                       </p>
                       {row.badges.length > 0 ? (
-                        <div className="student-v2-achievement-badge-row">
-                          {row.badges.map((badge) => (
-                            <a
-                              key={`${row.enrollmentId}-${badge.courseId}`}
-                              className="student-v2-doc-link-badge-bg"
-                              href={resolveApiAssetUrl(badge.badgeUrl)}
-                              target="_blank"
-                              rel="noreferrer"
-                              title={badge.courseTitle}
+                        <>
+                          <div className="student-v2-achievement-badge-line">
+                            <div
+                              key={`badge-inline-${row.enrollmentId}-${badgeInlinePages[row.enrollmentId] || 1}`}
+                              className="student-v2-achievement-badge-row student-v2-achievement-badge-row-animated"
                             >
-                              Badge
-                            </a>
-                          ))}
-                        </div>
+                              {row.badges
+                                .slice(
+                                  ((badgeInlinePages[row.enrollmentId] || 1) - 1) *
+                                    BADGES_INLINE_PAGE_SIZE,
+                                  (badgeInlinePages[row.enrollmentId] || 1) *
+                                    BADGES_INLINE_PAGE_SIZE,
+                                )
+                                .map((badge) => (
+                                  <a
+                                    key={`${row.enrollmentId}-${badge.courseId}`}
+                                    className="student-v2-doc-link-badge-bg"
+                                    href={resolveApiAssetUrl(badge.badgeUrl)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    title={badge.courseTitle}
+                                  >
+                                    Badge
+                                  </a>
+                                ))}
+                            </div>
+                            {row.badges.length > BADGES_INLINE_PAGE_SIZE && (
+                              <div className="student-v2-badge-inline-pager">
+                                <button
+                                  type="button"
+                                  className="student-v2-badge-inline-nav"
+                                  onClick={() =>
+                                    setBadgeInlinePages((prev) => {
+                                      const current = prev[row.enrollmentId] || 1;
+                                      return {
+                                        ...prev,
+                                        [row.enrollmentId]: Math.max(1, current - 1),
+                                      };
+                                    })
+                                  }
+                                  disabled={(badgeInlinePages[row.enrollmentId] || 1) === 1}
+                                  aria-label="Previous badges"
+                                >
+                                  &lt;
+                                </button>
+                                <button
+                                  type="button"
+                                  className="student-v2-badge-inline-nav"
+                                  onClick={() =>
+                                    setBadgeInlinePages((prev) => {
+                                      const current = prev[row.enrollmentId] || 1;
+                                      const totalPages = Math.max(
+                                        1,
+                                        Math.ceil(row.badges.length / BADGES_INLINE_PAGE_SIZE),
+                                      );
+                                      return {
+                                        ...prev,
+                                        [row.enrollmentId]: Math.min(totalPages, current + 1),
+                                      };
+                                    })
+                                  }
+                                  disabled={
+                                    (badgeInlinePages[row.enrollmentId] || 1) >=
+                                    Math.ceil(row.badges.length / BADGES_INLINE_PAGE_SIZE)
+                                  }
+                                  aria-label="Next badges"
+                                >
+                                  &gt;
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </>
                       ) : (
                         <span className="student-v2-soft-pill">No badge earned yet</span>
                       )}
@@ -1299,23 +1361,46 @@ export default function StudentPage({ pushToast }) {
                           {invoice.enrollment?.formation?.title ||
                             `Formation #${invoice.enrollment?.formation?.id || '-'} `}
                         </h4>
-                        <p className="hint student-v2-invoice-meta">
-                          Amount: {Number(invoice.amount || 0).toFixed(2)} TND
-                        </p>
-                        <p className="hint student-v2-invoice-meta">
-                          Issued: {toDateLabel(invoice.createdAt)}
-                        </p>
-                        <a
-                          className="student-v2-doc-link student-v2-invoice-open-btn"
-                          href={resolveApiAssetUrl(invoice.pdfUrl)}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <span className="student-v2-invoice-btn-icon" aria-hidden="true">
-                            <img src="/images/import.png" alt="" />
-                          </span>
-                          <span>Download Invoice</span>
-                        </a>
+                        <div className="student-v2-invoice-meta-stack">
+                          <div className="student-v2-invoice-meta-row">
+                            <span className="student-v2-invoice-meta-label">Amount</span>
+                            <span className="student-v2-invoice-amount-pill">
+                              {Number(invoice.amount || 0).toFixed(2)} TND
+                            </span>
+                          </div>
+                          <div className="student-v2-invoice-meta-row student-v2-invoice-issued-row">
+                            <span className="student-v2-invoice-meta-label">Issued</span>
+                            <span className="student-v2-invoice-issued-value">
+                              {toDateLabel(invoice.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="student-v2-invoice-footer">
+                          {invoice.pdfUrl ? (
+                            <a
+                              className="student-v2-doc-link student-v2-invoice-open-btn"
+                              href={resolveApiAssetUrl(invoice.pdfUrl)}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <span className="student-v2-invoice-btn-icon" aria-hidden="true">
+                                <img src="/images/import.png" alt="" />
+                              </span>
+                              <span>Download Invoice</span>
+                            </a>
+                          ) : (
+                            <button
+                              type="button"
+                              className="student-v2-doc-link student-v2-invoice-open-btn is-disabled"
+                              disabled
+                            >
+                              <span className="student-v2-invoice-btn-icon" aria-hidden="true">
+                                <img src="/images/import.png" alt="" />
+                              </span>
+                              <span>Download Invoice</span>
+                            </button>
+                          )}
+                        </div>
                       </article>
                     ))}
                   </div>
@@ -1424,7 +1509,7 @@ export default function StudentPage({ pushToast }) {
                   </article>
                 ))}
               </div>
-              {filteredSortedPendingEnrollments.length > INVOICE_PAGE_SIZE && (
+              {filteredSortedPendingEnrollments.length > PENDING_PAGE_SIZE && (
                 <div className="pagination-bar">
                   <button
                     type="button"

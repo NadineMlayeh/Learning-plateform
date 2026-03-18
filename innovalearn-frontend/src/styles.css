@@ -3502,8 +3502,10 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
 .admin-modal-body .admin-user-detail-cards .admin-metric-card {
   padding: 0.44rem 0.58rem;
   min-height: 64px;
+  height: auto;
   gap: 0.14rem;
   align-content: start;
+  min-width: 0;
 }
 
 .admin-modal-body .admin-user-detail-cards .admin-metric-card .hint {
@@ -3513,8 +3515,18 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
 }
 
 .admin-modal-body .admin-user-detail-cards .admin-metric-card strong {
+  display: block;
+  max-width: 100%;
   font-size: 0.94rem;
   line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.admin-modal-body .admin-user-detail-cards {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: stretch;
 }
 
 .admin-metric-card-centered {
@@ -6893,12 +6905,26 @@ select.student-v2-enrolled-filter {
 }
 
 .student-v2-course-card {
+  position: relative;
   border: 1px solid rgba(11, 45, 114, 0.14);
   border-radius: 16px;
   background: linear-gradient(145deg, #ffffff 0%, #ecf7ff 100%);
   overflow: hidden;
   transition: transform 170ms ease, box-shadow 170ms ease;
   box-shadow: 0 16px 28px -24px rgba(11, 45, 114, 0.86);
+}
+
+.student-v2-course-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, 
+  #ddaed3 0%, 
+  #8fd3f4 50%, 
+  #ddaed3 100%
+);
+  z-index: 2;
 }
 
 .student-v2-course-card:hover {
@@ -7137,7 +7163,7 @@ display: inline-flex;
 }
 
 .student-v2-doc-link:hover {
-  background: red;
+  background: linear-gradient(145deg, #ffffff 0%, #f5f9ff 100%);
 }
 
 .student-v2-invoice-open-btn {
@@ -7150,13 +7176,13 @@ display: inline-flex;
   isolation: isolate;
   border-radius: 10px;
   padding: 0.52rem 0.84rem;
-  border: 1px solid rgba(122, 77, 210, 0.4);
-  background: linear-gradient(135deg, #3b0764 0%, #581c87 50%, #7e22ce 100%);
+  border: 1px solid #2f2f2f;
+  background: linear-gradient(180deg, #0b5db6 0%, #2e8eea 100%);
   color: #ffffff;
   font-weight: 700;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 12px 22px -16px rgba(98, 62, 176, 0.8);
+    0 12px 22px -16px rgba(32, 32, 32, 0.72);
   transition: box-shadow 180ms ease, border-color 180ms ease, filter 180ms ease, background 180ms ease;
 }
 
@@ -7193,16 +7219,29 @@ display: inline-flex;
 }
 
 .student-v2-invoice-open-btn:hover {
-  background: linear-gradient(135deg, #3b0764 0%, #581c87 50%, #7e22ce 100%);
-  border-color: rgba(136, 93, 226, 0.55);
+  background: linear-gradient(180deg, #0b5db6 0%, #2e8eea 100%);
+  border-color: #343434;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.25),
-    0 14px 24px -16px rgba(102, 67, 180, 0.9),
-    0 0 18px rgba(173, 132, 255, 0.22);
+    0 14px 24px -16px rgba(28, 28, 28, 0.86),
+    0 0 14px rgba(0, 0, 0, 0.16);
 }
 
 .student-v2-invoice-open-btn:hover::after {
   animation: btn-shine 760ms ease;
+}
+
+.student-v2-invoice-open-btn.is-disabled,
+.student-v2-invoice-open-btn.is-disabled:hover {
+  background: linear-gradient(180deg, #eceff4 0%, #e5e9f0 100%);
+  border-color: #d6dde8;
+  color: #a8b4c5;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.student-v2-invoice-open-btn.is-disabled .student-v2-invoice-btn-icon img {
+  filter: brightness(0) saturate(100%) invert(77%) sepia(11%) saturate(316%) hue-rotate(175deg) brightness(87%) contrast(89%);
 }
 
 .student-v2-doc-link.is-ghost {
@@ -7264,25 +7303,28 @@ display: inline-flex;
 }
 
 .student-v2-achievement-grid.student-v2-achievement-grid-paged {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .student-v2-achievement-card {
+  position: relative;
+  overflow: hidden;
   border: 1px solid rgba(138, 111, 70, 0.24);
   border-radius: 16px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.44) 0%,
-      rgba(255, 255, 255, 0.34) 56%,
-      rgba(252, 246, 236, 0.4) 100%
-    ),
-    url('/images/invoiceback.png') center center / cover no-repeat;
+  background: linear-gradient(145deg, #f9fafb 0%, #f3f5f7 55%, #eef1f4 100%);
   padding: 0.85rem;
   display: grid;
   gap: 0.62rem;
   box-shadow: 0 14px 24px -22px rgba(96, 72, 41, 0.28);
   transition: transform 170ms ease, box-shadow 170ms ease;
+}
+
+.student-v2-achievement-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, #e7c672 0%, #c9962a 50%, #b07a1e 100%);
 }
 
 .student-v2-achievement-card:hover {
@@ -7339,11 +7381,82 @@ display: inline-flex;
   line-height: 1;
 }
 
+.student-v2-achievement-badge-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
 .student-v2-achievement-badge-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.45rem;
-  align-items: flex-start;
+  align-items: center;
+  min-width: 0;
+}
+
+.student-v2-achievement-badge-row-animated {
+  animation: studentBadgeInlineSlide 380ms ease-out;
+}
+@keyframes studentBadgeInlineSlide {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.student-v2-badge-inline-pager {
+  display: flex;
+  gap: 0.34rem;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.student-v2-badge-inline-nav {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1.5px solid #6b7a8d !important;
+  background: #ffffff !important;
+  color: #2c3a4a !important;
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.student-v2-badge-inline-nav:hover:not(:disabled),
+.student-v2-badge-inline-nav:focus-visible:not(:disabled) {
+  background: #ffffff !important;
+  border-color: #4a5568 !important;
+  color: #1a2530 !important;
+}
+
+.student-v2-badge-inline-nav:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.student-v2-badge-inline-nav:active {
+  background: #ffffff !important;
+  transform: none;
+}
+
+.student-v2-badge-inline-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .student-v2-doc-link-cert {
@@ -7519,7 +7632,7 @@ display: inline-flex;
 
 .student-v2-invoice-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.72rem;
 }
 
@@ -7535,19 +7648,96 @@ display: inline-flex;
 }
 
 .student-v2-invoice-card {
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.08) 100%),
-    url('/images/invoiceback.png') center center / cover no-repeat;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  position: relative;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  border-color: #d2e3f6;
+  background: #ffffff;
+  box-shadow: 0 14px 26px -20px rgba(10, 36, 76, 0.35);
+}
+
+.student-v2-invoice-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, #0b5db6 0%, #2e8eea 100%);
+}
+
+.student-v2-invoice-card > h4 {
+  margin: 0;
+  padding: 1rem 1rem 0.2rem 1.1rem;
+  color: #11386d;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.student-v2-invoice-meta-stack {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.1rem 1rem 0.95rem 1.1rem;
+}
+
+.student-v2-invoice-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.62rem;
+  flex-wrap: wrap;
+}
+
+.student-v2-invoice-meta-label {
+  color: #7b92b5;
+  font-weight: 700;
+  font-size: 1.02rem;
+}
+
+.student-v2-invoice-amount-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0.2rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid #c9d9ee;
+  background: linear-gradient(180deg, #e5eef9 0%, #d6e5f7 100%);
+  color: #1658a6;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.student-v2-invoice-issued-value {
+  color: #203f6a;
+  font-size: 0.97rem;
+  font-weight: 700;
+}
+
+.student-v2-invoice-footer {
+  border-top: 1px solid #e2ebf7;
+  padding: 0.95rem 1rem;
+  display: flex;
+}
+
+.student-v2-invoice-footer .student-v2-invoice-open-btn {
+  width: 100%;
+  min-height: 46px;
 }
 
 .student-v2-pending-card {
+  position: relative;
   padding: 0;
   gap: 0;
   overflow: hidden;
   background: linear-gradient(145deg, #ffffff 0%, #f1f8ff 100%);
+}
+
+.student-v2-pending-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, #0b5db6 0%, #2eb3ec 58%, #ddaed3 100%);
+  z-index: 2;
 }
 
 .student-v2-pending-thumb {
@@ -7876,6 +8066,12 @@ body.backoffice-palette-active .formation-manage-stack button.content-delete-btn
 body.backoffice-palette-active .formation-manage-stack button.content-delete-btn-inline:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+@media (max-width: 1360px) {
+  .student-v2-invoice-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 1120px) {
@@ -9336,6 +9532,13 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   padding-left: 10px;
   box-sizing: border-box;
   background: #ffffff;
+  --admin-surface-bg:
+    linear-gradient(
+      145deg,
+      #f7fbff 0%,
+      #eef5fd 52%,
+      #f7fbff 100%
+    );
 }
 
 body .admin-skin-page {
@@ -9374,7 +9577,7 @@ body .admin-skin-page {
   padding: 16px;
   border: 1px solid #e6edf6;
   border-radius: 0 16px 16px 0;
-  background: linear-gradient(160deg, #ffffff 0%, #f4f9ff 50%, #cceaf7 100%);
+  background: var(--admin-surface-bg) !important;
   box-shadow: 0 18px 38px rgba(12, 34, 62, 0.2);
   scrollbar-width: thin;
   scrollbar-color: #c8d9ee transparent;
@@ -9558,7 +9761,54 @@ body .admin-skin-page {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px;
-  background: linear-gradient(160deg, #ffffff 0%, #eef5ff 60%, #8fd8f3 100%) !important;
+  padding-left: 34px !important;
+  position: relative;
+  overflow: hidden;
+  background: var(--admin-surface-bg) !important;
+}
+
+.admin-saas-top-header::before {
+  display: none !important;
+  content: none !important;
+}
+
+.admin-saas-header-accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 7px;
+  border-radius: 14px 0 0 14px;
+  background: linear-gradient(180deg, #0b2d72 0%, #0ac4e0 62%, #9ec9ff 100%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.admin-saas-header-intro {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding-left: 4px;
+  min-width: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.admin-saas-header-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  border: 1px solid #c8ddf5;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  box-shadow: 0 10px 22px rgba(12, 36, 64, 0.12);
+}
+
+.admin-saas-header-copy {
+  min-width: 0;
 }
 
 /* Hide admin header buttons but keep layout width */
@@ -9709,14 +9959,13 @@ body.backoffice-palette-active .container .admin-saas-quick-actions .link-btn:fo
 .admin-saas-section {
   display: grid;
   gap: 12px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.42) 0%,
-      rgba(246, 250, 255, 0.32) 52%,
-      rgba(255, 255, 255, 0.36) 100%
-    ),
-    url('/images/nn.jpg') center center / cover no-repeat !important;
+  background: var(--admin-surface-bg) !important;
+}
+
+body.backoffice-palette-active .admin-skin-page .admin-saas-sidebar,
+body.backoffice-palette-active .admin-skin-page .admin-saas-top-header,
+body.backoffice-palette-active .admin-skin-page .admin-saas-section {
+  background: var(--admin-surface-bg) !important;
 }
 
 .admin-saas-overview {
@@ -9787,6 +10036,12 @@ body.backoffice-palette-active .container .admin-saas-quick-actions .link-btn:fo
   padding: 14px;
   min-height: 102px;
   overflow: hidden;
+  transition: transform 190ms ease, box-shadow 190ms ease;
+}
+
+.admin-saas-kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 42px rgba(14, 36, 66, 0.24);
 }
 
 .admin-saas-kpi-card::before {
@@ -9849,6 +10104,12 @@ body.backoffice-palette-active .container .admin-saas-quick-actions .link-btn:fo
   padding: 16px 16px 16px 52px;
   min-height: 116px;
   overflow: hidden;
+  transition: transform 190ms ease, box-shadow 190ms ease;
+}
+
+.admin-saas-highlight-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 46px rgba(14, 36, 66, 0.26);
 }
 
 .admin-saas-highlight-accent {
