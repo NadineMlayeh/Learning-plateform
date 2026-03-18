@@ -338,6 +338,55 @@ export default function AdminDashboardPage({ pushToast }) {
     analyticsStudentPage * ANALYTICS_STUDENT_PAGE_SIZE,
   );
 
+  const globalOverview = useMemo(() => {
+    const totalFormations = analyticsFormations.length;
+    const publishedFormations = analyticsFormations.filter(
+      (entry) => Boolean(entry?.formation?.published),
+    ).length;
+    const totalCourses = analyticsFormations.reduce(
+      (sum, entry) => sum + (entry.courseStatistics?.length || 0),
+      0,
+    );
+
+    let totalStudentsEnrolled = 0;
+    let totalApprovedStudents = 0;
+    let totalCompletedStudents = 0;
+    let weightedSuccessCompleted = 0;
+
+    analyticsFormations.forEach((entry) => {
+      const stats = entry.statistics || {};
+      const approved = Number(stats.totalApprovedStudents || 0);
+      const completed = Number(stats.totalCompletedStudents || 0);
+      const enrolled = Number(stats.totalStudentsEnrolled || 0);
+      const successRate = Number(stats.successRate || 0);
+
+      totalStudentsEnrolled += enrolled;
+      totalApprovedStudents += approved;
+      totalCompletedStudents += completed;
+      weightedSuccessCompleted += (approved * successRate) / 100;
+    });
+
+    const completionRate =
+      totalApprovedStudents === 0
+        ? 0
+        : (totalCompletedStudents / totalApprovedStudents) * 100;
+    const successRate =
+      totalApprovedStudents === 0
+        ? 0
+        : (weightedSuccessCompleted / totalApprovedStudents) * 100;
+
+    return {
+      totalFormations,
+      publishedFormations,
+      draftFormations: Math.max(totalFormations - publishedFormations, 0),
+      totalCourses,
+      totalStudentsEnrolled,
+      totalApprovedStudents,
+      completionRate,
+      successRate,
+    };
+  }, [analyticsFormations]);
+
   function openAnalyticsForFormation(formationId) {
     const exists = analyticsByFormationId.has(formationId);
     if (!exists) {
@@ -489,6 +538,57 @@ export default function AdminDashboardPage({ pushToast }) {
           >
             Add Formation
           </button>
+        </div>
+      </div>
+
+      <div className="card formateur-global-overview-card">
+        <div className="card-head-row">
+          <h2>Global Overview</h2>
+          <div className="row">
+            <StatusBadge
+              label={`${globalOverview.totalFormations} formations`}
+              tone={globalOverview.totalFormations > 0 ? 'blue' : 'gray'}
+            />
+            {analyticsLoading && (
+              <span className="hint formateur-overview-loading">
+                Refreshing...
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="formateur-overview-grid">
+          <article className="formateur-overview-metric">
+            <p className="hint">Total Formations</p>
+            <strong>{globalOverview.totalFormations}</strong>
+          </article>
+          <article className="formateur-overview-metric">
+            <p className="hint">Published</p>
+            <strong>{globalOverview.publishedFormations}</strong>
+          </article>
+          <article className="formateur-overview-metric">
+            <p className="hint">Draft</p>
+            <strong>{globalOverview.draftFormations}</strong>
+          </article>
+          <article className="formateur-overview-metric">
+            <p className="hint">Total Courses</p>
+            <strong>{globalOverview.totalCourses}</strong>
+          </article>
+          <article className="formateur-overview-metric">
+            <p className="hint">Students Enrolled</p>
+            <strong>{globalOverview.totalStudentsEnrolled}</strong>
+          </article>
+          <article className="formateur-overview-metric">
+            <p className="hint">Approved Students</p>
+            <strong>{globalOverview.totalApprovedStudents}</strong>
+          </article>
+          <article className="formateur-overview-metric">
+            <p className="hint">Completion Rate</p>
+            <strong>{globalOverview.completionRate.toFixed(2)}%</strong>
+          </article>
+          <article className="formateur-overview-metric">
+            <p className="hint">Success Rate</p>
+            <strong>{globalOverview.successRate.toFixed(2)}%</strong>
+          </article>
         </div>
       </div>
 
