@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { apiRequest } from '../api';
+import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
 import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 
 const PAGE_SIZE = 6;
+const DETAILS_TABLE_PAGE_SIZE = 4;
 
 function statusTone(status) {
   if (status === 'APPROVED') return 'green';
@@ -76,6 +77,8 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({ page: 1, totalPages: 1, total: 0, items: [] });
   const [details, setDetails] = useState(null);
+  const [detailsEnrollmentSearch, setDetailsEnrollmentSearch] = useState('');
+  const [detailsEnrollmentPage, setDetailsEnrollmentPage] = useState(1);
   const [editModel, setEditModel] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [suspendTarget, setSuspendTarget] = useState(null);
@@ -100,11 +103,31 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
   async function openDetails(studentId) {
     try {
       const response = await apiRequest(`/admin/students/${studentId}`, { token: user.token });
+      setDetailsEnrollmentSearch('');
+      setDetailsEnrollmentPage(1);
       setDetails(response);
     } catch (err) {
       pushToast(err.message, 'error');
     }
   }
+
+  const filteredDetailsEnrollments = useMemo(() => {
+    const rows = details?.enrollments || [];
+    const query = detailsEnrollmentSearch.trim().toLowerCase();
+    if (!query) return rows;
+    return rows.filter((entry) =>
+      (entry.formation?.title || '').toLowerCase().includes(query),
+    );
+  }, [details, detailsEnrollmentSearch]);
+
+  const detailsEnrollmentTotalPages = Math.max(
+    1,
+    Math.ceil(filteredDetailsEnrollments.length / DETAILS_TABLE_PAGE_SIZE),
+  );
+  const detailsEnrollmentRows = filteredDetailsEnrollments.slice(
+    (detailsEnrollmentPage - 1) * DETAILS_TABLE_PAGE_SIZE,
+    detailsEnrollmentPage * DETAILS_TABLE_PAGE_SIZE,
+  );
 
   async function onSaveStudent(event) {
     event.preventDefault();
@@ -188,6 +211,16 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
   useEffect(() => {
     setPage(1);
   }, [search]);
+
+  useEffect(() => {
+    setDetailsEnrollmentPage(1);
+  }, [detailsEnrollmentSearch, details?.id]);
+
+  useEffect(() => {
+    if (detailsEnrollmentPage > detailsEnrollmentTotalPages) {
+      setDetailsEnrollmentPage(detailsEnrollmentTotalPages);
+    }
+  }, [detailsEnrollmentPage, detailsEnrollmentTotalPages]);
 
   return (
     <section className={embedded ? 'stack admin-skin-page admin-embedded-content' : 'stack admin-skin-page'}>
@@ -333,15 +366,19 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
       <Modal open={Boolean(details)} title={`Student #${details?.id || ''}`} onClose={() => setDetails(null)}>
         {details && (
           <div className="stack">
-            <div className="admin-metric-grid admin-user-detail-cards">
-              <article className="admin-metric-card">
-                <p className="hint">Full Name</p>
+            <div className="admin-user-detail-identity">
+              <div className="admin-user-detail-avatar">
+                <img
+                  src={resolveApiAssetUrl(details.profileImageUrl) || '/images/student.png'}
+                  alt={details.name || 'Student'}
+                />
+              </div>
+              <div className="admin-user-detail-text">
                 <strong>{details.name}</strong>
-              </article>
-              <article className="admin-metric-card">
-                <p className="hint">Email</p>
-                <strong>{details.email}</strong>
-              </article>
+                <p className="hint">{details.email}</p>
+              </div>
+            </div>
+            <div className="admin-metric-grid admin-user-detail-cards">
               <article className="admin-metric-card">
                 <p className="hint">Phone Number</p>
                 <strong>{details.phoneNumber || '-'}</strong>
@@ -360,6 +397,14 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
               </article>
             </div>
             <div className="table-wrap">
+              <div className="table-toolbar admin-details-table-toolbar">
+                <input
+                  type="text"
+                  value={detailsEnrollmentSearch}
+                  onChange={(event) => setDetailsEnrollmentSearch(event.target.value)}
+                  placeholder="Search formation by name"
+                />
+              </div>
               <table>
                 <thead>
                   <tr>
@@ -370,7 +415,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {(details.enrollments || []).map((entry) => (
+                  {detailsEnrollmentRows.map((entry) => (
                     <tr key={entry.id}>
                       <td>{entry.formation?.title || '-'}</td>
                       <td>
@@ -380,8 +425,40 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                       <td>{entry.invoice ? formatMoney(entry.invoice.amount) : '-'}</td>
                     </tr>
                   ))}
+                  {detailsEnrollmentRows.length === 0 && (
+                    <tr>
+                      <td colSpan={4}>No formations found for this search.</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
+            </div>
+            <div className="pagination-bar admin-details-pagination">
+              <button
+                type="button"
+                className="action-btn action-page"
+                onClick={() =>
+                  setDetailsEnrollmentPage((prev) => Math.max(1, prev - 1))
+                }
+                disabled={detailsEnrollmentPage === 1}
+              >
+                Prev
+              </button>
+              <span>
+                Page {detailsEnrollmentPage} / {detailsEnrollmentTotalPages}
+              </span>
+              <button
+                type="button"
+                className="action-btn action-page"
+                onClick={() =>
+                  setDetailsEnrollmentPage((prev) =>
+                    Math.min(detailsEnrollmentTotalPages, prev + 1),
+                  )
+                }
+                disabled={detailsEnrollmentPage === detailsEnrollmentTotalPages}
+              >
+                Next
+              </button>
             </div>
           </div>
         )}

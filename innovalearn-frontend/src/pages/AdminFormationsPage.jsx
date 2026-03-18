@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
@@ -6,6 +6,7 @@ import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 
 const PAGE_SIZE = 6;
+const ANALYTICS_STUDENT_PAGE_SIZE = 5;
 
 function buildQuery(path, params) {
   const query = new URLSearchParams();
@@ -127,6 +128,8 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
     formationId: null,
     data: null,
   });
+  const [analyticsStudentSearch, setAnalyticsStudentSearch] = useState('');
+  const [analyticsStudentPage, setAnalyticsStudentPage] = useState(1);
 
   async function loadFormations() {
     setLoading(true);
@@ -150,6 +153,8 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
   }
 
   async function openAnalytics(formationId) {
+    setAnalyticsStudentSearch('');
+    setAnalyticsStudentPage(1);
     setAnalytics({
       open: true,
       loading: true,
@@ -196,6 +201,8 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
   }
 
   function closeAnalytics() {
+    setAnalyticsStudentSearch('');
+    setAnalyticsStudentPage(1);
     setAnalytics({
       open: false,
       loading: false,
@@ -352,6 +359,34 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
     setPage(1);
   }, [search, statusFilter, typeFilter]);
 
+  const filteredAnalyticsStudents = useMemo(() => {
+    const rows = analytics.data?.enrolledStudents || [];
+    const query = analyticsStudentSearch.trim().toLowerCase();
+    if (!query) return rows;
+    return rows.filter((student) =>
+      String(student.name || '').toLowerCase().includes(query),
+    );
+  }, [analytics.data, analyticsStudentSearch]);
+
+  const analyticsStudentTotalPages = Math.max(
+    1,
+    Math.ceil(filteredAnalyticsStudents.length / ANALYTICS_STUDENT_PAGE_SIZE),
+  );
+  const analyticsStudentRows = filteredAnalyticsStudents.slice(
+    (analyticsStudentPage - 1) * ANALYTICS_STUDENT_PAGE_SIZE,
+    analyticsStudentPage * ANALYTICS_STUDENT_PAGE_SIZE,
+  );
+
+  useEffect(() => {
+    setAnalyticsStudentPage(1);
+  }, [analyticsStudentSearch, analytics.data?.formation?.id]);
+
+  useEffect(() => {
+    if (analyticsStudentPage > analyticsStudentTotalPages) {
+      setAnalyticsStudentPage(analyticsStudentTotalPages);
+    }
+  }, [analyticsStudentPage, analyticsStudentTotalPages]);
+
   return (
     <section className={embedded ? 'stack admin-skin-page admin-embedded-content' : 'stack admin-skin-page'}>
       {!embedded && <ProfileSidebar user={user} />}
@@ -423,9 +458,12 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                 <tr key={formation.id}>
                   <td>{formation.id}</td>
                   <td>
-                    {formation.title}
-                    <br />
-                    <span className="hint">{formation.description || '-'}</span>
+                    <span
+                      className="admin-formation-table-title"
+                      title={formation.description || ''}
+                    >
+                      {formation.title}
+                    </span>
                   </td>
                   <td>{formation.type}</td>
                   <td>
@@ -771,6 +809,16 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                     )}
 
                     <section className="table-wrap formateur-analytics-table">
+                      <div className="table-toolbar admin-details-table-toolbar">
+                        <input
+                          type="text"
+                          value={analyticsStudentSearch}
+                          onChange={(event) =>
+                            setAnalyticsStudentSearch(event.target.value)
+                          }
+                          placeholder="Search student by name"
+                        />
+                      </div>
                       <table>
                         <thead>
                           <tr>
@@ -782,7 +830,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                           </tr>
                         </thead>
                         <tbody>
-                          {(entry.enrolledStudents || []).map((student) => {
+                          {analyticsStudentRows.map((student) => {
                             const isCompleted =
                               student.completionStatus !== 'IN_PROGRESS';
                             return (
@@ -813,14 +861,43 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                               </tr>
                             );
                           })}
-                          {(entry.enrolledStudents || []).length === 0 && (
+                          {analyticsStudentRows.length === 0 && (
                             <tr>
-                              <td colSpan={isPresentiel ? 3 : 5}>No approved students yet.</td>
+                              <td colSpan={isPresentiel ? 3 : 5}>
+                                No students match this search.
+                              </td>
                             </tr>
                           )}
                         </tbody>
                       </table>
                     </section>
+                    <div className="pagination-bar admin-details-pagination">
+                      <button
+                        type="button"
+                        className="action-btn action-page"
+                        onClick={() =>
+                          setAnalyticsStudentPage((prev) => Math.max(1, prev - 1))
+                        }
+                        disabled={analyticsStudentPage === 1}
+                      >
+                        Prev
+                      </button>
+                      <span>
+                        Page {analyticsStudentPage} / {analyticsStudentTotalPages}
+                      </span>
+                      <button
+                        type="button"
+                        className="action-btn action-page"
+                        onClick={() =>
+                          setAnalyticsStudentPage((prev) =>
+                            Math.min(analyticsStudentTotalPages, prev + 1),
+                          )
+                        }
+                        disabled={analyticsStudentPage === analyticsStudentTotalPages}
+                      >
+                        Next
+                      </button>
+                    </div>
 
                     {!isPresentiel && (
                       <section className="table-wrap formateur-analytics-table">

@@ -214,6 +214,7 @@ export class AdminService {
         id: true,
         name: true,
         email: true,
+        profileImageUrl: true,
         phoneNumber: true,
         dateOfBirth: true,
         createdAt: true,
@@ -526,6 +527,7 @@ export class AdminService {
         id: true,
         name: true,
         email: true,
+        profileImageUrl: true,
         phoneNumber: true,
         dateOfBirth: true,
         createdAt: true,
@@ -1527,6 +1529,11 @@ export class AdminService {
                   select: {
                     id: true,
                     title: true,
+                    formateur: {
+                      select: {
+                        name: true,
+                      },
+                    },
                   },
                 },
               },
@@ -1553,7 +1560,12 @@ export class AdminService {
 
     const revenuePerFormationMap = new Map<
       number,
-      { formationId: number; title: string; revenue: number }
+      {
+        formationId: number;
+        title: string;
+        formateurName: string;
+        revenue: number;
+      }
     >();
 
     allInvoices.forEach((invoice) => {
@@ -1564,6 +1576,7 @@ export class AdminService {
         revenuePerFormationMap.set(formation.id, {
           formationId: formation.id,
           title: formation.title,
+          formateurName: formation.formateur?.name || '-',
           revenue: 0,
         });
       }

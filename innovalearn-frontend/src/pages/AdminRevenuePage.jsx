@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
@@ -8,6 +8,8 @@ import StatusBadge from '../components/StatusBadge';
 function money(value) {
   return `${Number(value || 0).toFixed(2)} TND`;
 }
+
+const REVENUE_TABLE_PAGE_SIZE = 8;
 
 function MonthlyRevenueChart({ rows }) {
   const maxValue = Math.max(1, ...rows.map((entry) => Number(entry.revenue || 0)));
@@ -44,6 +46,33 @@ export default function AdminRevenuePage({ pushToast, embedded = false }) {
     revenuePerFormation: [],
     monthlyRevenue: [],
   });
+  const [revenueSearch, setRevenueSearch] = useState('');
+  const [revenueSort, setRevenueSort] = useState('highest');
+  const [revenuePage, setRevenuePage] = useState(1);
+
+  const filteredRevenueRows = useMemo(() => {
+    const query = revenueSearch.trim().toLowerCase();
+    const rows = (data.revenuePerFormation || []).filter((entry) =>
+      (entry.title || '').toLowerCase().includes(query),
+    );
+
+    rows.sort((a, b) => {
+      const diff = Number(b.revenue || 0) - Number(a.revenue || 0);
+      if (revenueSort === 'least') return -diff;
+      return diff;
+    });
+
+    return rows;
+  }, [data.revenuePerFormation, revenueSearch, revenueSort]);
+
+  const revenueTotalPages = Math.max(
+    1,
+    Math.ceil(filteredRevenueRows.length / REVENUE_TABLE_PAGE_SIZE),
+  );
+  const revenuePageRows = filteredRevenueRows.slice(
+    (revenuePage - 1) * REVENUE_TABLE_PAGE_SIZE,
+    revenuePage * REVENUE_TABLE_PAGE_SIZE,
+  );
 
   async function loadRevenue() {
     setLoading(true);
@@ -62,6 +91,16 @@ export default function AdminRevenuePage({ pushToast, embedded = false }) {
   useEffect(() => {
     loadRevenue();
   }, [year]);
+
+  useEffect(() => {
+    setRevenuePage(1);
+  }, [revenueSearch, revenueSort, year]);
+
+  useEffect(() => {
+    if (revenuePage > revenueTotalPages) {
+      setRevenuePage(revenueTotalPages);
+    }
+  }, [revenuePage, revenueTotalPages]);
 
   return (
     <section className={embedded ? 'stack admin-skin-page admin-embedded-content' : 'stack admin-skin-page'}>
@@ -123,28 +162,68 @@ export default function AdminRevenuePage({ pushToast, embedded = false }) {
 
         <article className="admin-analytics-card">
           <h3>Revenue Per Formation</h3>
+          <div className="table-toolbar">
+            <input
+              type="text"
+              value={revenueSearch}
+              onChange={(event) => setRevenueSearch(event.target.value)}
+              placeholder="Search by formation name"
+            />
+            <select
+              value={revenueSort}
+              onChange={(event) => setRevenueSort(event.target.value)}
+            >
+              <option value="highest">Highest Revenue</option>
+              <option value="least">Least Revenue</option>
+            </select>
+          </div>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Formation</th>
+                  <th>Formateur</th>
                   <th>Revenue</th>
                 </tr>
               </thead>
               <tbody>
-                {(data.revenuePerFormation || []).map((entry) => (
+                {revenuePageRows.map((entry) => (
                   <tr key={entry.formationId}>
                     <td>{entry.title}</td>
+                    <td>{entry.formateurName || '-'}</td>
                     <td>{money(entry.revenue)}</td>
                   </tr>
                 ))}
-                {(!data.revenuePerFormation || data.revenuePerFormation.length === 0) && (
+                {revenuePageRows.length === 0 && (
                   <tr>
-                    <td colSpan={2}>No revenue rows for this year.</td>
+                    <td colSpan={3}>No revenue rows for this filter.</td>
                   </tr>
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="pagination-bar">
+            <button
+              type="button"
+              className="action-btn action-page"
+              onClick={() => setRevenuePage((prev) => Math.max(1, prev - 1))}
+              disabled={revenuePage === 1}
+            >
+              Prev
+            </button>
+            <span>
+              Page {revenuePage} / {revenueTotalPages}
+            </span>
+            <button
+              type="button"
+              className="action-btn action-page"
+              onClick={() =>
+                setRevenuePage((prev) => Math.min(revenueTotalPages, prev + 1))
+              }
+              disabled={revenuePage === revenueTotalPages}
+            >
+              Next
+            </button>
           </div>
         </article>
       </div>

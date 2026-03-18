@@ -2,13 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
-import StatusBadge from '../components/StatusBadge';
+import StatusBadge from '../components/StatusBadge';  
 import AdminStudentsPage from './AdminStudentsPage';
 import AdminFormateursPage from './AdminFormateursPage';
 import AdminFormationsPage from './AdminFormationsPage';
 import AdminRevenuePage from './AdminRevenuePage';
 
 const PAGE_SIZE = 3;
+const INVOICE_DETAILS_PAGE_SIZE = 5;
 
 function statusTone(status) {
   if (status === 'APPROVED') return 'green';
@@ -71,6 +72,8 @@ export default function AdminPage({ pushToast }) {
   const [invoicePage, setInvoicePage] = useState(1);
   const [expandedInvoiceStudentId, setExpandedInvoiceStudentId] =
     useState(null);
+  const [invoiceDetailsSearch, setInvoiceDetailsSearch] = useState('');
+  const [invoiceDetailsPage, setInvoiceDetailsPage] = useState(1);
 
   async function loadFormateurs() {
     try {
@@ -372,6 +375,29 @@ export default function AdminPage({ pushToast }) {
     (invoicePage - 1) * PAGE_SIZE,
     invoicePage * PAGE_SIZE,
   );
+  const expandedInvoiceGroup = useMemo(
+    () =>
+      groupedInvoices.find(
+        (group) => group.studentId === expandedInvoiceStudentId,
+      ) || null,
+    [groupedInvoices, expandedInvoiceStudentId],
+  );
+  const filteredExpandedInvoiceRows = useMemo(() => {
+    if (!expandedInvoiceGroup) return [];
+    const query = invoiceDetailsSearch.trim().toLowerCase();
+    if (!query) return expandedInvoiceGroup.invoices;
+    return expandedInvoiceGroup.invoices.filter((entry) =>
+      (entry.enrollment?.formation?.title || '').toLowerCase().includes(query),
+    );
+  }, [expandedInvoiceGroup, invoiceDetailsSearch]);
+  const invoiceDetailsTotalPages = Math.max(
+    1,
+    Math.ceil(filteredExpandedInvoiceRows.length / INVOICE_DETAILS_PAGE_SIZE),
+  );
+  const invoiceDetailsRows = filteredExpandedInvoiceRows.slice(
+    (invoiceDetailsPage - 1) * INVOICE_DETAILS_PAGE_SIZE,
+    invoiceDetailsPage * INVOICE_DETAILS_PAGE_SIZE,
+  );
 
   useEffect(() => {
     if (!isDashboardSection) return;
@@ -404,6 +430,15 @@ export default function AdminPage({ pushToast }) {
   }, [invoiceSearch, invoiceGroupSort]);
 
   useEffect(() => {
+    setInvoiceDetailsSearch('');
+    setInvoiceDetailsPage(1);
+  }, [expandedInvoiceStudentId]);
+
+  useEffect(() => {
+    setInvoiceDetailsPage(1);
+  }, [invoiceDetailsSearch]);
+
+  useEffect(() => {
     if (enrollmentPage > enrollmentTotalPages) {
       setEnrollmentPage(enrollmentTotalPages);
     }
@@ -420,6 +455,12 @@ export default function AdminPage({ pushToast }) {
       setInvoicePage(invoiceTotalPages);
     }
   }, [invoicePage, invoiceTotalPages]);
+
+  useEffect(() => {
+    if (invoiceDetailsPage > invoiceDetailsTotalPages) {
+      setInvoiceDetailsPage(invoiceDetailsTotalPages);
+    }
+  }, [invoiceDetailsPage, invoiceDetailsTotalPages]);
 
   function navItemClass(path) {
     return currentAdminPath === path
@@ -957,9 +998,7 @@ export default function AdminPage({ pushToast }) {
                     className="action-btn action-page"
                     onClick={() =>
                       setExpandedInvoiceStudentId((prev) =>
-                        prev === group.studentId
-                          ? null
-                          : group.studentId,
+                        prev === group.studentId ? null : group.studentId,
                       )
                     }
                   >
@@ -968,48 +1007,90 @@ export default function AdminPage({ pushToast }) {
                 </div>
 
                 {isExpanded && (
-                  <div className="table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Invoice</th>
-                          <th>Formation</th>
-                          <th>Type</th>
-                          <th>Amount</th>
-                          <th>Issued</th>
-                          <th>Download</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {group.invoices.map((entry) => (
-                          <tr key={entry.id}>
-                            <td>#{entry.id}</td>
-                            <td>{entry.enrollment?.formation?.title || '-'}</td>
-                            <td>{entry.enrollment?.formation?.type || '-'}</td>
-                            <td>{Number(entry.amount || 0).toFixed(2)} TND</td>
-                            <td>
-                              {new Date(entry.createdAt).toLocaleString()}
-                            </td>
-                            <td>
-                              <a
-                                className="admin-invoice-download-link"
-                                href={resolveApiAssetUrl(entry.pdfUrl)}
-                                target="_blank"
-                                rel="noreferrer"
-                                aria-label="Download invoice PDF"
-                                title="Download invoice PDF"
-                              >
-                                <img
-                                  src="/images/download.png"
-                                  alt=""
-                                  className="admin-invoice-download-icon"
-                                />
-                              </a>
-                            </td>
+                  <div className="stack">
+                    <div className="table-toolbar admin-details-table-toolbar">
+                      <input
+                        type="text"
+                        value={invoiceDetailsSearch}
+                        onChange={(event) =>
+                          setInvoiceDetailsSearch(event.target.value)
+                        }
+                        placeholder="Search by formation name"
+                      />
+                    </div>
+                    <div className="table-wrap">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Invoice</th>
+                            <th>Formation</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Issued</th>
+                            <th>Download</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {invoiceDetailsRows.map((entry) => (
+                            <tr key={entry.id}>
+                              <td>#{entry.id}</td>
+                              <td>{entry.enrollment?.formation?.title || '-'}</td>
+                              <td>{entry.enrollment?.formation?.type || '-'}</td>
+                              <td>{Number(entry.amount || 0).toFixed(2)} TND</td>
+                              <td>{new Date(entry.createdAt).toLocaleString()}</td>
+                              <td>
+                                <a
+                                  className="admin-invoice-download-link"
+                                  href={resolveApiAssetUrl(entry.pdfUrl)}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  aria-label="Download invoice PDF"
+                                  title="Download invoice PDF"
+                                >
+                                  <img
+                                    src="/images/download.png"
+                                    alt=""
+                                    className="admin-invoice-download-icon"
+                                  />
+                                </a>
+                              </td>
+                            </tr>
+                          ))}
+                          {invoiceDetailsRows.length === 0 && (
+                            <tr>
+                              <td colSpan={6}>No invoices found for this formation search.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="pagination-bar admin-details-pagination">
+                      <button
+                        type="button"
+                        className="action-btn action-page"
+                        onClick={() =>
+                          setInvoiceDetailsPage((prev) => Math.max(1, prev - 1))
+                        }
+                        disabled={invoiceDetailsPage === 1}
+                      >
+                        Prev
+                      </button>
+                      <span>
+                        Page {invoiceDetailsPage} / {invoiceDetailsTotalPages}
+                      </span>
+                      <button
+                        type="button"
+                        className="action-btn action-page"
+                        onClick={() =>
+                          setInvoiceDetailsPage((prev) =>
+                            Math.min(invoiceDetailsTotalPages, prev + 1),
+                          )
+                        }
+                        disabled={invoiceDetailsPage === invoiceDetailsTotalPages}
+                      >
+                        Next
+                      </button>
+                    </div>
                   </div>
                 )}
               </article>

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { apiRequest } from '../api';
+import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
 import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 
 const PAGE_SIZE = 6;
+const DETAILS_TABLE_PAGE_SIZE = 4;
 
 function statusTone(status) {
   if (status === 'APPROVED') return 'green';
@@ -121,6 +122,8 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({ page: 1, totalPages: 1, total: 0, items: [] });
   const [details, setDetails] = useState(null);
+  const [detailsFormationSearch, setDetailsFormationSearch] = useState('');
+  const [detailsFormationPage, setDetailsFormationPage] = useState(1);
   const [editModel, setEditModel] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [suspendTarget, setSuspendTarget] = useState(null);
@@ -152,11 +155,31 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
   async function openDetails(formateurId) {
     try {
       const response = await apiRequest(`/admin/formateurs/${formateurId}`, { token: user.token });
+      setDetailsFormationSearch('');
+      setDetailsFormationPage(1);
       setDetails(response);
     } catch (err) {
       pushToast(err.message, 'error');
     }
   }
+
+  const filteredDetailsFormations = useMemo(() => {
+    const rows = details?.formations || [];
+    const query = detailsFormationSearch.trim().toLowerCase();
+    if (!query) return rows;
+    return rows.filter((formation) =>
+      (formation.title || '').toLowerCase().includes(query),
+    );
+  }, [details, detailsFormationSearch]);
+
+  const detailsFormationTotalPages = Math.max(
+    1,
+    Math.ceil(filteredDetailsFormations.length / DETAILS_TABLE_PAGE_SIZE),
+  );
+  const detailsFormationRows = filteredDetailsFormations.slice(
+    (detailsFormationPage - 1) * DETAILS_TABLE_PAGE_SIZE,
+    detailsFormationPage * DETAILS_TABLE_PAGE_SIZE,
+  );
 
   async function saveFormateur(event) {
     event.preventDefault();
@@ -261,6 +284,16 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
   useEffect(() => {
     setPage(1);
   }, [search]);
+
+  useEffect(() => {
+    setDetailsFormationPage(1);
+  }, [detailsFormationSearch, details?.id]);
+
+  useEffect(() => {
+    if (detailsFormationPage > detailsFormationTotalPages) {
+      setDetailsFormationPage(detailsFormationTotalPages);
+    }
+  }, [detailsFormationPage, detailsFormationTotalPages]);
 
   return (
     <section className={embedded ? 'stack admin-skin-page admin-embedded-content' : 'stack admin-skin-page'}>
@@ -416,15 +449,19 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
       <Modal open={Boolean(details)} title={`Formateur #${details?.id || ''}`} onClose={() => setDetails(null)}>
         {details && (
           <div className="stack">
-            <div className="admin-metric-grid admin-user-detail-cards">
-              <article className="admin-metric-card">
-                <p className="hint">Name</p>
+            <div className="admin-user-detail-identity">
+              <div className="admin-user-detail-avatar">
+                <img
+                  src={resolveApiAssetUrl(details.profileImageUrl) || '/images/student.png'}
+                  alt={details.name || 'Formateur'}
+                />
+              </div>
+              <div className="admin-user-detail-text">
                 <strong>{details.name}</strong>
-              </article>
-              <article className="admin-metric-card">
-                <p className="hint">Email</p>
-                <strong>{details.email}</strong>
-              </article>
+                <p className="hint">{details.email}</p>
+              </div>
+            </div>
+            <div className="admin-metric-grid admin-user-detail-cards">
               <article className="admin-metric-card">
                 <p className="hint">Phone Number</p>
                 <strong>{details.phoneNumber || '-'}</strong>
@@ -433,12 +470,16 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
                 <p className="hint">Date of Birth</p>
                 <strong>{formatDateOfBirth(details.dateOfBirth)}</strong>
               </article>
-              <article className="admin-metric-card">
-                <p className="hint">Status</p>
-                <strong>{details.status || 'PENDING'}</strong>
-              </article>
             </div>
             <div className="table-wrap">
+              <div className="table-toolbar admin-details-table-toolbar">
+                <input
+                  type="text"
+                  value={detailsFormationSearch}
+                  onChange={(event) => setDetailsFormationSearch(event.target.value)}
+                  placeholder="Search formation by name"
+                />
+              </div>
               <table>
                 <thead>
                   <tr>
@@ -451,7 +492,7 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {(details.formations || []).map((formation) => (
+                  {detailsFormationRows.map((formation) => (
                     <tr key={formation.id}>
                       <td>{formation.id}</td>
                       <td>{formation.title}</td>
@@ -461,13 +502,40 @@ export default function AdminFormateursPage({ pushToast, embedded = false }) {
                       <td>{Number(formation.successRate || 0).toFixed(2)}%</td>
                     </tr>
                   ))}
-                  {(details.formations || []).length === 0 && (
+                  {detailsFormationRows.length === 0 && (
                     <tr>
-                      <td colSpan={6}>No formations found for this formateur.</td>
+                      <td colSpan={6}>No formations found for this search.</td>
                     </tr>
                   )}
                 </tbody>
               </table>
+            </div>
+            <div className="pagination-bar admin-details-pagination">
+              <button
+                type="button"
+                className="action-btn action-page"
+                onClick={() =>
+                  setDetailsFormationPage((prev) => Math.max(1, prev - 1))
+                }
+                disabled={detailsFormationPage === 1}
+              >
+                Prev
+              </button>
+              <span>
+                Page {detailsFormationPage} / {detailsFormationTotalPages}
+              </span>
+              <button
+                type="button"
+                className="action-btn action-page"
+                onClick={() =>
+                  setDetailsFormationPage((prev) =>
+                    Math.min(detailsFormationTotalPages, prev + 1),
+                  )
+                }
+                disabled={detailsFormationPage === detailsFormationTotalPages}
+              >
+                Next
+              </button>
             </div>
           </div>
         )}

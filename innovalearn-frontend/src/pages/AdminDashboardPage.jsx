@@ -7,6 +7,7 @@ import StatusBadge from '../components/StatusBadge';
 import LoadingButton from '../components/LoadingButton';
 
 const PAGE_SIZE = 3;
+const ANALYTICS_STUDENT_PAGE_SIZE = 5;
 const FORMATION_PUBLISH_TS_KEY = 'formateur_published_at_map_v1';
 const INITIAL_FORMATION_FORM = {
   title: '',
@@ -125,6 +126,8 @@ export default function AdminDashboardPage({ pushToast }) {
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [selectedAnalyticsFormationId, setSelectedAnalyticsFormationId] =
     useState(null);
+  const [analyticsStudentSearch, setAnalyticsStudentSearch] = useState('');
+  const [analyticsStudentPage, setAnalyticsStudentPage] = useState(1);
 
   async function loadFormations() {
     try {
@@ -317,6 +320,24 @@ export default function AdminDashboardPage({ pushToast }) {
     ? analyticsByFormationId.get(selectedAnalyticsFormationId)
     : null;
 
+  const filteredAnalyticsStudents = useMemo(() => {
+    const rows = selectedAnalyticsEntry?.enrolledStudents || [];
+    const query = analyticsStudentSearch.trim().toLowerCase();
+    if (!query) return rows;
+    return rows.filter((student) =>
+      String(student.name || '').toLowerCase().includes(query),
+    );
+  }, [selectedAnalyticsEntry, analyticsStudentSearch]);
+
+  const analyticsStudentTotalPages = Math.max(
+    1,
+    Math.ceil(filteredAnalyticsStudents.length / ANALYTICS_STUDENT_PAGE_SIZE),
+  );
+  const analyticsStudentRows = filteredAnalyticsStudents.slice(
+    (analyticsStudentPage - 1) * ANALYTICS_STUDENT_PAGE_SIZE,
+    analyticsStudentPage * ANALYTICS_STUDENT_PAGE_SIZE,
+  );
+
   function openAnalyticsForFormation(formationId) {
     const exists = analyticsByFormationId.has(formationId);
     if (!exists) {
@@ -324,10 +345,14 @@ export default function AdminDashboardPage({ pushToast }) {
       return;
     }
 
+    setAnalyticsStudentSearch('');
+    setAnalyticsStudentPage(1);
     setSelectedAnalyticsFormationId(formationId);
   }
 
   function closeAnalyticsModal() {
+    setAnalyticsStudentSearch('');
+    setAnalyticsStudentPage(1);
     setSelectedAnalyticsFormationId(null);
   }
 
@@ -435,6 +460,16 @@ export default function AdminDashboardPage({ pushToast }) {
   const formationToDelete = confirmDeleteFormationId
     ? formations.find((item) => item.id === confirmDeleteFormationId)
     : null;
+
+  useEffect(() => {
+    setAnalyticsStudentPage(1);
+  }, [analyticsStudentSearch, selectedAnalyticsFormationId]);
+
+  useEffect(() => {
+    if (analyticsStudentPage > analyticsStudentTotalPages) {
+      setAnalyticsStudentPage(analyticsStudentTotalPages);
+    }
+  }, [analyticsStudentPage, analyticsStudentTotalPages]);
 
   return (
     <section className="stack formateur-dashboard-page admin-skin-page">
@@ -842,6 +877,16 @@ export default function AdminDashboardPage({ pushToast }) {
                     )}
 
                     <section className="table-wrap formateur-analytics-table">
+                      <div className="table-toolbar admin-details-table-toolbar">
+                        <input
+                          type="text"
+                          value={analyticsStudentSearch}
+                          onChange={(event) =>
+                            setAnalyticsStudentSearch(event.target.value)
+                          }
+                          placeholder="Search student by name"
+                        />
+                      </div>
                       <table>
                         <thead>
                           <tr>
@@ -853,7 +898,7 @@ export default function AdminDashboardPage({ pushToast }) {
                           </tr>
                         </thead>
                         <tbody>
-                          {(entry.enrolledStudents || []).map((student) => {
+                          {analyticsStudentRows.map((student) => {
                             const isCompleted =
                               student.completionStatus !== 'IN_PROGRESS';
                             return (
@@ -892,14 +937,43 @@ export default function AdminDashboardPage({ pushToast }) {
                               </tr>
                             );
                           })}
-                          {(entry.enrolledStudents || []).length === 0 && (
+                          {analyticsStudentRows.length === 0 && (
                             <tr>
-                              <td colSpan={isPresentiel ? 3 : 5}>No approved students yet.</td>
+                              <td colSpan={isPresentiel ? 3 : 5}>
+                                No students match this search.
+                              </td>
                             </tr>
                           )}
                         </tbody>
                       </table>
                     </section>
+                    <div className="pagination-bar admin-details-pagination">
+                      <button
+                        type="button"
+                        className="action-btn action-page"
+                        onClick={() =>
+                          setAnalyticsStudentPage((prev) => Math.max(1, prev - 1))
+                        }
+                        disabled={analyticsStudentPage === 1}
+                      >
+                        Prev
+                      </button>
+                      <span>
+                        Page {analyticsStudentPage} / {analyticsStudentTotalPages}
+                      </span>
+                      <button
+                        type="button"
+                        className="action-btn action-page"
+                        onClick={() =>
+                          setAnalyticsStudentPage((prev) =>
+                            Math.min(analyticsStudentTotalPages, prev + 1),
+                          )
+                        }
+                        disabled={analyticsStudentPage === analyticsStudentTotalPages}
+                      >
+                        Next
+                      </button>
+                    </div>
 
                     {!isPresentiel && (
                       <section className="table-wrap formateur-analytics-table">
