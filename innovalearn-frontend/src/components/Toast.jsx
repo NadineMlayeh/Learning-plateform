@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const TOAST_TIMEOUT_MS = 4200;
+const TOAST_TIMEOUT_MS = 2500;
 let nextToastId = 1;
 
 function ToastItem({ toast, onClose }) {
@@ -12,12 +12,14 @@ function ToastItem({ toast, onClose }) {
     return () => clearTimeout(timer);
   }, [toast.id, onClose]);
 
+  const isSuccess = toast.type === 'success';
+
   return (
     <div className={`toast toast-${toast.type}`}>
+      <span className="toast-icon">
+        {isSuccess ? '✓' : '✕'}
+      </span>
       <p>{toast.message}</p>
-      <button type="button" className="toast-close" onClick={() => onClose(toast.id)}>
-        x
-      </button>
     </div>
   );
 }
@@ -36,11 +38,19 @@ export function useToast() {
   const [toasts, setToasts] = useState([]);
 
   function pushToast(message, type = 'error') {
+    const normalizedMessage = String(message ?? '').trim();
+    if (!normalizedMessage) return;
+
+    if (type === 'error') {
+      const lower = normalizedMessage.toLowerCase();
+      if (lower.includes('unauthorized')) return;
+    }
+
     setToasts((prev) => [
       ...prev,
       {
         id: nextToastId++,
-        message,
+        message: normalizedMessage,
         type,
       },
     ]);

@@ -1,4 +1,5 @@
 export const API_BASE_URL = 'http://localhost:3000';
+import { clearToken } from './auth';
 
 function getAuthHeaders(token) {
   return token
@@ -31,6 +32,14 @@ export async function apiRequest(path, options = {}) {
   const data = text ? safeJsonParse(text) : null;
 
   if (!response.ok) {
+    if (response.status === 401 && token) {
+      clearToken({ reason: 'timeout' });
+      if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+        window.location.replace('/');
+      }
+      throw new Error('');
+    }
+
     const message =
       (data && (data.message || data.error)) ||
       `Request failed with status ${response.status}`;

@@ -82,12 +82,14 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {error && <p className="error">{error}</p>}
+        {error && (
+          <article className="auth-error-box" role="alert" aria-live="assertive">
+            <p className="auth-error-title">⚠ Login Failed</p>
+            <p className="auth-error-body">{error}</p>
+          </article>
+        )}
 
         <div className="auth-foot">
-          <p className="hint">
-            If you are a formateur and not approved yet, backend login is expected to fail.
-          </p>
           <p className="hint">
             New here?{' '}
             <Link to="/signup" className="auth-inline-link">

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
@@ -9,6 +9,7 @@ import LoadingButton from '../components/LoadingButton';
 const PAGE_SIZE = 3;
 const ANALYTICS_STUDENT_PAGE_SIZE = 5;
 const FORMATION_PUBLISH_TS_KEY = 'formateur_published_at_map_v1';
+const FORMATEUR_DASHBOARD_RETURN_SECTION_KEY = 'formateur_dashboard_return_section';
 const INITIAL_FORMATION_FORM = {
   title: '',
   description: '',
@@ -128,6 +129,8 @@ export default function AdminDashboardPage({ pushToast }) {
     useState(null);
   const [analyticsStudentSearch, setAnalyticsStudentSearch] = useState('');
   const [analyticsStudentPage, setAnalyticsStudentPage] = useState(1);
+  const pendingSectionRef = useRef(null);
+  const analyticsSectionRef = useRef(null);
 
   async function loadFormations() {
     try {
@@ -229,6 +232,22 @@ export default function AdminDashboardPage({ pushToast }) {
   useEffect(() => {
     loadFormations();
     loadAnalytics();
+  }, []);
+
+  useEffect(() => {
+    const section = sessionStorage.getItem(FORMATEUR_DASHBOARD_RETURN_SECTION_KEY);
+    if (!section) return undefined;
+
+    const frame = requestAnimationFrame(() => {
+      const target =
+        section === 'analytics'
+          ? analyticsSectionRef.current
+          : pendingSectionRef.current;
+      target?.scrollIntoView({ behavior: 'auto', block: 'start' });
+      sessionStorage.removeItem(FORMATEUR_DASHBOARD_RETURN_SECTION_KEY);
+    });
+
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const filteredFormations = useMemo(
@@ -524,19 +543,30 @@ export default function AdminDashboardPage({ pushToast }) {
     <section className="stack formateur-dashboard-page admin-skin-page">
       <ProfileSidebar user={user} />
 
-      <div className="card panel-head">
-        <div>
-          <h1>Formateur Dashboard</h1>
-          <p className="hint">
-            Manage your formations and monitor student learning analytics.
-          </p>
+      <div className="card panel-head formateur-dashboard-head">
+        <span className="admin-saas-header-accent" aria-hidden="true" />
+        <div className="admin-saas-header-intro">
+          <span className="admin-saas-header-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#1263b9" strokeWidth="1.6" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#1263b9" strokeWidth="1.6" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#1263b9" strokeWidth="1.6" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#1263b9" strokeWidth="1.6" />
+            </svg>
+          </span>
+          <div className="admin-saas-header-copy">
+            <h1>Formateur Dashboard</h1>
+            <p className="hint">
+              Manage your formations and monitor student learning analytics.
+            </p>
+          </div>
         </div>
-        <div className="row">
+        <div className="row formateur-dashboard-head-actions">
           <button
             type="button"
             onClick={openCreateFormationModal}
           >
-            Add Formation
+            +  Add Formation
           </button>
         </div>
       </div>
@@ -556,43 +586,58 @@ export default function AdminDashboardPage({ pushToast }) {
             )}
           </div>
         </div>
-        <div className="formateur-overview-grid">
-          <article className="formateur-overview-metric">
+        <div className="admin-saas-kpi-grid formateur-overview-kpi-grid">
+          <article className="admin-saas-kpi-card">
             <p className="hint">Total Formations</p>
             <strong>{globalOverview.totalFormations}</strong>
+            <span className="admin-saas-kpi-icon" aria-hidden="true">
+              <img src="/images/learning.png" alt="" className="admin-saas-kpi-icon-img" />
+            </span>
           </article>
-          <article className="formateur-overview-metric">
+          <article className="admin-saas-kpi-card">
             <p className="hint">Published</p>
             <strong>{globalOverview.publishedFormations}</strong>
+            <span className="admin-saas-kpi-icon" aria-hidden="true">
+              <img src="/images/send.png" alt="" className="admin-saas-kpi-icon-img" />
+            </span>
           </article>
-          <article className="formateur-overview-metric">
+          <article className="admin-saas-kpi-card">
             <p className="hint">Draft</p>
             <strong>{globalOverview.draftFormations}</strong>
+            <span className="admin-saas-kpi-icon" aria-hidden="true">
+              <img src="/images/draft.png" alt="" className="admin-saas-kpi-icon-img" />
+            </span>
           </article>
-          <article className="formateur-overview-metric">
-            <p className="hint">Total Courses</p>
-            <strong>{globalOverview.totalCourses}</strong>
-          </article>
-          <article className="formateur-overview-metric">
+          <article className="admin-saas-kpi-card">
             <p className="hint">Students Enrolled</p>
             <strong>{globalOverview.totalStudentsEnrolled}</strong>
+            <span className="admin-saas-kpi-icon" aria-hidden="true">
+              <img src="/images/grad.png" alt="" className="admin-saas-kpi-icon-img" />
+            </span>
           </article>
-          <article className="formateur-overview-metric">
-            <p className="hint">Approved Students</p>
-            <strong>{globalOverview.totalApprovedStudents}</strong>
-          </article>
-          <article className="formateur-overview-metric">
+        </div>
+
+        <div className="admin-saas-highlight-grid formateur-overview-highlight-grid">
+          <article className="admin-saas-highlight-card">
+            <span className="admin-saas-highlight-accent" aria-hidden="true" />
+            <span className="admin-saas-highlight-badge" aria-hidden="true">
+              %
+            </span>
             <p className="hint">Completion Rate</p>
             <strong>{globalOverview.completionRate.toFixed(2)}%</strong>
           </article>
-          <article className="formateur-overview-metric">
+          <article className="admin-saas-highlight-card">
+            <span className="admin-saas-highlight-accent" aria-hidden="true" />
+            <span className="admin-saas-highlight-badge" aria-hidden="true">
+              %
+            </span>
             <p className="hint">Success Rate</p>
             <strong>{globalOverview.successRate.toFixed(2)}%</strong>
           </article>
         </div>
       </div>
 
-      <div className="card formateur-formations-card">
+      <div className="card formateur-formations-card" ref={pendingSectionRef}>
         <div className="card-head-row">
           <h2>Pending Formations</h2>
           <StatusBadge
@@ -664,9 +709,13 @@ export default function AdminDashboardPage({ pushToast }) {
                       <button
                         type="button"
                         className="action-btn action-page"
-                        onClick={() =>
-                          navigate(`/formateur/formations/${formation.id}`)
-                        }
+                        onClick={() => {
+                          sessionStorage.setItem(
+                            FORMATEUR_DASHBOARD_RETURN_SECTION_KEY,
+                            'pending',
+                          );
+                          navigate(`/formateur/formations/${formation.id}`);
+                        }}
                       >
                         <img src="/images/share.png" alt="" className="btn-inline-icon" />
                         Open
@@ -733,7 +782,7 @@ export default function AdminDashboardPage({ pushToast }) {
         </div>
       </div>
 
-      <div className="card formateur-formations-card">
+      <div className="card formateur-formations-card" ref={analyticsSectionRef}>
         <div className="card-head-row">
           <h2>Formation Analytics</h2>
           <StatusBadge
@@ -808,9 +857,13 @@ export default function AdminDashboardPage({ pushToast }) {
                       <button
                         type="button"
                         className="action-btn action-page"
-                        onClick={() =>
-                          navigate(`/formateur/formations/${formation.id}`)
-                        }
+                        onClick={() => {
+                          sessionStorage.setItem(
+                            FORMATEUR_DASHBOARD_RETURN_SECTION_KEY,
+                            'analytics',
+                          );
+                          navigate(`/formateur/formations/${formation.id}`);
+                        }}
                       >
                         <img src="/images/analyzing.png" alt="" className="btn-inline-icon" />
                         View

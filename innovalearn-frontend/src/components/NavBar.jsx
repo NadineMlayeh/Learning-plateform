@@ -41,17 +41,17 @@ export default function NavBar() {
           {user && <Link to="/" className="topbar-link-underline">Home</Link>}
           {user?.role === 'FORMATEUR' && (
             <Link to="/formateur" className="topbar-link-underline">
-              Manage Content
+              Dashboard
             </Link>
           )}
           {user?.role === 'ADMIN' && (
             <Link to="/admin" className="topbar-link-underline">
-              Admin Dashboard
+              Dashboard
             </Link>
           )}
           {user?.role === 'STUDENT' && (
             <Link to="/student" className="topbar-link-underline">
-              Student
+              Dashboard
             </Link>
           )}
         </div>

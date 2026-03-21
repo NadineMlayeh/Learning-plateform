@@ -1573,7 +1573,11 @@ export default function StudentPage({ pushToast }) {
       if (lastVisit === today) {
         nextStreak = Math.max(1, Math.min(STREAK_TARGET_DAYS, savedCount || 1));
       } else if (lastVisit === yesterday) {
-        nextStreak = Math.max(1, Math.min(STREAK_TARGET_DAYS, savedCount + 1));
+        if (savedCount >= STREAK_TARGET_DAYS) {
+          nextStreak = 1;
+        } else {
+          nextStreak = Math.max(1, Math.min(STREAK_TARGET_DAYS, savedCount + 1));
+        }
       } else {
         nextStreak = 1;
       }

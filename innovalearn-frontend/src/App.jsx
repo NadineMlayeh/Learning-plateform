@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { getCurrentUser } from './auth';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { clearToken, getCurrentUser, isSessionExpired } from './auth';
 import NavBar from './components/NavBar';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ToastViewport, useToast } from './components/Toast';
@@ -20,6 +20,7 @@ import ForbiddenPage from './pages/ForbiddenPage';
 
 export default function App() {
   const user = getCurrentUser();
+  const navigate = useNavigate();
   const { toasts, pushToast, removeToast } = useToast();
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
@@ -62,6 +63,22 @@ export default function App() {
       document.body.classList.remove('student-wallpaper-active');
     };
   }, [isStudentPage]);
+
+  useEffect(() => {
+    if (!user?.token) return undefined;
+
+    const checkSessionTimeout = () => {
+      if (isSessionExpired()) {
+        clearToken({ reason: 'timeout' });
+        navigate('/', { replace: true });
+      }
+    };
+
+    checkSessionTimeout();
+    const interval = setInterval(checkSessionTimeout, 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [user?.token, navigate]);
 
   function roleHome() {
     if (!user) return '/';
