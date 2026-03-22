@@ -43,6 +43,7 @@ export default function AdminPage({ pushToast }) {
     currentAdminPath === '/admin/formateurs' ||
     dashboardAnchor === 'formateur-approvals';
   const isInvoicesAnchorActive = dashboardAnchor === 'invoices';
+  const isSettingsActive = currentAdminPath === '/admin/settings';
 
   const [globalOverview, setGlobalOverview] = useState(null);
   const [formateurs, setFormateurs] = useState([]);
@@ -74,6 +75,15 @@ export default function AdminPage({ pushToast }) {
     useState(null);
   const [invoiceDetailsSearch, setInvoiceDetailsSearch] = useState('');
   const [invoiceDetailsPage, setInvoiceDetailsPage] = useState(1);
+  const [adminSettingsEmail, setAdminSettingsEmail] = useState('');
+  const [adminPasswordForm, setAdminPasswordForm] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmNewPassword: '',
+  });
+  const [savingAdminPassword, setSavingAdminPassword] = useState(false);
+  const [adminPasswordError, setAdminPasswordError] = useState('');
+  const [adminPasswordSuccess, setAdminPasswordSuccess] = useState('');
 
   async function loadFormateurs() {
     try {
@@ -114,6 +124,50 @@ export default function AdminPage({ pushToast }) {
       setGlobalOverview(data);
     } catch (err) {
       pushToast(err.message, 'error');
+    }
+  }
+
+  async function loadAdminSettingsProfile() {
+    try {
+      const current = await apiRequest('/users/me', { token: user.token });
+      setAdminSettingsEmail(current?.email || '');
+    } catch (err) {
+      pushToast(err.message, 'error');
+    }
+  }
+
+  async function saveAdminPassword(event) {
+    event.preventDefault();
+    setAdminPasswordError('');
+    setAdminPasswordSuccess('');
+
+    if (adminPasswordForm.newPassword !== adminPasswordForm.confirmNewPassword) {
+      setAdminPasswordError('New passwords do not match.');
+      return;
+    }
+
+    setSavingAdminPassword(true);
+    try {
+      await apiRequest('/users/me/password', {
+        method: 'PATCH',
+        token: user.token,
+        body: {
+          email: adminSettingsEmail,
+          oldPassword: adminPasswordForm.oldPassword,
+          newPassword: adminPasswordForm.newPassword,
+          confirmNewPassword: adminPasswordForm.confirmNewPassword,
+        },
+      });
+      setAdminPasswordSuccess('Password updated successfully.');
+      setAdminPasswordForm({
+        oldPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
+      });
+    } catch (err) {
+      setAdminPasswordError(err.message || 'Failed to update password.');
+    } finally {
+      setSavingAdminPassword(false);
     }
   }
 
@@ -408,6 +462,11 @@ export default function AdminPage({ pushToast }) {
   }, [isDashboardSection]);
 
   useEffect(() => {
+    if (!isSettingsActive) return;
+    loadAdminSettingsProfile();
+  }, [isSettingsActive]);
+
+  useEffect(() => {
     if (!isDashboardSection) return;
     if (!dashboardAnchor) return;
     const section = document.getElementById(dashboardAnchor);
@@ -552,7 +611,14 @@ export default function AdminPage({ pushToast }) {
           </Link>
         </nav>
 
-
+        <div className="admin-saas-sidebar-bottom">
+          <Link className={navItemClass('/admin/settings')} to="/admin/settings">
+            <span className="admin-saas-nav-icon" aria-hidden="true">
+              <img src="/images/gear.png" alt="" className="admin-saas-nav-icon-img" />
+            </span>
+            Settings
+          </Link>
+        </div>
       </aside>
 
       <div className="admin-saas-main">
@@ -1133,6 +1199,104 @@ export default function AdminPage({ pushToast }) {
           <AdminFormationsPage pushToast={pushToast} embedded />
         ) : currentAdminPath === '/admin/revenue' ? (
           <AdminRevenuePage pushToast={pushToast} embedded />
+        ) : currentAdminPath === '/admin/settings' ? (
+          <div className="card admin-saas-section admin-settings-section">
+            
+            <h2>⚙️ Password Settings</h2>
+            <form className="admin-settings-password-form" onSubmit={saveAdminPassword}>
+              <label className="profile-edit-field">
+                <span>Email</span>
+                <input
+                  type="email"
+                  value={adminSettingsEmail}
+                  onChange={(event) => setAdminSettingsEmail(event.target.value)}
+                  required
+                />
+              </label>
+
+              <label className="profile-edit-field">
+                <span>Old password</span>
+                <input
+                  type="password"
+                  value={adminPasswordForm.oldPassword}
+                  onChange={(event) =>
+                    setAdminPasswordForm((prev) => ({
+                      ...prev,
+                      oldPassword: event.target.value,
+                    }))
+                  }
+                  required
+                />
+              </label>
+
+              <label className="profile-edit-field">
+                <span>New password</span>
+                <input
+                  type="password"
+                  value={adminPasswordForm.newPassword}
+                  onChange={(event) =>
+                    setAdminPasswordForm((prev) => ({
+                      ...prev,
+                      newPassword: event.target.value,
+                    }))
+                  }
+                  required
+                />
+              </label>
+
+              <label className="profile-edit-field">
+                <span>New password again</span>
+                <input
+                  type="password"
+                  value={adminPasswordForm.confirmNewPassword}
+                  onChange={(event) =>
+                    setAdminPasswordForm((prev) => ({
+                      ...prev,
+                      confirmNewPassword: event.target.value,
+                    }))
+                  }
+                  required
+                />
+              </label>
+
+              {adminPasswordError && (
+                <article className="auth-error-box" role="alert" aria-live="assertive">
+                  <p className="auth-error-title">⚠ Password Reset Failed</p>
+                  <p className="auth-error-body">{adminPasswordError}</p>
+                </article>
+              )}
+              {adminPasswordSuccess && (
+                <p className="hint admin-password-success">{adminPasswordSuccess}</p>
+              )}
+
+              <div className="admin-settings-password-actions">
+                <button
+                  type="submit"
+                  className="profile-save-btn"
+                  disabled={savingAdminPassword}
+                >
+                  {savingAdminPassword ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  type="button"
+                  className="profile-glass-cancel-btn"
+                  onClick={() => {
+                    if (savingAdminPassword) return;
+                    setAdminPasswordForm({
+                      oldPassword: '',
+                      newPassword: '',
+                      confirmNewPassword: '',
+                    });
+                    setAdminPasswordError('');
+                    setAdminPasswordSuccess('');
+                  }}
+                  disabled={savingAdminPassword}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         ) : (
           <div className="card admin-saas-section">
             <p className="hint">Section not found.</p>

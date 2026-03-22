@@ -6,6 +6,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { ToastViewport, useToast } from './components/Toast';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminPage from './pages/AdminPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -25,7 +27,10 @@ export default function App() {
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
   const isAuthPage =
-    location.pathname === '/login' || location.pathname === '/signup';
+    location.pathname === '/login' ||
+    location.pathname === '/signup' ||
+    location.pathname === '/forgot-password' ||
+    location.pathname === '/reset-password';
   const isBackofficePage =
     location.pathname.startsWith('/admin') ||
     location.pathname.startsWith('/formateur');
@@ -110,6 +115,8 @@ export default function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           <Route
             path="/admin"
@@ -145,6 +152,14 @@ export default function App() {
           />
           <Route
             path="/admin/revenue"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminPage pushToast={pushToast} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/settings"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AdminPage pushToast={pushToast} />

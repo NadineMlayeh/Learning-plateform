@@ -1408,7 +1408,7 @@ textarea {
   resize: vertical;
 }
 
-button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout):not(.topbar-link-underline),
+button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout):not(.topbar-link-underline):not(.profile-change-password-link),
 .link-btn {
   border: 1px solid transparent;
   background: linear-gradient(140deg, #155fc4 0%, #1a78db 100%);
@@ -1420,13 +1420,13 @@ button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logo
   box-shadow: 0 10px 20px -16px rgba(17, 90, 184, 0.95);
 }
 
-button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout):not(.topbar-link-underline):hover,
+button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout):not(.topbar-link-underline):not(.profile-change-password-link):hover,
 .link-btn:hover {
   transform: translateY(-1px);
   filter: brightness(1.04);
 }
 
-button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout):not(.topbar-link-underline):active,
+button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout):not(.topbar-link-underline):not(.profile-change-password-link):active,
 .link-btn:active {
   transform: translateY(0);
 }
@@ -6588,6 +6588,11 @@ code {
   animation: btn-shine 760ms ease;
 }
 
+.auth-forgot-row {
+  margin-top: 0.08rem;
+  text-align: right;
+}
+
 .auth-error-box {
   margin-top: 0.35rem;
   border-left: 3px solid rgba(220, 60, 60, 0.85);
@@ -6613,6 +6618,18 @@ code {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.65);
   line-height: 1.25;
+}
+
+.auth-success-box {
+  margin-top: 0.35rem;
+  border-left: 3px solid rgba(34, 197, 94, 0.86);
+  border-radius: 0 10px 10px 0;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.58rem 0.72rem;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(229, 255, 240, 0.92);
+  text-align: left;
 }
 
 .auth-foot {
@@ -10507,8 +10524,8 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 42px;
-  padding: 10px 12px;
+  min-height: 38px;
+  padding: 8px 11px;
   border-radius: 10px;
   color: rgba(210, 230, 255, 1);
   font-weight: 600;
@@ -10586,6 +10603,10 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page {
   margin-top: auto;
   padding-top: 8px;
   border-top: 1px solid rgba(120, 180, 255, 0.14);
+}
+
+.admin-saas-sidebar-bottom .admin-saas-nav-item {
+  min-height: 36px;
 }
 
 .admin-saas-settings-btn {
@@ -11070,7 +11091,110 @@ body.backoffice-palette-active .admin-skin-page .admin-saas-sidebar {
   background: #ffffff;
   box-shadow: 0 14px 30px rgba(14, 36, 66, 0.16);
 }
+.admin-settings-section {
+  max-width: none;
+}
 
+/* FORM (no container look at all) */
+.admin-settings-password-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 0; /* removed box feeling */
+}
+
+/* FIELD */
+.admin-settings-password-form .profile-edit-field {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-settings-password-form .profile-edit-field > span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #5b6f8f;
+}
+
+/* INPUT (this is where the style lives now) */
+.admin-settings-password-form .profile-edit-field input {
+  border-radius: 12px;
+  border: 1px solid rgba(168, 194, 226, 0.6);
+  background: #f7faff; /* soft off-white, not harsh */
+  color: #173a66;
+  min-height: 40px;
+  padding: 0 12px;
+
+  transition: all 0.25s ease;
+
+  box-shadow: 0 2px 6px rgba(20, 60, 120, 0.06);
+}
+
+/* INPUT FOCUS */
+.admin-settings-password-form .profile-edit-field input:focus {
+  outline: none;
+  border-color: rgba(120, 170, 255, 0.8);
+
+  box-shadow:
+    0 0 0 3px rgba(120, 170, 255, 0.15),
+    0 6px 14px rgba(50, 120, 255, 0.12);
+
+  transform: translateY(-1px);
+}
+
+/* ACTIONS */
+.admin-settings-password-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 6px;
+}
+
+/* BUTTON BASE */
+.admin-settings-password-actions .profile-save-btn,
+.admin-settings-password-actions .profile-glass-cancel-btn {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+/* SAVE BUTTON */
+.admin-settings-password-actions .profile-save-btn {
+  border: 1px solid #1fbc76 !important;
+  background: linear-gradient(135deg, #22c57a, #1fd1ff) !important;
+  color: #ffffff !important;
+
+  box-shadow: 0 6px 18px rgba(34, 197, 122, 0.25);
+}
+
+.admin-settings-password-actions .profile-save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(34, 197, 122, 0.35);
+}
+
+/* CANCEL BUTTON */
+.admin-settings-password-actions .profile-glass-cancel-btn {
+  border: 1px solid rgba(140, 180, 255, 0.4) !important;
+  background: linear-gradient(145deg, #111827 0%, #030712 100%)!important;
+  color: white !important;
+}
+
+.admin-settings-password-actions .profile-glass-cancel-btn:hover {
+  background: black !important;
+  transform: translateY(-2px);
+}
+
+/* SUCCESS TEXT */
+.admin-password-success {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1f8a58;
+}
 /* Admin formations table: equal-size status etiquettes for Draft/Published */
 .admin-formation-status-pill {
   display: inline-flex;
@@ -11757,6 +11881,68 @@ body.backoffice-palette-active .profile-glass-sidebar .profile-glass-upload-btn:
   margin-top: 2px;
 }
 
+.profile-change-password-link {
+  margin-top: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #eaf3ff !important;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.profile-change-password-link:hover,
+.profile-change-password-link:focus-visible {
+  color: #ffffff !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.profile-change-password-icon {
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-change-password-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.profile-change-password-icon svg path,
+.profile-change-password-icon svg rect,
+.profile-change-password-icon svg circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.profile-glass-password-panel .auth-error-box {
+  margin-top: 2px;
+}
+
+.profile-password-error {
+  width: 100%;
+}
+
+.profile-password-success {
+  margin: 0;
+  color: #daf9e9;
+  font-size: 0.72rem;
+}
+
 body .profile-glass-sidebar .profile-save-btn,
 body.backoffice-palette-active .profile-glass-sidebar .profile-save-btn {
   width: 100%;
@@ -12103,9 +12289,12 @@ body .notebook-modal-panel .notebook-tab::after {
 body .notebook-modal-panel .notebook-input-row button {
   min-height: 40px !important;
   border-radius: 11px !important;
-  border: none !important;
-  background: linear-gradient(130deg, #1263b9 0%, #3b9eff 100%) !important;
-  color: #ffffff !important;
+background: linear-gradient(135deg,
+  rgba(248, 252, 255, 0.92) 0%,
+  rgba(255, 225, 245, 0.95) 25%,
+  rgba(240, 248, 255, 0.9) 55%,
+  rgba(255, 215, 240, 0.94) 100%) !important;
+  color: black !important;
   font-size: 12.5px !important;
   font-weight: 800 !important;
   padding: 0 16px !important;
@@ -12196,7 +12385,7 @@ body .notebook-modal-panel .notebook-input-row button::after {
 
 .notebook-note-main textarea {
   width: 100%;
-  min-height: 58px;
+  min-height: 58px; 
   border-radius: 9px;
   border: 1.5px solid #8fd8f3;
   background: #f8fcff;
@@ -12298,9 +12487,9 @@ body .notebook-modal-panel .notebook-checkbox:hover {
 }
 
 body .notebook-modal-panel .notebook-checkbox.is-checked {
-  background: linear-gradient(135deg, #1263b9 0%, #8fd8f3 100%) !important;
+  background: green !important;
   border-color: transparent !important;
-  box-shadow: 0 3px 10px rgba(18, 99, 185, 0.3) !important;
+  box-shadow: 0 3px 5px rgba(18, 99, 185, 0.3) !important;
 }
 
 body .notebook-modal-panel .notebook-checkbox::before,
@@ -12341,17 +12530,17 @@ body .notebook-modal-panel .notebook-checkbox::after {
 }
 
 .notebook-todo-row.is-completed:hover {
-  opacity: 0.75;
+  opacity: 0.8;
 }
 
 .notebook-todo-row.is-completed .notebook-todo-text {
   text-decoration: line-through;
-  color: #8a9dc0;
+  color: black;
 }
 
 /* ── FOOTER ── */
 .notebook-footer {
-  border-top: 1px solid #edf2fa;
+  border-top: 3px solid #edf2fa;
   background: linear-gradient(135deg, #f8faff 0%, #fdf5fd 100%);
   padding: 11px 14px;
   display: flex;

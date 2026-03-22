@@ -14,6 +14,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
@@ -99,5 +100,11 @@ export class UserController {
 
     const profileImageUrl = `/uploads/avatars/${file.filename}`;
     return this.userService.updateProfileImage(req.user.userId, profileImageUrl);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/password')
+  async changeMyPassword(@Req() req, @Body() body: ChangePasswordDto) {
+    return this.userService.changePassword(req.user.userId, body || {});
   }
 }

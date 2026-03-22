@@ -40,6 +40,7 @@ model User {
   invoices Invoice[]
   notebookNotes NotebookNote[]
   notebookTodos NotebookTodo[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 enum FormationType {
@@ -206,4 +207,12 @@ model NotebookTodo {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, completed, createdAt])
+}
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

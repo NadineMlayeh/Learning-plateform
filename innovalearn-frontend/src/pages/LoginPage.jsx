@@ -82,9 +82,15 @@ export default function LoginPage() {
           </button>
         </form>
 
+        <div className="auth-forgot-row">
+          <Link to="/forgot-password" className="auth-inline-link">
+            Forgot your password?
+          </Link>
+        </div>
+
         {error && (
           <article className="auth-error-box" role="alert" aria-live="assertive">
-            <p className="auth-error-title">⚠ Login Failed</p>
+            <p className="auth-error-title">[!] Login Failed</p>
             <p className="auth-error-body">{error}</p>
           </article>
         )}

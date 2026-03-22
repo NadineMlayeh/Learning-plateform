@@ -59,6 +59,14 @@ function MetaIcon({ kind }) {
       </svg>
     );
   }
+  if (kind === 'password') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="4" y="11" width="16" height="9" rx="2" />
+        <path d="M8 11V8a4 4 0 018 0v3" />
+      </svg>
+    );
+  }
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M10.4 2h3.2l.5 2.2a7.9 7.9 0 011.8.8l2-1.1 2.3 2.3-1.1 2a8.2 8.2 0 01.8 1.8L22 10.4v3.2l-2.2.5a8.2 8.2 0 01-.8 1.8l1.1 2-2.3 2.3-2-1.1a7.9 7.9 0 01-1.8.8l-.5 2.2h-3.2l-.5-2.2a7.9 7.9 0 01-1.8-.8l-2 1.1-2.3-2.3 1.1-2a8.2 8.2 0 01-.8-1.8L2 13.6v-3.2l2.2-.5a8.2 8.2 0 01.8-1.8l-1.1-2L6.2 3.8l2 1.1a7.9 7.9 0 011.8-.8L10.4 2z" />
@@ -69,6 +77,7 @@ function MetaIcon({ kind }) {
 
 export default function ProfileSidebar({ user }) {
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isPasswordMode, setIsPasswordMode] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [activeItem, setActiveItem] = useState('bio');
   const [profile, setProfile] = useState(null);
@@ -81,6 +90,15 @@ export default function ProfileSidebar({ user }) {
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
+  const [passwordForm, setPasswordForm] = useState({
+    email: '',
+    oldPassword: '',
+    newPassword: '',
+    confirmNewPassword: '',
+  });
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -134,6 +152,13 @@ export default function ProfileSidebar({ user }) {
     });
   }, [profile?.name, profile?.bio, profile?.phoneNumber, profile?.dateOfBirth]);
 
+  useEffect(() => {
+    setPasswordForm((prev) => ({
+      ...prev,
+      email: profile?.email || '',
+    }));
+  }, [profile?.email]);
+
   const canEditProfile = useMemo(() => {
     const role = String(profile?.role || user?.role || '');
     return role === 'STUDENT' || role === 'FORMATEUR';
@@ -162,15 +187,18 @@ export default function ProfileSidebar({ user }) {
   const showGlassSidebar = roleKey === 'STUDENT' || roleKey === 'FORMATEUR';
 
   useEffect(() => {
-    const shouldShift = isHovered || isEditMode;
+    const shouldShift = isHovered || isEditMode || isPasswordMode;
     document.body.classList.toggle('profile-glass-expanded', shouldShift);
-    document.body.classList.toggle('profile-glass-editing', isEditMode);
+    document.body.classList.toggle(
+      'profile-glass-editing',
+      isEditMode || isPasswordMode,
+    );
 
     return () => {
       document.body.classList.remove('profile-glass-expanded');
       document.body.classList.remove('profile-glass-editing');
     };
-  }, [isHovered, isEditMode]);
+  }, [isHovered, isEditMode, isPasswordMode]);
 
   const infoItems = useMemo(
     () => [
@@ -238,6 +266,39 @@ export default function ProfileSidebar({ user }) {
     }
   }
 
+  async function savePassword(event) {
+    event.preventDefault();
+    if (!canEditProfile || !user?.token) return;
+
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
+      setPasswordError('New passwords do not match.');
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      await apiRequest('/users/me/password', {
+        method: 'PATCH',
+        token: user.token,
+        body: passwordForm,
+      });
+      setPasswordSuccess('Password updated successfully.');
+      setPasswordForm((prev) => ({
+        ...prev,
+        oldPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
+      }));
+    } catch (err) {
+      setPasswordError(err.message || 'Failed to update password.');
+    } finally {
+      setChangingPassword(false);
+    }
+  }
+
   function openFilePicker() {
     if (!canEditProfile || uploadingAvatar) return;
     fileInputRef.current?.click();
@@ -249,7 +310,7 @@ export default function ProfileSidebar({ user }) {
 
   return (
     <aside
-      className={`profile-glass-sidebar ${isEditMode ? 'is-editing' : ''}`}
+      className={`profile-glass-sidebar ${isEditMode || isPasswordMode ? 'is-editing' : ''}`}
       aria-label="Profile sidebar"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -277,7 +338,7 @@ export default function ProfileSidebar({ user }) {
           </span>
         </div>
 
-        {!isEditMode && (
+        {!isEditMode && !isPasswordMode && (
           <div className="profile-glass-items-list">
             {infoItems.map((item) => (
               <button
@@ -406,11 +467,124 @@ export default function ProfileSidebar({ user }) {
                 Cancel
               </button>
             </div>
+
+            <button
+              type="button"
+              className="profile-change-password-link"
+              onClick={() => {
+                setIsEditMode(false);
+                setIsPasswordMode(true);
+                setStatusMessage('');
+                setPasswordError('');
+                setPasswordSuccess('');
+              }}
+            >
+              <span className="profile-change-password-icon" aria-hidden="true">
+                <MetaIcon kind="password" />
+              </span>
+              <span>Change password</span>
+            </button>
+          </form>
+        )}
+
+        {isPasswordMode && canEditProfile && (
+          <form className="profile-glass-edit-panel profile-glass-password-panel" onSubmit={savePassword}>
+            <label className="profile-edit-field">
+              <span>Email</span>
+              <input
+                type="email"
+                value={passwordForm.email}
+                onChange={(event) =>
+                  setPasswordForm((prev) => ({
+                    ...prev,
+                    email: event.target.value,
+                  }))
+                }
+                required
+              />
+            </label>
+
+            <label className="profile-edit-field">
+              <span>Old password</span>
+              <input
+                type="password"
+                value={passwordForm.oldPassword}
+                onChange={(event) =>
+                  setPasswordForm((prev) => ({
+                    ...prev,
+                    oldPassword: event.target.value,
+                  }))
+                }
+                required
+              />
+            </label>
+
+            <label className="profile-edit-field">
+              <span>New password</span>
+              <input
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={(event) =>
+                  setPasswordForm((prev) => ({
+                    ...prev,
+                    newPassword: event.target.value,
+                  }))
+                }
+                required
+              />
+            </label>
+
+            <label className="profile-edit-field">
+              <span>New password again</span>
+              <input
+                type="password"
+                value={passwordForm.confirmNewPassword}
+                onChange={(event) =>
+                  setPasswordForm((prev) => ({
+                    ...prev,
+                    confirmNewPassword: event.target.value,
+                  }))
+                }
+                required
+              />
+            </label>
+
+            {passwordError && (
+              <article className="auth-error-box profile-password-error" role="alert" aria-live="assertive">
+                <p className="auth-error-title">⚠ Password Reset Failed</p>
+                <p className="auth-error-body">{passwordError}</p>
+              </article>
+            )}
+
+            {passwordSuccess && <p className="hint profile-password-success">{passwordSuccess}</p>}
+
+            <div className="profile-glass-edit-actions">
+              <button
+                type="submit"
+                className="profile-save-btn"
+                disabled={changingPassword}
+              >
+                {changingPassword ? 'Resetting...' : 'Reset'}
+              </button>
+              <button
+                type="button"
+                className="profile-glass-cancel-btn"
+                onClick={() => {
+                  if (changingPassword) return;
+                  setIsPasswordMode(false);
+                  setPasswordError('');
+                  setPasswordSuccess('');
+                }}
+                disabled={changingPassword}
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         )}
       </div>
 
-      {canEditProfile && !isEditMode && (
+      {canEditProfile && !isEditMode && !isPasswordMode && (
         <div className="profile-glass-bottom">
           <button
             type="button"
@@ -420,6 +594,7 @@ export default function ProfileSidebar({ user }) {
             onClick={() => {
               setActiveItem('settings');
               setIsEditMode(true);
+              setIsPasswordMode(false);
               setStatusMessage('');
             }}
             title="Settings"

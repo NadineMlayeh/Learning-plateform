@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
 import { existsSync, unlinkSync } from 'fs';
 import { join } from 'path';
@@ -183,5 +184,65 @@ async create(dto: CreateUserDto) {
         dateOfBirth: true,
       },
     });
+  }
+
+  async changePassword(
+    userId: number,
+    payload: ChangePasswordDto,
+  ): Promise<{ success: true; message: string }> {
+    const email = String(payload?.email || '').trim().toLowerCase();
+    const oldPassword = String(payload?.oldPassword || '');
+    const newPassword = String(payload?.newPassword || '');
+    const confirmNewPassword = String(payload?.confirmNewPassword || '');
+
+    if (!email || !oldPassword || !newPassword || !confirmNewPassword) {
+      throw new BadRequestException(
+        'Email, old password, new password and password confirmation are required',
+      );
+    }
+
+    if (newPassword.length < 6) {
+      throw new BadRequestException(
+        'New password must be at least 6 characters long',
+      );
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      throw new BadRequestException('New passwords do not match');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, password: true },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (String(user.email || '').toLowerCase() !== email) {
+      throw new BadRequestException('Email does not match your account');
+    }
+
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+      throw new BadRequestException('Old password is incorrect');
+    }
+
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      throw new BadRequestException(
+        'New password must be different from old password',
+      );
+    }
+
+    const password = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { password },
+    });
+
+    return { success: true, message: 'Password updated successfully' };
   }
 }
