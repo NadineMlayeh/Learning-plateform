@@ -10,6 +10,7 @@ const PAGE_SIZE = 3;
 const ANALYTICS_STUDENT_PAGE_SIZE = 5;
 const FORMATION_PUBLISH_TS_KEY = 'formateur_published_at_map_v1';
 const FORMATEUR_DASHBOARD_RETURN_SECTION_KEY = 'formateur_dashboard_return_section';
+const FORMATEUR_DASHBOARD_STATE_KEY = 'formateur_dashboard_state_v1';
 const INITIAL_FORMATION_FORM = {
   title: '',
   description: '',
@@ -44,6 +45,29 @@ function savePublishedAtFallback(formationId, iso) {
   const map = readPublishedAtFallbackMap();
   map[String(formationId)] = iso;
   writePublishedAtFallbackMap(map);
+}
+
+function readFormateurDashboardState() {
+  try {
+    const raw = sessionStorage.getItem(FORMATEUR_DASHBOARD_STATE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeFormateurDashboardState(nextState) {
+  try {
+    sessionStorage.setItem(
+      FORMATEUR_DASHBOARD_STATE_KEY,
+      JSON.stringify(nextState),
+    );
+  } catch {
+    // ignore storage failures
+  }
 }
 
 function createdTimestamp(item) {
@@ -102,17 +126,36 @@ function DonutChart({ segments, label, valueText, size = 120, thickness = 20 }) 
 export default function AdminDashboardPage({ pushToast }) {
   const user = getCurrentUser();
   const navigate = useNavigate();
+  const restoredDashboardState = useMemo(
+    () => readFormateurDashboardState(),
+    [],
+  );
 
   const [formations, setFormations] = useState([]);
+  const [formationsLoaded, setFormationsLoaded] = useState(false);
   const [publishingId, setPublishingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [confirmDeleteFormationId, setConfirmDeleteFormationId] = useState(null);
-  const [titleSearch, setTitleSearch] = useState('');
-  const [createdSort, setCreatedSort] = useState('newest_first');
-  const [pendingTypeFilter, setPendingTypeFilter] = useState('ALL');
-  const [publishedTypeFilter, setPublishedTypeFilter] = useState('ALL');
-  const [pendingPage, setPendingPage] = useState(1);
-  const [publishedPage, setPublishedPage] = useState(1);
+  const [titleSearch, setTitleSearch] = useState(
+    String(restoredDashboardState?.titleSearch || ''),
+  );
+  const [createdSort, setCreatedSort] = useState(
+    restoredDashboardState?.createdSort === 'oldest_first'
+      ? 'oldest_first'
+      : 'newest_first',
+  );
+  const [pendingTypeFilter, setPendingTypeFilter] = useState(
+    restoredDashboardState?.pendingTypeFilter || 'ALL',
+  );
+  const [publishedTypeFilter, setPublishedTypeFilter] = useState(
+    restoredDashboardState?.publishedTypeFilter || 'ALL',
+  );
+  const [pendingPage, setPendingPage] = useState(
+    Math.max(1, Number(restoredDashboardState?.pendingPage || 1)),
+  );
+  const [publishedPage, setPublishedPage] = useState(
+    Math.max(1, Number(restoredDashboardState?.publishedPage || 1)),
+  );
   const [isCreateFormationModalOpen, setIsCreateFormationModalOpen] =
     useState(false);
   const [createFormationForm, setCreateFormationForm] = useState(
@@ -131,6 +174,9 @@ export default function AdminDashboardPage({ pushToast }) {
   const [analyticsStudentPage, setAnalyticsStudentPage] = useState(1);
   const pendingSectionRef = useRef(null);
   const analyticsSectionRef = useRef(null);
+  const skipFirstFilterResetRef = useRef(true);
+  const restoredScrollDoneRef = useRef(false);
+  const restoredPaginationAppliedRef = useRef(false);
 
   async function loadFormations() {
     try {
@@ -149,6 +195,8 @@ export default function AdminDashboardPage({ pushToast }) {
       setFormations(normalized);
     } catch (err) {
       pushToast(err.message, 'error');
+    } finally {
+      setFormationsLoaded(true);
     }
   }
 
@@ -229,26 +277,88 @@ export default function AdminDashboardPage({ pushToast }) {
     }
   }
 
+  function persistDashboardSnapshot(overrides = {}) {
+    const existing = readFormateurDashboardState() || {};
+    const nextSnapshot = {
+      titleSearch,
+      createdSort,
+      pendingTypeFilter,
+      publishedTypeFilter,
+      pendingPage,
+      publishedPage,
+      returnSection:
+        overrides.returnSection ??
+        existing.returnSection ??
+        sessionStorage.getItem(FORMATEUR_DASHBOARD_RETURN_SECTION_KEY) ??
+        'pending',
+      scrollY:
+        Number.isFinite(overrides.scrollY) && overrides.scrollY >= 0
+          ? overrides.scrollY
+          : typeof window !== 'undefined'
+            ? window.scrollY
+            : Number(existing.scrollY || 0),
+    };
+    writeFormateurDashboardState(nextSnapshot);
+  }
+
   useEffect(() => {
     loadFormations();
     loadAnalytics();
   }, []);
 
   useEffect(() => {
-    const section = sessionStorage.getItem(FORMATEUR_DASHBOARD_RETURN_SECTION_KEY);
-    if (!section) return undefined;
+    persistDashboardSnapshot();
+  }, [
+    titleSearch,
+    createdSort,
+    pendingTypeFilter,
+    publishedTypeFilter,
+    pendingPage,
+    publishedPage,
+  ]);
 
+  useEffect(() => {
+    if (restoredScrollDoneRef.current) return undefined;
+
+    const sectionFromClick = sessionStorage.getItem(
+      FORMATEUR_DASHBOARD_RETURN_SECTION_KEY,
+    );
+    const restoredSection = sectionFromClick || restoredDashboardState?.returnSection;
+    const restoredScrollY = Number(restoredDashboardState?.scrollY);
+
+    if (
+      Number.isFinite(restoredScrollY) &&
+      restoredScrollY > 0 &&
+      formations.length === 0
+    ) {
+      return undefined;
+    }
+
+    let timeoutId = null;
     const frame = requestAnimationFrame(() => {
-      const target =
-        section === 'analytics'
-          ? analyticsSectionRef.current
-          : pendingSectionRef.current;
-      target?.scrollIntoView({ behavior: 'auto', block: 'start' });
+      const restore = () => {
+        if (Number.isFinite(restoredScrollY) && restoredScrollY >= 0) {
+          window.scrollTo({ top: restoredScrollY, behavior: 'auto' });
+        } else if (restoredSection) {
+          const target =
+            restoredSection === 'analytics'
+              ? analyticsSectionRef.current
+              : pendingSectionRef.current;
+          target?.scrollIntoView({ behavior: 'auto', block: 'start' });
+        }
+      };
+
+      restore();
+      timeoutId = setTimeout(restore, 120);
       sessionStorage.removeItem(FORMATEUR_DASHBOARD_RETURN_SECTION_KEY);
+      restoredScrollDoneRef.current = true;
     });
 
-    return () => cancelAnimationFrame(frame);
-  }, []);
+    return () => {
+      cancelAnimationFrame(frame);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [formations.length, restoredDashboardState]);
 
   const filteredFormations = useMemo(
     () =>
@@ -309,18 +419,38 @@ export default function AdminDashboardPage({ pushToast }) {
   );
 
   useEffect(() => {
+    if (!formationsLoaded) return;
     if (pendingPage > pendingTotalPages) {
       setPendingPage(pendingTotalPages);
     }
-  }, [pendingPage, pendingTotalPages]);
+  }, [pendingPage, pendingTotalPages, formationsLoaded]);
 
   useEffect(() => {
+    if (!formationsLoaded) return;
     if (publishedPage > publishedTotalPages) {
       setPublishedPage(publishedTotalPages);
     }
-  }, [publishedPage, publishedTotalPages]);
+  }, [publishedPage, publishedTotalPages, formationsLoaded]);
 
   useEffect(() => {
+    if (!formationsLoaded || restoredPaginationAppliedRef.current) return;
+
+    const saved = readFormateurDashboardState();
+    if (saved) {
+      const savedPendingPage = Math.max(1, Number(saved.pendingPage || 1));
+      const savedPublishedPage = Math.max(1, Number(saved.publishedPage || 1));
+      setPendingPage(savedPendingPage);
+      setPublishedPage(savedPublishedPage);
+    }
+
+    restoredPaginationAppliedRef.current = true;
+  }, [formationsLoaded]);
+
+  useEffect(() => {
+    if (skipFirstFilterResetRef.current) {
+      skipFirstFilterResetRef.current = false;
+      return;
+    }
     setPendingPage(1);
     setPublishedPage(1);
   }, [titleSearch, createdSort, pendingTypeFilter, publishedTypeFilter]);
@@ -710,6 +840,10 @@ export default function AdminDashboardPage({ pushToast }) {
                         type="button"
                         className="action-btn action-page"
                         onClick={() => {
+                          persistDashboardSnapshot({
+                            returnSection: 'pending',
+                            scrollY: window.scrollY,
+                          });
                           sessionStorage.setItem(
                             FORMATEUR_DASHBOARD_RETURN_SECTION_KEY,
                             'pending',
@@ -858,6 +992,10 @@ export default function AdminDashboardPage({ pushToast }) {
                         type="button"
                         className="action-btn action-page"
                         onClick={() => {
+                          persistDashboardSnapshot({
+                            returnSection: 'analytics',
+                            scrollY: window.scrollY,
+                          });
                           sessionStorage.setItem(
                             FORMATEUR_DASHBOARD_RETURN_SECTION_KEY,
                             'analytics',

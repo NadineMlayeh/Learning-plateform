@@ -13,6 +13,7 @@ import { LessonModule } from './lesson/lesson.module';
 import { QuizModule } from './quiz/quiz.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { InvoiceModule } from './invoice/invoice.module';
+import { NotebookModule } from './notebook/notebook.module';
 
 
 @Module({
@@ -30,6 +31,7 @@ import { InvoiceModule } from './invoice/invoice.module';
     QuizModule,
     EnrollmentModule,
     InvoiceModule,
+    NotebookModule,
   ],
   controllers: [TestController],
   providers: [AppService],

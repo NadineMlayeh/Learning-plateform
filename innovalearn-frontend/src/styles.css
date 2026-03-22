@@ -190,7 +190,8 @@ body.auth-wallpaper-active {
   animation: btn-shine 780ms ease;
 }
 
-.topbar a.topbar-link-underline {
+.topbar a.topbar-link-underline,
+.topbar button.topbar-link-underline {
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -199,10 +200,19 @@ body.auth-wallpaper-active {
   transition: color 220ms ease;
   color: #f6fbff;
   text-shadow: 0 1px 6px rgba(9, 28, 60, 0.45);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.1;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
 }
 
 .topbar a.topbar-link-underline:hover,
-.topbar a.topbar-link-underline:focus-visible {
+.topbar a.topbar-link-underline:focus-visible,
+.topbar button.topbar-link-underline:hover,
+.topbar button.topbar-link-underline:focus-visible {
   color: #ffffff;
   background: transparent;
   border-color: transparent;
@@ -210,20 +220,23 @@ body.auth-wallpaper-active {
   box-shadow: none;
 }
 
-.topbar a.topbar-link-underline::after {
+.topbar a.topbar-link-underline::after,
+.topbar button.topbar-link-underline::after {
   inset: auto 0 0 0;
   width: 100%;
   height: 2px;
   opacity: 0.82;
   transform: scaleX(0);
   transform-origin: left center;
-  background: linear-gradient(90deg, #ffffff 0%, #d3eff8 52%, #ffe9f8 100%);
+  background: #ffffff;
   animation: none;
   transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
 }
 
 .topbar a.topbar-link-underline:hover::after,
-.topbar a.topbar-link-underline:focus-visible::after {
+.topbar a.topbar-link-underline:focus-visible::after,
+.topbar button.topbar-link-underline:hover::after,
+.topbar button.topbar-link-underline:focus-visible::after {
   transform: scaleX(1);
   opacity: 1;
 }
@@ -1395,7 +1408,7 @@ textarea {
   resize: vertical;
 }
 
-button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout),
+button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout):not(.topbar-link-underline),
 .link-btn {
   border: 1px solid transparent;
   background: linear-gradient(140deg, #155fc4 0%, #1a78db 100%);
@@ -1407,13 +1420,13 @@ button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logo
   box-shadow: 0 10px 20px -16px rgba(17, 90, 184, 0.95);
 }
 
-button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout):hover,
+button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout):not(.topbar-link-underline):hover,
 .link-btn:hover {
   transform: translateY(-1px);
   filter: brightness(1.04);
 }
 
-button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout):active,
+button:not(.admin-modal-backdrop):not(.profile-drawer-backdrop):not(.topbar-logout):not(.topbar-link-underline):active,
 .link-btn:active {
   transform: translateY(0);
 }
@@ -5502,7 +5515,6 @@ code {
    Palette: white → #ddaed3 (rose) → #8fd8f3 (sky) → #2f73ba → #0b2d72 (navy)
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@600;700;800&display=swap');
 
 /* ── TOKENS ── */
 :root {
@@ -6909,7 +6921,10 @@ body.backoffice-palette-active .topbar a:hover {
 
 body.backoffice-palette-active .topbar a.topbar-link-underline,
 body.backoffice-palette-active .topbar a.topbar-link-underline:hover,
-body.backoffice-palette-active .topbar a.topbar-link-underline:focus-visible {
+body.backoffice-palette-active .topbar a.topbar-link-underline:focus-visible,
+body.backoffice-palette-active .topbar button.topbar-link-underline,
+body.backoffice-palette-active .topbar button.topbar-link-underline:hover,
+body.backoffice-palette-active .topbar button.topbar-link-underline:focus-visible {
   background: transparent;
   border-color: transparent;
   box-shadow: none;
@@ -6918,7 +6933,9 @@ body.backoffice-palette-active .topbar a.topbar-link-underline:focus-visible {
 }
 
 body.backoffice-palette-active .topbar a.topbar-link-underline:hover,
-body.backoffice-palette-active .topbar a.topbar-link-underline:focus-visible {
+body.backoffice-palette-active .topbar a.topbar-link-underline:focus-visible,
+body.backoffice-palette-active .topbar button.topbar-link-underline:hover,
+body.backoffice-palette-active .topbar button.topbar-link-underline:focus-visible {
   color: #ffffff;
 }
 
@@ -11870,4 +11887,496 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .pendin
 .formation-summary-text .row {
   margin-top: auto;
   padding-top: 0.6rem;
+}
+
+/* ===============================
+   Notebook Modal — Pro Max Design
+   =============================== */
+
+body .topbar button.topbar-notebook-trigger {
+  white-space: nowrap;
+}
+
+.notebook-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  background: rgba(14, 26, 44, 0.26);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.notebook-modal-panel {
+  width: min(400px, calc(100vw - 24px));
+  height: 430px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1.5px solid rgba(224, 234, 245, 0.8);
+  box-shadow:
+    0 32px 80px rgba(11, 45, 114, 0.2),
+    0 8px 24px rgba(221, 174, 211, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  overflow: hidden;
+  animation: notebook-modal-enter 260ms cubic-bezier(0.34, 1.1, 0.64, 1) both;
+}
+
+/* ── HEADER ── */
+.notebook-modal-head {
+  padding: 16px 16px 12px;
+background: linear-gradient(135deg,
+  rgba(248, 252, 255, 0.92) 0%,
+  rgba(255, 225, 245, 0.95) 25%,
+  rgba(240, 248, 255, 0.9) 55%,
+  rgba(255, 215, 240, 0.94) 100%);
+  border-bottom: 1px solid rgba(220, 232, 248, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.notebook-modal-head::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(143, 216, 243, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.notebook-modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notebook-modal-title-row h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0b2d72;
+  letter-spacing: -0.01em;
+}
+
+.notebook-modal-title-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: whitesmoke;
+  box-shadow:
+    0 6px 16px rgba(47, 115, 186, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  font-size: 16px;
+}
+
+body .notebook-modal-panel .notebook-modal-close {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 9px !important;
+  border: 1.5px solid #dde8f5 !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: #5a7299 !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 6px rgba(11, 45, 114, 0.08) !important;
+  transition: background 140ms ease, box-shadow 140ms ease !important;
+}
+
+body .notebook-modal-panel .notebook-modal-close:hover {
+  background: #fff0f0 !important;
+  border-color: #f5a8a8 !important;
+  color: #c0392b !important;
+}
+
+body .notebook-modal-panel .notebook-modal-close::before,
+body .notebook-modal-panel .notebook-modal-close::after {
+  content: none !important;
+}
+
+/* ── TABS ── */
+.notebook-tabs {
+  padding: 10px 12px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background: #eef3fb;
+  border-bottom: 2px solid #d8e6f5;
+}
+
+body .notebook-modal-panel .notebook-tab {
+  border: 1.5px solid #e2eaf4 !important;
+  border-bottom: 0 !important;
+  border-radius: 10px 10px 0 0 !important;
+  background: #e4edf8 !important; /* darker than #f0f5fc */
+  color: #6b80a0 !important; /* slightly darker than #8a9dc0 */
+  border-color: #cddaee !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 9px 10px !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
+  transition: background 140ms ease, color 140ms ease !important;
+}
+
+body .notebook-modal-panel .notebook-tab:hover {
+  background: #e8f0fc !important;
+  color: #1263b9 !important;
+}
+
+body .notebook-modal-panel .notebook-tab.is-active {
+  background: #ffffff !important;
+  color: #0b2d72 !important;
+  border-color: #d0dff0 !important;
+  box-shadow: 0 -2px 8px rgba(11, 45, 114, 0.06) !important;
+}
+
+body .notebook-modal-panel .notebook-tab::before,
+body .notebook-modal-panel .notebook-tab::after {
+  content: none !important;
+}
+
+/* ── CONTENT ── */
+.notebook-content {
+  overflow-y: auto;
+  padding: 14px 12px;
+  display: grid;
+  gap: 10px;
+  background: #f8faff;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #d0dff0 transparent;
+  align-content: start;
+}
+
+.notebook-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.notebook-content::-webkit-scrollbar-thumb {
+  background: #d0dff0;
+  border-radius: 999px;
+}
+
+/* ── INPUT ROW ── */
+.notebook-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.notebook-input-row input {
+  min-height: 40px;
+  border-radius: 11px;
+  border: 1.5px solid #e0eaf5;
+  background: #ffffff;
+  color: #1a3060;
+  padding: 0 13px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-shadow: 0 2px 6px rgba(11, 45, 114, 0.04);
+}
+
+.notebook-input-row input:focus {
+  outline: none;
+  border-color: #8fd8f3;
+  box-shadow: 0 0 0 3px rgba(143, 216, 243, 0.18);
+}
+
+body .notebook-modal-panel .notebook-input-row button {
+  min-height: 40px !important;
+  border-radius: 11px !important;
+  border: none !important;
+  background: linear-gradient(130deg, #1263b9 0%, #3b9eff 100%) !important;
+  color: #ffffff !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  padding: 0 16px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 14px rgba(18, 99, 185, 0.3) !important;
+  transition: transform 140ms ease, box-shadow 140ms ease !important;
+}
+
+body .notebook-modal-panel .notebook-input-row button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(18, 99, 185, 0.4) !important;
+}
+
+body .notebook-modal-panel .notebook-input-row button:active {
+  transform: translateY(0) !important;
+}
+
+body .notebook-modal-panel .notebook-input-row button::before,
+body .notebook-modal-panel .notebook-input-row button::after {
+  content: none !important;
+}
+
+/* ── LISTS ── */
+.notebook-list {
+  display: grid;
+  gap: 8px;
+}
+
+.notebook-empty {
+  margin: 16px 0 0;
+  color: #a0b4cc;
+  font-size: 13px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* ── NOTE CARDS ── */
+.notebook-note-card {
+  display: grid;
+  grid-template-columns: 3px 1fr auto;
+  align-items: start;
+  gap: 10px;
+  background: #ffffff;
+  border: 1.5px solid #e8eef8;
+  border-radius: 14px;
+  padding: 12px 12px 12px 0;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  box-shadow: 0 2px 8px rgba(11, 45, 114, 0.04);
+}
+
+.notebook-note-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(11, 45, 114, 0.1);
+  border-color: #c8ddf5;
+}
+
+.notebook-note-accent {
+  height: 100%;
+  min-height: 36px;
+  border-radius: 14px 0 0 14px;
+  background: linear-gradient(180deg, #ddaed3 0%, #8fd8f3 100%);
+}
+
+.notebook-note-main {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.notebook-note-text {
+  margin: 0;
+  color: #1a3060;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  cursor: text;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.notebook-note-text:hover {
+  color: #0b2d72;
+}
+
+.notebook-note-main textarea {
+  width: 100%;
+  min-height: 58px;
+  border-radius: 9px;
+  border: 1.5px solid #8fd8f3;
+  background: #f8fcff;
+  color: #1a3060;
+  padding: 8px 9px;
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(143, 216, 243, 0.15);
+}
+
+.notebook-note-time {
+  font-size: 10.5px;
+  color: #a0b4cc;
+  font-weight: 500;
+}
+
+/* ── DELETE BUTTON ── */
+body .notebook-modal-panel .notebook-delete-btn {
+  margin-top: 2px;
+  width: 26px !important;
+  height: 26px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: #fde8e8 !important;
+  color: #e53e3e !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  transition: background 140ms ease, transform 140ms ease, box-shadow 140ms ease !important;
+  opacity: 0.7 !important;
+}
+
+.notebook-note-card:hover .notebook-delete-btn,
+.notebook-todo-row:hover .notebook-delete-btn {
+  opacity: 1 !important;
+}
+
+body .notebook-modal-panel .notebook-delete-btn:hover {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35) !important;
+  opacity: 1 !important;
+}
+
+body .notebook-modal-panel .notebook-delete-btn::before,
+body .notebook-modal-panel .notebook-delete-btn::after {
+  content: none !important;
+}
+
+/* ── TODO ROWS ── */
+.notebook-todo-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1.5px solid #e8eef8;
+  border-radius: 14px;
+  padding: 11px 12px;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  box-shadow: 0 2px 8px rgba(11, 45, 114, 0.04);
+}
+
+.notebook-todo-row:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(11, 45, 114, 0.1);
+  border-color: #c8ddf5;
+}
+
+body .notebook-modal-panel .notebook-checkbox {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 6px !important;
+  border: 2px solid #c8ddf5 !important;
+  background: #ffffff !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  transition: all 160ms ease !important;
+  flex-shrink: 0 !important;
+}
+
+body .notebook-modal-panel .notebook-checkbox:hover {
+  border-color: #8fd8f3 !important;
+  background: #f0f8ff !important;
+}
+
+body .notebook-modal-panel .notebook-checkbox.is-checked {
+  background: linear-gradient(135deg, #1263b9 0%, #8fd8f3 100%) !important;
+  border-color: transparent !important;
+  box-shadow: 0 3px 10px rgba(18, 99, 185, 0.3) !important;
+}
+
+body .notebook-modal-panel .notebook-checkbox::before,
+body .notebook-modal-panel .notebook-checkbox::after {
+  content: none !important;
+}
+
+.notebook-todo-text {
+  margin: 0;
+  color: #1a3060;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  cursor: text;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  transition: color 160ms ease;
+}
+
+.notebook-inline-input {
+  width: 100%;
+  min-height: 30px;
+  border-radius: 8px;
+  border: 1.5px solid #8fd8f3;
+  background: #f8fcff;
+  color: #1a3060;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 9px;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(143, 216, 243, 0.15);
+}
+
+.notebook-todo-row.is-completed {
+  opacity: 0.6;
+  background: #f8f9fb;
+  border-color: #edf0f5;
+}
+
+.notebook-todo-row.is-completed:hover {
+  opacity: 0.75;
+}
+
+.notebook-todo-row.is-completed .notebook-todo-text {
+  text-decoration: line-through;
+  color: #8a9dc0;
+}
+
+/* ── FOOTER ── */
+.notebook-footer {
+  border-top: 1px solid #edf2fa;
+  background: linear-gradient(135deg, #f8faff 0%, #fdf5fd 100%);
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: #8a9dc0;
+  font-weight: 600;
+}
+
+.notebook-footer strong {
+  color: #1263b9;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* ── ANIMATION ── */
+@keyframes notebook-modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }

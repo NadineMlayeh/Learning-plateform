@@ -1890,12 +1890,10 @@ export default function AdminFormationPage({ pushToast }) {
           </div>
         )}
 
-        {formation.courses.length === 0 && (
+        {formation.courses.length === 0 && formation.type !== 'PRESENTIEL' && (
           <div className="card">
             <p className="hint">
-              {formation.type === 'PRESENTIEL'
-                ? 'Presentiel formation: no online courses.'
-                : 'No course yet for this formation.'}
+              No course yet for this formation.
             </p>
           </div>
         )}
