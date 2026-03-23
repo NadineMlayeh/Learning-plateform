@@ -201,6 +201,43 @@ export class AuthService {
     };
   }
 
+  async validateResetToken(tokenInput?: string) {
+    const token = String(tokenInput || '').trim();
+    if (!token) {
+      return {
+        valid: false,
+        message: 'Invalid or expired reset token',
+      };
+    }
+
+    const hashedToken = createHash('sha256').update(token).digest('hex');
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { token: hashedToken },
+      select: { id: true, expiresAt: true },
+    });
+
+    if (!resetToken) {
+      return {
+        valid: false,
+        message: 'Invalid or expired reset token',
+      };
+    }
+
+    if (resetToken.expiresAt.getTime() < Date.now()) {
+      await this.prisma.passwordResetToken.delete({
+        where: { id: resetToken.id },
+      });
+      return {
+        valid: false,
+        message: 'This reset link has expired. Please request a new one.',
+      };
+    }
+
+    return {
+      valid: true,
+    };
+  }
+
   private buildResetUrl(rawToken: string): string {
     const configured = String(
       this.configService.get('FRONTEND_RESET_PASSWORD_URL') ||

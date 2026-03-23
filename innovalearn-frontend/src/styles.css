@@ -222,6 +222,8 @@ body.auth-wallpaper-active {
 
 .topbar a.topbar-link-underline::after,
 .topbar button.topbar-link-underline::after {
+  content: '';
+  position: absolute;
   inset: auto 0 0 0;
   width: 100%;
   height: 2px;
@@ -6589,12 +6591,23 @@ code {
 }
 
 .auth-forgot-row {
-  margin-top: 0.08rem;
-  text-align: right;
+  margin-top: 0.42rem;
+  text-align: left;
+}
+
+.auth-forgot-row .auth-inline-link {
+  color: rgba(255, 255, 255, 0.95);
+  border-bottom-color: rgba(255, 255, 255, 0.62);
+}
+
+.auth-forgot-row .auth-inline-link:hover,
+.auth-forgot-row .auth-inline-link:focus-visible {
+  color: #ffffff;
+  border-bottom-color: rgba(255, 255, 255, 0.88);
 }
 
 .auth-error-box {
-  margin-top: 0.35rem;
+  margin-top: 0.62rem;
   border-left: 3px solid rgba(220, 60, 60, 0.85);
   border-radius: 0 10px 10px 0;
   background: rgba(255, 255, 255, 0.15);
@@ -12081,6 +12094,124 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .pendin
 
 body .topbar button.topbar-notebook-trigger {
   white-space: nowrap;
+}
+
+/* ===============================
+   Onboarding Tour (driver.js)
+   =============================== */
+
+/* --- Overlay --- */
+.driver-overlay {
+  fill: rgba(8, 18, 38, 0.72) !important;
+}
+
+/* --- Highlighted element --- */
+.driver-active-element {
+  border-radius: 12px !important;
+  box-shadow:
+    0 0 0 2px #8fd8f3,
+    0 0 0 4px rgba(143, 216, 243, 0.15),
+    0 14px 34px -20px rgba(11, 45, 114, 0.55) !important;
+}
+.driver-popover.innova-tour-popover .driver-popover-close-btn {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #dde8f5 !important;
+  background: #f3f7fd !important;
+  color: #6b80a0 !important;
+  font-size: 13px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+.driver-popover.innova-tour-popover .driver-popover-close-btn:hover {
+  background: #ffe8e8 !important;
+  border-color: #f5a8a8 !important;
+  color: #c0392b !important;
+}
+/* --- Popover shell --- */
+.driver-popover.innova-tour-popover {
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  border: 1px solid #d9e6f4 !important;
+  box-shadow: 0 24px 54px -24px rgba(11, 45, 114, 0.34) !important;
+  min-width: 280px;
+  max-width: 340px;
+}
+
+/* --- Arrow (stays attached to bubble) --- */
+.driver-popover.innova-tour-popover .driver-popover-arrow {
+  border-color: #ffffff !important;
+}
+
+/* --- Title --- */
+.driver-popover.innova-tour-popover .driver-popover-title {
+  color: #0b2d72 !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.1px !important;
+}
+
+/* --- Description --- */
+.driver-popover.innova-tour-popover .driver-popover-description {
+  color: #6b7fa0 !important;
+  line-height: 1.6 !important;
+}
+
+/* --- Progress text --- */
+.driver-popover.innova-tour-popover .driver-popover-progress-text {
+  color: #a0b4cc !important;
+}
+
+/* --- Next button --- */
+.driver-popover.innova-tour-popover .driver-popover-footer .driver-popover-next-btn {
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 7px 14px !important;
+  color: #ffffff !important;
+  background: linear-gradient(130deg, #1263b9, #3b9eff) !important;
+  box-shadow: 0 8px 18px -10px rgba(18, 99, 185, 0.85) !important;
+  text-shadow: none !important;
+  transition: filter 0.18s ease, transform 0.15s ease !important;
+}
+
+.driver-popover.innova-tour-popover .driver-popover-footer .driver-popover-next-btn:hover,
+.driver-popover.innova-tour-popover .driver-popover-footer .driver-popover-next-btn:focus-visible {
+  filter: brightness(1.07) !important;
+  transform: translateY(-1px) !important;
+}
+
+.driver-popover.innova-tour-popover .driver-popover-footer .driver-popover-next-btn:active {
+  transform: translateY(0) !important;
+  filter: brightness(0.97) !important;
+}
+
+/* --- Prev button --- */
+.driver-popover.innova-tour-popover .driver-popover-footer .driver-popover-prev-btn {
+  border: 1.5px solid #d8e6f5 !important;
+  border-radius: 999px !important;
+  padding: 7px 14px !important;
+  color: #4a6490 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  transition: background 0.18s ease, transform 0.15s ease !important;
+}
+
+.driver-popover.innova-tour-popover .driver-popover-footer .driver-popover-prev-btn:hover,
+.driver-popover.innova-tour-popover .driver-popover-footer .driver-popover-prev-btn:focus-visible {
+  background: #f3f8ff !important;
+  transform: translateY(-1px) !important;
+}
+
+.driver-popover.innova-tour-popover .driver-popover-footer .driver-popover-prev-btn:active {
+  transform: translateY(0) !important;
 }
 
 .notebook-modal-overlay {

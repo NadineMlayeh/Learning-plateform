@@ -38,6 +38,7 @@ async create(dto: CreateUserDto) {
         phoneNumber: true,
         role: true,
         formateurStatus: true,
+        hasSeenTour: true,
         createdAt: true,
         profileImageUrl: true,
         bio: true,
@@ -57,6 +58,7 @@ async create(dto: CreateUserDto) {
         phoneNumber: true,
         role: true,
         formateurStatus: true,
+        hasSeenTour: true,
         createdAt: true,
         profileImageUrl: true,
         bio: true,
@@ -81,6 +83,7 @@ async create(dto: CreateUserDto) {
         phoneNumber: true,
         role: true,
         formateurStatus: true,
+        hasSeenTour: true,
         createdAt: true,
         profileImageUrl: true,
         bio: true,
@@ -178,6 +181,7 @@ async create(dto: CreateUserDto) {
         phoneNumber: true,
         role: true,
         formateurStatus: true,
+        hasSeenTour: true,
         createdAt: true,
         profileImageUrl: true,
         bio: true,
@@ -244,5 +248,14 @@ async create(dto: CreateUserDto) {
     });
 
     return { success: true, message: 'Password updated successfully' };
+  }
+
+  async markTourSeen(userId: number): Promise<{ success: true; hasSeenTour: true }> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { hasSeenTour: true },
+    });
+
+    return { success: true, hasSeenTour: true };
   }
 }

@@ -107,4 +107,10 @@ export class UserController {
   async changeMyPassword(@Req() req, @Body() body: ChangePasswordDto) {
     return this.userService.changePassword(req.user.userId, body || {});
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/tour-seen')
+  async markMyTourSeen(@Req() req) {
+    return this.userService.markTourSeen(req.user.userId);
+  }
 }

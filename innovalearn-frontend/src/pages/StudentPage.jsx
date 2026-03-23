@@ -4,6 +4,11 @@ import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
 import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
+import {
+  hasLocalTourDone,
+  markTourSeen,
+  startOnboardingTour,
+} from '../tour/onboardingTour';
 
 const INVOICE_PAGE_SIZE = 4;
 const PENDING_PAGE_SIZE = 3;
@@ -340,8 +345,12 @@ function QuickActionCard({
 export default function StudentPage({ pushToast }) {
   const user = getCurrentUser();
   const navigate = useNavigate();
+  const studentTourRef = useRef(null);
+  const autoTourStartedRef = useRef(false);
 
   const [studentName, setStudentName] = useState('Student');
+  const [hasSeenTour, setHasSeenTour] = useState(true);
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [formations, setFormations] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -402,6 +411,7 @@ export default function StudentPage({ pushToast }) {
     try {
       const profile = await apiRequest('/users/me', { token: user.token });
       const name = String(profile?.name || '').trim();
+      setHasSeenTour(Boolean(profile?.hasSeenTour));
       if (name) {
         setStudentName(name);
         return;
@@ -416,11 +426,66 @@ export default function StudentPage({ pushToast }) {
         (entry) => Number(entry.id) === Number(user.userId),
       );
       const name = String(current?.name || '').trim();
+      if (typeof current?.hasSeenTour === 'boolean') {
+        setHasSeenTour(Boolean(current.hasSeenTour));
+      }
       if (name) setStudentName(name);
     } catch {
       // keep default "Student"
     }
   }
+
+  function launchStudentTour() {
+    const tour = startOnboardingTour({
+      steps: [
+        {
+          element: '[data-tour="app-navbar"]',
+          popover: {
+            title: 'Navigation',
+            description:
+              'Welcome to InnovaLearn! This is your navigation bar. Use it to access your dashboard, notebook and profile.',
+          },
+        },
+        {
+          element: '[data-tour="student-quick-stats"]',
+          popover: {
+            title: 'Quick stats',
+            description:
+              'These cards show your enrolled courses, certificates earned, payments and pending requests at a glance.',
+          },
+        },
+        {
+          element: '[data-tour="student-first-formation-card"]',
+          popover: {
+            title: 'Enrolled formations',
+            description:
+              'These are your enrolled formations. Click to start learning.',
+          },
+        },
+        {
+          element: '[data-tour="navbar-notebook"]',
+          popover: {
+            title: 'My Notebook',
+            description:
+              'Use My Notebook to jot down notes and manage your learning tasks anytime.',
+          },
+        },
+        {
+          element: '[data-tour="profile-sidebar-trigger"]',
+          popover: {
+            title: 'Profile settings',
+            description:
+              'Click here to update your profile photo and personal information.',
+          },
+        },
+      ],
+    onFinish: () => {
+      setHasSeenTour(true); // ← add this line
+      markTourSeen({ token: user?.token, userId: user?.userId });
+    },
+  });
+  if (tour) studentTourRef.current = tour;
+}
 
   async function enroll(formationId) {
     setEnrollingFormationId(formationId);
@@ -831,7 +896,7 @@ export default function StudentPage({ pushToast }) {
               <p className="hint">No enrolled formation matches your search/filter.</p>
             ) : (
               <div className="student-v2-course-grid student-v2-course-grid-paged">
-                {enrolledPageRows.map((entry) => {
+                {enrolledPageRows.map((entry, index) => {
                   const formation = entry.formation;
                   const progress = getFormationProgress(entry);
                   const completedBadgeLabel = progress.completed
@@ -841,7 +906,11 @@ export default function StudentPage({ pushToast }) {
                     : null;
 
                   return (
-                    <article key={entry.id} className="student-v2-course-card">
+                    <article
+                      key={entry.id}
+                      className="student-v2-course-card"
+                      data-tour={index === 0 ? 'student-first-formation-card' : undefined}
+                    >
                       <div className="student-v2-course-thumb">
                         <img
                           src={formationThumbnailFor(
@@ -1547,10 +1616,73 @@ export default function StudentPage({ pushToast }) {
   }
 
   useEffect(() => {
-    loadStudentProfile();
-    loadFormations();
-    loadEnrollments();
-    loadInvoices();
+    let active = true;
+
+    async function bootstrap() {
+      await Promise.all([
+        loadStudentProfile(),
+        loadFormations(),
+        loadEnrollments(),
+        loadInvoices(),
+      ]);
+      if (active) setInitialDataLoaded(true);
+    }
+
+    bootstrap();
+
+    return () => {
+      active = false;
+      if (studentTourRef.current?.isActive?.()) {
+        studentTourRef.current.destroy();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user?.userId || !initialDataLoaded) return;
+    if (autoTourStartedRef.current) return;
+    if (hasSeenTour || hasLocalTourDone(user.userId)) return;
+
+    const timeoutId = setTimeout(() => {
+      autoTourStartedRef.current = true;
+      launchStudentTour();
+    }, 800);
+
+    return () => clearTimeout(timeoutId);
+  }, [hasSeenTour, initialDataLoaded, user?.userId]);
+
+  useEffect(() => {
+    if (!initialDataLoaded) return;
+
+    let forced = false;
+    try {
+      forced = sessionStorage.getItem('innova_force_tour') === '1';
+      if (forced) sessionStorage.removeItem('innova_force_tour');
+    } catch {
+      forced = false;
+    }
+
+    if (!forced) return;
+
+    autoTourStartedRef.current = true;
+    if (studentTourRef.current?.isActive?.()) {
+      studentTourRef.current.destroy();
+    }
+    launchStudentTour();
+  }, [initialDataLoaded]);
+
+  useEffect(() => {
+    function handleManualTourStart() {
+      autoTourStartedRef.current = true;
+      if (studentTourRef.current?.isActive?.()) {
+        studentTourRef.current.destroy();
+      }
+      launchStudentTour();
+    }
+
+    window.addEventListener('innova:start-tour', handleManualTourStart);
+    return () =>
+      window.removeEventListener('innova:start-tour', handleManualTourStart);
   }, []);
 
   useEffect(() => {
@@ -1724,7 +1856,7 @@ export default function StudentPage({ pushToast }) {
         </div>
       </article>
 
-      <section className="student-v2-quick-grid">
+      <section className="student-v2-quick-grid" data-tour="student-quick-stats">
         {quickCards.map((card) => (
           <QuickActionCard
             key={card.key}

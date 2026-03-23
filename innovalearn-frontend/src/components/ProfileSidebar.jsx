@@ -591,6 +591,7 @@ export default function ProfileSidebar({ user }) {
             className={`profile-glass-item profile-glass-settings ${
               activeItem === 'settings' ? 'is-active' : ''
             }`}
+            data-tour="profile-sidebar-trigger"
             onClick={() => {
               setActiveItem('settings');
               setIsEditMode(true);

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { apiRequest } from '../api';
 
@@ -9,12 +9,60 @@ export default function ResetPasswordPage() {
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [tokenError, setTokenError] = useState('');
+  const [tokenChecked, setTokenChecked] = useState(false);
+  const [tokenValid, setTokenValid] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const token = useMemo(() => {
     const params = new URLSearchParams(location.search);
     return String(params.get('token') || '').trim();
   }, [location.search]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function validateToken() {
+      setTokenChecked(false);
+      setTokenValid(false);
+      setTokenError('');
+
+      if (!token) {
+        if (!cancelled) {
+          setTokenChecked(true);
+          setTokenError('This reset link is invalid or expired.');
+        }
+        return;
+      }
+
+      try {
+        const result = await apiRequest('/auth/reset-password/validate', {
+          method: 'POST',
+          body: { token },
+        });
+
+        if (cancelled) return;
+
+        if (result?.valid) {
+          setTokenValid(true);
+        } else {
+          setTokenError(
+            result?.message || 'This reset link is invalid or expired.',
+          );
+        }
+      } catch (err) {
+        if (cancelled) return;
+        setTokenError(err.message || 'This reset link is invalid or expired.');
+      } finally {
+        if (!cancelled) setTokenChecked(true);
+      }
+    }
+
+    validateToken();
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -50,6 +98,50 @@ export default function ResetPasswordPage() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (!tokenChecked) {
+    return (
+      <section className="auth-page">
+        <article className="card auth-card">
+          <div className="auth-head">
+            <h1>Checking Reset Link</h1>
+            <p className="hint">Please wait while we validate your link.</p>
+          </div>
+        </article>
+      </section>
+    );
+  }
+
+  if (!tokenValid) {
+    return (
+      <section className="auth-page">
+        <article className="card auth-card">
+          <div className="auth-head">
+            <h1>Reset Link Expired</h1>
+            <p className="hint">
+              This password reset link is no longer valid.
+            </p>
+          </div>
+
+          <article className="auth-error-box" role="alert" aria-live="assertive">
+            <p className="auth-error-title">[!] Link Expired</p>
+            <p className="auth-error-body">
+              {tokenError || 'Please request a new password reset link.'}
+            </p>
+          </article>
+
+          <div className="auth-foot">
+            <p className="hint">
+              Request a new link from{' '}
+              <Link to="/forgot-password" className="auth-inline-link">
+                Forgot Password
+              </Link>
+            </p>
+          </div>
+        </article>
+      </section>
+    );
   }
 
   return (

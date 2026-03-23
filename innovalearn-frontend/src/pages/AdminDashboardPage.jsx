@@ -5,6 +5,11 @@ import { getCurrentUser } from '../auth';
 import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 import LoadingButton from '../components/LoadingButton';
+import {
+  hasLocalTourDone,
+  markTourSeen,
+  startOnboardingTour,
+} from '../tour/onboardingTour';
 
 const PAGE_SIZE = 3;
 const ANALYTICS_STUDENT_PAGE_SIZE = 5;
@@ -126,6 +131,8 @@ function DonutChart({ segments, label, valueText, size = 120, thickness = 20 }) 
 export default function AdminDashboardPage({ pushToast }) {
   const user = getCurrentUser();
   const navigate = useNavigate();
+  const formateurTourRef = useRef(null);
+  const formateurAutoTourStartedRef = useRef(false);
   const restoredDashboardState = useMemo(
     () => readFormateurDashboardState(),
     [],
@@ -133,6 +140,8 @@ export default function AdminDashboardPage({ pushToast }) {
 
   const [formations, setFormations] = useState([]);
   const [formationsLoaded, setFormationsLoaded] = useState(false);
+  const [hasSeenTour, setHasSeenTour] = useState(true);
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [publishingId, setPublishingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [confirmDeleteFormationId, setConfirmDeleteFormationId] = useState(null);
@@ -213,6 +222,69 @@ export default function AdminDashboardPage({ pushToast }) {
       setAnalyticsLoading(false);
     }
   }
+
+  async function loadTourStatus() {
+    try {
+      const profile = await apiRequest('/users/me', {
+        token: user.token,
+      });
+      setHasSeenTour(Boolean(profile?.hasSeenTour));
+    } catch {
+      // keep default true to avoid unwanted auto popups on failures
+    }
+  }
+
+  function launchFormateurTour() {
+    const tour = startOnboardingTour({
+      steps: [
+        {
+          element: '[data-tour="formateur-header-card"]',
+          popover: {
+            title: 'Dashboard header',
+            description:
+              'Welcome! This is your Formateur Dashboard where you manage all your formations.',
+          },
+        },
+        {
+          element: '[data-tour="formateur-kpi-cards"]',
+          popover: {
+            title: 'KPI cards',
+            description:
+              'These show your total formations, published count, drafts and enrolled students at a glance.',
+          },
+        },
+        {
+          element: '[data-tour="formateur-pending-table"]',
+          popover: {
+            title: 'Pending formations',
+            description:
+              'Your draft formations appear here. Open, publish or delete them from this table.',
+          },
+        },
+        {
+          element: '[data-tour="formateur-analytics-table"]',
+          popover: {
+            title: 'Formation analytics',
+            description:
+              'Your published formations are here. Click Stats to see detailed student performance analytics.',
+          },
+        },
+        {
+          element: '[data-tour="formateur-add-formation-btn"]',
+          popover: {
+            title: 'Create formation',
+            description:
+              'Ready to create? Click here to add a new formation and start building your course content.',
+          },
+        },
+      ],
+    onFinish: () => {
+      setHasSeenTour(true); // ← add this line
+      markTourSeen({ token: user?.token, userId: user?.userId });
+    },
+  });
+  if (tour) formateurTourRef.current = tour;
+}
 
   async function publishFormation(formationId) {
     setPublishingId(formationId);
@@ -302,8 +374,68 @@ export default function AdminDashboardPage({ pushToast }) {
   }
 
   useEffect(() => {
-    loadFormations();
-    loadAnalytics();
+    let active = true;
+
+    async function bootstrap() {
+      await Promise.all([loadFormations(), loadAnalytics(), loadTourStatus()]);
+      if (active) setInitialDataLoaded(true);
+    }
+
+    bootstrap();
+
+    return () => {
+      active = false;
+      if (formateurTourRef.current?.isActive?.()) {
+        formateurTourRef.current.destroy();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user?.userId || !initialDataLoaded) return;
+    if (formateurAutoTourStartedRef.current) return;
+    if (hasSeenTour || hasLocalTourDone(user.userId)) return;
+
+    const timeoutId = setTimeout(() => {
+      formateurAutoTourStartedRef.current = true;
+      launchFormateurTour();
+    }, 800);
+
+    return () => clearTimeout(timeoutId);
+  }, [hasSeenTour, initialDataLoaded, user?.userId]);
+
+  useEffect(() => {
+    if (!initialDataLoaded) return;
+
+    let forced = false;
+    try {
+      forced = sessionStorage.getItem('innova_force_tour') === '1';
+      if (forced) sessionStorage.removeItem('innova_force_tour');
+    } catch {
+      forced = false;
+    }
+
+    if (!forced) return;
+
+    formateurAutoTourStartedRef.current = true;
+    if (formateurTourRef.current?.isActive?.()) {
+      formateurTourRef.current.destroy();
+    }
+    launchFormateurTour();
+  }, [initialDataLoaded]);
+
+  useEffect(() => {
+    function handleManualTourStart() {
+      formateurAutoTourStartedRef.current = true;
+      if (formateurTourRef.current?.isActive?.()) {
+        formateurTourRef.current.destroy();
+      }
+      launchFormateurTour();
+    }
+
+    window.addEventListener('innova:start-tour', handleManualTourStart);
+    return () =>
+      window.removeEventListener('innova:start-tour', handleManualTourStart);
   }, []);
 
   useEffect(() => {
@@ -673,7 +805,10 @@ export default function AdminDashboardPage({ pushToast }) {
     <section className="stack formateur-dashboard-page admin-skin-page">
       <ProfileSidebar user={user} />
 
-      <div className="card panel-head formateur-dashboard-head">
+      <div
+        className="card panel-head formateur-dashboard-head"
+        data-tour="formateur-header-card"
+      >
         <span className="admin-saas-header-accent" aria-hidden="true" />
         <div className="admin-saas-header-intro">
           <span className="admin-saas-header-icon" aria-hidden="true">
@@ -694,6 +829,8 @@ export default function AdminDashboardPage({ pushToast }) {
         <div className="row formateur-dashboard-head-actions">
           <button
             type="button"
+            className="formateur-add-formation-btn"
+            data-tour="formateur-add-formation-btn"
             onClick={openCreateFormationModal}
           >
             +  Add Formation
@@ -716,7 +853,10 @@ export default function AdminDashboardPage({ pushToast }) {
             )}
           </div>
         </div>
-        <div className="admin-saas-kpi-grid formateur-overview-kpi-grid">
+        <div
+          className="admin-saas-kpi-grid formateur-overview-kpi-grid"
+          data-tour="formateur-kpi-cards"
+        >
           <article className="admin-saas-kpi-card">
             <p className="hint">Total Formations</p>
             <strong>{globalOverview.totalFormations}</strong>
@@ -767,7 +907,11 @@ export default function AdminDashboardPage({ pushToast }) {
         </div>
       </div>
 
-      <div className="card formateur-formations-card" ref={pendingSectionRef}>
+      <div
+        className="card formateur-formations-card"
+        ref={pendingSectionRef}
+        data-tour="formateur-pending-table"
+      >
         <div className="card-head-row">
           <h2>Pending Formations</h2>
           <StatusBadge
@@ -916,7 +1060,11 @@ export default function AdminDashboardPage({ pushToast }) {
         </div>
       </div>
 
-      <div className="card formateur-formations-card" ref={analyticsSectionRef}>
+      <div
+        className="card formateur-formations-card"
+        ref={analyticsSectionRef}
+        data-tour="formateur-analytics-table"
+      >
         <div className="card-head-row">
           <h2>Formation Analytics</h2>
           <StatusBadge
