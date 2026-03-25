@@ -462,14 +462,7 @@ export default function StudentPage({ pushToast }) {
               'These are your enrolled formations. Click to start learning.',
           },
         },
-        {
-          element: '[data-tour="navbar-notebook"]',
-          popover: {
-            title: 'My Notebook',
-            description:
-              'Use My Notebook to jot down notes and manage your learning tasks anytime.',
-          },
-        },
+
         {
           element: '[data-tour="profile-sidebar-trigger"]',
           popover: {
@@ -479,13 +472,14 @@ export default function StudentPage({ pushToast }) {
           },
         },
       ],
-    onFinish: () => {
-      setHasSeenTour(true); // ← add this line
-      markTourSeen({ token: user?.token, userId: user?.userId });
-    },
-  });
-  if (tour) studentTourRef.current = tour;
-}
+      onFinish: () => {
+        setHasSeenTour(true);
+        markTourSeen({ token: user?.token, userId: user?.userId });
+      },
+    });
+
+    if (tour) studentTourRef.current = tour;
+  }
 
   async function enroll(formationId) {
     setEnrollingFormationId(formationId);
@@ -1673,6 +1667,13 @@ export default function StudentPage({ pushToast }) {
 
   useEffect(() => {
     function handleManualTourStart() {
+      try {
+        sessionStorage.removeItem('innova_force_tour');
+      } catch {
+        // ignore storage failures
+      }
+      setHasSeenTour(true);
+      markTourSeen({ token: user?.token, userId: user?.userId });
       autoTourStartedRef.current = true;
       if (studentTourRef.current?.isActive?.()) {
         studentTourRef.current.destroy();
@@ -1878,5 +1879,7 @@ export default function StudentPage({ pushToast }) {
     </section>
   );
 }
+
+
 
 

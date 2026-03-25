@@ -37,15 +37,15 @@ export function markLocalTourDone(userId) {
 
 export async function markTourSeen({ token, userId }) {
   if (!token || !userId) return;
+  // Persist locally first so refresh/navigation can't retrigger auto-tour.
+  markLocalTourDone(userId);
   try {
     await apiRequest('/users/me/tour-seen', {
       method: 'PATCH',
       token,
     });
-    markLocalTourDone(userId);
   } catch {
-    // Fallback requested by product: avoid showing again in same browser
-    markLocalTourDone(userId);
+    // Keep local fallback only; backend update can be retried later.
   }
 }
 
@@ -81,7 +81,15 @@ export function startOnboardingTour({
     onFinish?.();
   };
 
-  const tourDriver = driver({
+  let tourDriver = null;
+  const handleClose = () => {
+    doneOnce();
+    if (tourDriver?.isActive?.()) {
+      tourDriver.destroy();
+    }
+  };
+
+  tourDriver = driver({
     animate: true,
     smoothScroll: true,
     stagePadding: 9,
@@ -93,6 +101,8 @@ export function startOnboardingTour({
     nextBtnText: 'Next',
     prevBtnText: 'Previous',
     doneBtnText: 'Done',
+    onCloseClick: () => handleClose(),
+    onDestroyStarted: () => doneOnce(),
     onDestroyed: () => doneOnce(),
   });
 
@@ -100,4 +110,3 @@ export function startOnboardingTour({
   tourDriver.drive();
   return tourDriver;
 }
-

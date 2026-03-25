@@ -30,27 +30,36 @@ export default function NavBar() {
   }
 
   function openGuide() {
-    try {
-      sessionStorage.setItem(FORCE_TOUR_KEY, '1');
-    } catch {
-      // ignore storage failures
-    }
-
     const isStudentDashboard = location.pathname.startsWith('/student');
     const isFormateurDashboard = location.pathname.startsWith('/formateur');
 
     if (user?.role === 'STUDENT' && !isStudentDashboard) {
+      try {
+        sessionStorage.setItem(FORCE_TOUR_KEY, '1');
+      } catch {
+        // ignore storage failures
+      }
       navigate('/student');
       setTimeout(() => window.dispatchEvent(new Event('innova:start-tour')), 160);
       return;
     }
 
     if (user?.role === 'FORMATEUR' && !isFormateurDashboard) {
+      try {
+        sessionStorage.setItem(FORCE_TOUR_KEY, '1');
+      } catch {
+        // ignore storage failures
+      }
       navigate('/formateur');
       setTimeout(() => window.dispatchEvent(new Event('innova:start-tour')), 160);
       return;
     }
 
+    try {
+      sessionStorage.removeItem(FORCE_TOUR_KEY);
+    } catch {
+      // ignore storage failures
+    }
     window.dispatchEvent(new Event('innova:start-tour'));
   }
 

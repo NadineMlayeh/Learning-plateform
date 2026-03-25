@@ -278,13 +278,13 @@ export default function AdminDashboardPage({ pushToast }) {
           },
         },
       ],
-    onFinish: () => {
-      setHasSeenTour(true); // ← add this line
-      markTourSeen({ token: user?.token, userId: user?.userId });
-    },
-  });
-  if (tour) formateurTourRef.current = tour;
-}
+      onFinish: () => {
+        setHasSeenTour(true);
+        markTourSeen({ token: user?.token, userId: user?.userId });
+      },
+    });
+    if (tour) formateurTourRef.current = tour;
+  }
 
   async function publishFormation(formationId) {
     setPublishingId(formationId);
@@ -426,6 +426,13 @@ export default function AdminDashboardPage({ pushToast }) {
 
   useEffect(() => {
     function handleManualTourStart() {
+      try {
+        sessionStorage.removeItem('innova_force_tour');
+      } catch {
+        // ignore storage failures
+      }
+      setHasSeenTour(true);
+      markTourSeen({ token: user?.token, userId: user?.userId });
       formateurAutoTourStartedRef.current = true;
       if (formateurTourRef.current?.isActive?.()) {
         formateurTourRef.current.destroy();
@@ -1650,3 +1657,5 @@ export default function AdminDashboardPage({ pushToast }) {
     </section>
   );
 }
+
+
