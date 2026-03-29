@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Sora:wght@500;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Sora:wght@500;700&display=swap');
 
 :root {
   --bg-1: #f6faff;
@@ -1998,26 +1998,26 @@ tr:last-child td {
 }
 
 /* ============================================================
-   STUDENT DETAILS PAGE — GLASSMORPHISM REDESIGN
+   STUDENT DETAILS PAGE â€” GLASSMORPHISM REDESIGN
    Only these selectors changed. All logic/APIs untouched.
    ============================================================ */
 
 /* ============================================================
-   STUDENT FORMATION DETAILS — FULL CSS
+   STUDENT FORMATION DETAILS â€” FULL CSS
    ============================================================ */
 
-/* ── 1. PAGE WRAPPER ────────────────────────────────────────
-   Overrides .stack (display:grid → flex) and stretches
+/* â”€â”€ 1. PAGE WRAPPER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   Overrides .stack (display:grid â†’ flex) and stretches
    to fill the full viewport width and remaining height.
    We use position:relative + left trick instead of 100vw
    to avoid horizontal scrollbar.
    ---------------------------------------------------------- */
 /* ============================================================
-   STUDENT FORMATION DETAILS — FULL CSS
+   STUDENT FORMATION DETAILS â€” FULL CSS
    ============================================================ */
 
-/* ── 1. PAGE WRAPPER ────────────────────────────────────────
-   Overrides .stack (display:grid → flex) and stretches
+/* â”€â”€ 1. PAGE WRAPPER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   Overrides .stack (display:grid â†’ flex) and stretches
    to fill the full viewport width and remaining height.
    We use position:relative + left trick instead of 100vw
    to avoid horizontal scrollbar.
@@ -2043,7 +2043,7 @@ tr:last-child td {
   overflow: hidden;
 }
 
-/* ── 2. SHELL ───────────────────────────────────────────────
+/* â”€â”€ 2. SHELL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Matches topbar's exact side padding (0.92rem).
    grid-template-rows: hero auto-sizes, layout takes the rest.
    ---------------------------------------------------------- */
@@ -2063,7 +2063,7 @@ tr:last-child td {
   overflow: hidden;
 }
 
-/* ── 3. HERO ─────────────────────────────────────────────── */
+/* â”€â”€ 3. HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .student-details-hero {
   background:
     radial-gradient(circle at 18% 14%, rgba(255,255,255,0.55), transparent 40%),
@@ -2150,7 +2150,7 @@ tr:last-child td {
   margin-bottom: 0.25rem;
 }
 
-/* ── 4. GLASS BASE ──────────────────────────────────────────*/
+/* â”€â”€ 4. GLASS BASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€*/
 
 .student-details-glass {
   background:
@@ -2179,7 +2179,7 @@ tr:last-child td {
   background: linear-gradient(90deg, #0b2d72 0%, #0ac4e0 52%, #ddaed3 100%);
 }
 
-/* ── 5. TWO-COLUMN LAYOUT ───────────────────────────────────
+/* â”€â”€ 5. TWO-COLUMN LAYOUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    height:100% fills the 1fr shell row.
    align-items:stretch = both columns always equal height,
    never resizing based on content.
@@ -2195,7 +2195,7 @@ tr:last-child td {
   overflow: hidden;
 }
 
-/* ── 6. LEFT SIDEBAR ────────────────────────────────────────
+/* â”€â”€ 6. LEFT SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Fixed height = fills column. Only the list scrolls inside.
    ---------------------------------------------------------- */
 .student-course-sidebar {
@@ -2348,7 +2348,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   height: 11px;
 }
 
-/* ── 7. RIGHT CONTENT PANEL ─────────────────────────────────
+/* â”€â”€ 7. RIGHT CONTENT PANEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Fixed height = fills column. Scrolls internally.
    align-content:start so items stack from top, not centered.
    ---------------------------------------------------------- */
@@ -2380,7 +2380,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   font-size: 1.05rem;
 }
 
-/* ── 8. TAB SWITCHER ─────────────────────────────────────── */
+/* â”€â”€ 8. TAB SWITCHER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .student-tab-switcher {
   position: relative;
   display: grid;
@@ -2457,7 +2457,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── 9. LESSON LIST ──────────────────────────────────────── */
+/* â”€â”€ 9. LESSON LIST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .student-lesson-list {
   display: grid;
   gap: 0.55rem;
@@ -2541,11 +2541,11 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   box-shadow: 0 12px 22px -12px rgba(40,100,230,0.55);
 }
 
-/* ── 10. LESSON SLIDE DECK ── */
+/* â”€â”€ 10. LESSON SLIDE DECK â”€â”€ */
 .student-lesson-deck {
   position: relative;
   min-height: 480px;
-  /* ← remove overflow:hidden when viewer is active */
+  /* â† remove overflow:hidden when viewer is active */
 }
 
 .student-lesson-deck > .student-lesson-list {
@@ -2557,10 +2557,10 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
 }
 
 .student-lesson-deck > .student-lesson-viewer {
-  /* ← NOT absolute anymore when active — flows naturally */
+  /* â† NOT absolute anymore when active â€” flows naturally */
   position: absolute;
   inset: 0;
-  overflow: visible;        /* ← no scroll here at all */
+  overflow: visible;        /* â† no scroll here at all */
   transform: translateX(100%);
   opacity: 0;
   transition: transform 320ms cubic-bezier(0.4,0,0.2,1), opacity 240ms ease;
@@ -2569,11 +2569,11 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
 }
 
 .student-lesson-deck.is-viewer {
-  overflow: visible;         /* ← let content flow out naturally */
+  overflow: visible;         /* â† let content flow out naturally */
 }
 
 .student-lesson-deck.is-viewer > .student-lesson-list {
-  position: absolute;        /* ← list hides behind */
+  position: absolute;        /* â† list hides behind */
   inset: 0;
   transform: translateX(-100%);
   opacity: 0;
@@ -2581,7 +2581,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
 }
 
 .student-lesson-deck.is-viewer > .student-lesson-viewer {
-  position: relative;        /* ← back in normal flow */
+  position: relative;        /* â† back in normal flow */
   inset: auto;
   transform: translateX(0%);
   opacity: 1;
@@ -2589,14 +2589,14 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   overflow: visible;
 }
 
-/* ── 11. LESSON VIEWER ── */
+/* â”€â”€ 11. LESSON VIEWER â”€â”€ */
 .student-lesson-viewer {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   width: 100%;
   box-sizing: border-box;
-  /* no height:100%, no overflow — flows naturally */
+  /* no height:100%, no overflow â€” flows naturally */
 }
 
 .student-lesson-actions {
@@ -2605,7 +2605,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   padding-top: 0.2rem;
 }
 
-/* ── 12. PDF SHELL ── */
+/* â”€â”€ 12. PDF SHELL â”€â”€ */
 .student-pdf-shell {
   display: flex;
   flex-direction: column;
@@ -2639,7 +2639,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   font-size: 0.95rem;
 }
 
-/* PDF container — A4 ratio, single scroll source */
+/* PDF container â€” A4 ratio, single scroll source */
 .student-pdf-container {
   width: 100%;
   aspect-ratio: 1 / 1.414;
@@ -2658,7 +2658,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   display: block;
 }
 
-/* ── 14. QUIZ SECTION ────────────────────────────────────── */
+/* â”€â”€ 14. QUIZ SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .student-quiz-stack {
   margin-top: 0.4rem;
   display: grid;
@@ -2884,7 +2884,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   animation: btn-shine 780ms ease;
 }
 
-/* ── 15. DOC LINKS ───────────────────────────────────────── */
+/* â”€â”€ 15. DOC LINKS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .student-doc-link {
   display: inline-flex;
   align-items: center;
@@ -2913,7 +2913,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   box-shadow: none;
 }
 
-/* ── 16. RESULT MODAL ────────────────────────────────────── */
+/* â”€â”€ 16. RESULT MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .result-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -3038,7 +3038,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
     inset 0 -1px 0 rgba(25, 10, 5, 0.56);
 }
 
-/* ── 17. HERO OVERRIDES ──────────────────────────────────── */
+/* â”€â”€ 17. HERO OVERRIDES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .student-details-page .student-details-glass {
   background:
     /* soft ambient light */
@@ -3163,7 +3163,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   line-height: 1;
 }
 
-/* ── 18. OTHER PALETTE STYLES ────────────────────────────── */
+/* â”€â”€ 18. OTHER PALETTE STYLES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .student-course-shell {
   border-color: rgba(11,45,114,0.2);
   background:
@@ -3214,7 +3214,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   animation: btn-shine 780ms ease;
 }
 
-/* ── 19. RESPONSIVE ──────────────────────────────────────── */
+/* â”€â”€ 19. RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 980px) {
   .student-details-page {
     /* on mobile, let content flow naturally */
@@ -3268,7 +3268,7 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
   }
 }
 
-/* ── 20. KEYFRAMES ───────────────────────────────────────── */
+/* â”€â”€ 20. KEYFRAMES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes pulse-start-quiz {
   0%, 100% { box-shadow: 0 14px 24px -16px rgba(21,86,168,0.92); }
   50%       { box-shadow: 0 18px 30px -14px rgba(255,79,113,0.62); }
@@ -5512,12 +5512,12 @@ code {
   min-height: 100vh;
 }
 /* ============================================================
-   InnovaLearn — Total Makeover CSS
-   Palette: white → #ddaed3 (rose) → #8fd8f3 (sky) → #2f73ba → #0b2d72
+   InnovaLearn â€” Total Makeover CSS
+   Palette: white â†’ #ddaed3 (rose) â†’ #8fd8f3 (sky) â†’ #2f73ba â†’ #0b2d72
    Scroll: Fade + Slide Up via IntersectionObserver
    ============================================================ */
 
-/* ── TOKENS ── */
+/* â”€â”€ TOKENS â”€â”€ */
 :root {
   --il-rose:   #ddaed3;
   --il-sky:    #8fd8f3;
@@ -5532,12 +5532,12 @@ code {
   font-family: 'Nunito', sans-serif;
 }
 
-/* ── RESET ── */
+/* â”€â”€ RESET â”€â”€ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 img { max-width: 100%; display: block; }
 
-/* ── PAGE ── */
+/* â”€â”€ PAGE â”€â”€ */
 .il-page {
   min-height: 100vh;
   background: var(--il-white);
@@ -5545,16 +5545,16 @@ img { max-width: 100%; display: block; }
   overflow-x: hidden;
 }
 
-/* ── SHELL ── */
+/* â”€â”€ SHELL â”€â”€ */
 .il-shell {
   max-width: 1160px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
-/* ═══════════════════════════════════════
-   NAV — Glass morphism, ultra refined
-   ═══════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   NAV â€” Glass morphism, ultra refined
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .il-nav {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -5592,8 +5592,11 @@ img { max-width: 100%; display: block; }
 .il-nav-links {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: flex-end;
+  gap: 0.35rem;
   flex-wrap: wrap;
+  margin-left: auto;
+  transform: translateX(10px);
 }
 
 .il-nav-link {
@@ -5631,7 +5634,7 @@ img { max-width: 100%; display: block; }
 .il-nav-link:hover::after { left: 12px; right: 12px; }
 .il-nav-link:hover { color: var(--il-blue); }
 
-/* ── BUTTONS ── */
+/* â”€â”€ BUTTONS â”€â”€ */
 .il-btn {
   display: inline-flex;
   align-items: center;
@@ -5653,22 +5656,27 @@ img { max-width: 100%; display: block; }
   padding: 0.5rem 1.2rem;
   font-size: 0.85rem;
   border-radius: 10px;
-  border: 1.5px solid rgba(47,115,186,0.3);
+  border: 1px solid black;
   background: rgba(255,255,255,0.6);
-  color: var(--il-navy);
+  color: black;
   backdrop-filter: blur(8px);
 }
-.il-btn-ghost:hover { border-color: var(--il-blue); background: rgba(143,216,243,0.12); }
+
 
 .il-btn-primary {
   padding: 0.52rem 1.3rem;
   font-size: 0.85rem;
   border-radius: 10px;
-  background: linear-gradient(130deg, var(--il-blue) 0%, #1a8fc7 100%);
+  background:  #ddaed3;
   color: #fff;
+  border: 1.5px solid #ffffff; 
   box-shadow: 0 6px 20px rgba(47,115,186,0.35);
 }
 .il-btn-primary:hover { box-shadow: 0 10px 28px rgba(47,115,186,0.45); filter: brightness(1.06); }
+
+.il-nav-links .il-btn-ghost {
+  margin-right: 0.45rem;
+}
 
 .il-btn-dashboard {
   padding: 0.52rem 1.2rem;
@@ -5677,26 +5685,6 @@ img { max-width: 100%; display: block; }
   color: #fff;
   box-shadow: 0 6px 18px rgba(11,45,114,0.25);
 }
-
-.il-btn-hero-primary {
-  padding: 0.9rem 2.2rem;
-  font-size: 1rem;
-  background: linear-gradient(130deg, var(--il-navy) 0%, var(--il-blue) 50%, #1a8fc7 100%);
-  color: #fff;
-  box-shadow: 0 16px 44px rgba(11,45,114,0.32);
-  font-size: 1.02rem;
-}
-.il-btn-hero-primary:hover { box-shadow: 0 22px 52px rgba(11,45,114,0.44); }
-
-.il-btn-hero-ghost {
-  padding: 0.9rem 2.2rem;
-  font-size: 1rem;
-  border: 2px solid rgba(255,255,255,0.55);
-  background: rgba(255,255,255,0.18);
-  color: #fff;
-  backdrop-filter: blur(12px);
-}
-.il-btn-hero-ghost:hover { background: rgba(255,255,255,0.28); }
 
 .il-btn-cta {
   padding: 0.9rem 2.2rem;
@@ -5713,9 +5701,9 @@ img { max-width: 100%; display: block; }
   color: #fff;
 }
 
-/* ═══════════════════════════════════════
-   HERO — Full viewport, swappable bg
-   ═══════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   HERO â€” Full viewport, swappable bg
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .il-hero {
   position: relative;
   min-height: 100vh;
@@ -5772,36 +5760,8 @@ img { max-width: 100%; display: block; }
 .il-hero-inner {
   display: flex;
   flex-direction: column;
-  gap: 1.6rem;
-  max-width: 740px;
-}
-
-.il-hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 1.1rem;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.75);
-  border: 1px solid rgba(143,216,243,0.6);
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: var(--il-blue);
-  width: fit-content;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 14px rgba(47,115,186,0.12);
-  animation: il-fadein 600ms ease both;
-}
-
-.il-badge-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--il-blue);
-  animation: il-pulse 2s ease-in-out infinite;
-}
-@keyframes il-pulse {
-  0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(47,115,186,0.5); }
-  50%       { transform: scale(1.3); opacity: 0.7; box-shadow: 0 0 0 5px rgba(47,115,186,0); }
+  gap: 1.15rem;
+  width: min(100%, 860px);
 }
 
 .il-hero-title {
@@ -5816,10 +5776,10 @@ img { max-width: 100%; display: block; }
 .il-hero-gradient {
   background: linear-gradient(
     125deg,
-    #a9e9ff 0%,
-    #7fd7ff 38%,
-    #9bc7ff 62%,
-    #f2bddf 100%
+    #ec96cb 0%,
+    #a6ddff 34%,
+    #ddb0d7 68%,
+    #8fd8f3 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -5837,57 +5797,43 @@ img { max-width: 100%; display: block; }
   animation: il-fadeup 700ms 200ms ease both;
 }
 
-.il-hero-actions {
-  display: flex;
-  gap: 0.9rem;
-  flex-wrap: wrap;
-  align-items: center;
-  animation: il-fadeup 700ms 300ms ease both;
-}
-
 /* Floating stats card */
 .il-hero-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.2rem;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 1rem;
   margin-top: 1.5rem;
-  max-width: 100%;
+  width: min(860px, 100%);
 }
 
 /* each stat = equal size */
 .il-hero-stat {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
-  gap: 0.7rem;
-
-  padding: 1.1rem 1.4rem;
-  border-radius: 999px;
-
-  width: 100%; /* 🔥 important for grid equal sizing */
-
+  gap: 0.78rem;
+  padding: 1rem 1.2rem;
+  min-height: 108px;
+  border-radius: 30px;
+  width: 100%;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(16px);
-
   border: 1px solid rgba(255,255,255,0.3);
-
   box-shadow:
     0 10px 30px rgba(11,45,114,0.18),
     inset 0 1px 0 rgba(255,255,255,0.5);
-
   animation: floatStat 6s ease-in-out infinite;
   transition: all 0.3s ease;
-
-  white-space: nowrap;
+  white-space: normal;
 }
 
 /* DIFFERENT FLOAT DELAYS */
 .il-hero-stat:nth-child(2) { animation-delay: 1s; }
 .il-hero-stat:nth-child(3) { animation-delay: 2s; }
-.il-hero-stat:nth-child(4) { animation-delay: 3s; }
 
 /* HOVER = ALIVE */
 .il-hero-stat:hover {
-  transform: translateY(-6px) scale(1.05);
+  transform: translateY(-4px) scale(1.02);
   box-shadow: 0 18px 40px rgba(11,45,114,0.28);
 }
 
@@ -5905,10 +5851,17 @@ img { max-width: 100%; display: block; }
 }
 
 .il-hero-stat-label {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.85);
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.88);
 }
 
+.il-hero-stat-meta {
+  margin-top: 0.18rem;
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.72);
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
 
 
 .il-hero--dark-text .il-hero-title {
@@ -5919,77 +5872,23 @@ img { max-width: 100%; display: block; }
 }
 
 .il-hero--dark-text .il-hero-gradient {
-  background: linear-gradient(
-    122deg,
-    #eaf8ff 0%,
-    #bde9ff 34%,
-    #8fd8f3 62%,
-    #f3c0df 100%
-  );
+background: linear-gradient(
+  122deg,
+  #ec96cb 0%,
+  #ddb0d7 35%,
+  #b4e6ff 70%,
+  #8fd8f3 100%
+);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+  text-shadow: none;
 }
 
 .il-hero--dark-text .il-hero-sub {
   color: rgba(247, 252, 255, 0.94);
   text-shadow: 0 2px 10px rgba(9, 26, 60, 0.24);
-}
-
-/* Hero visual side */
-.il-hero-visual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: il-fadein 900ms 300ms ease both;
-}
-
-.il-hero-visual-card {
-  width: 100%;
-  max-width: 460px;
-  aspect-ratio: 4/3;
-  border-radius: 28px;
-  background: rgba(255,255,255,0.55);
-  backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(143,216,243,0.4);
-  box-shadow:
-    0 30px 80px rgba(11,45,114,0.12),
-    inset 0 1px 0 rgba(255,255,255,0.8);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.il-hero-visual-card img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  border-radius: 28px;
-}
-
-/* Floating badge over visual */
-.il-visual-badge {
-  position: absolute;
-  bottom: 20px; left: 20px;
-  background: rgba(255,255,255,0.92);
-  border-radius: 14px;
-  padding: 0.7rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  box-shadow: 0 8px 24px rgba(11,45,114,0.15);
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--il-navy);
-  backdrop-filter: blur(10px);
-  animation: il-floatbadge 3s ease-in-out infinite;
-}
-.il-visual-badge-icon { font-size: 1.3rem; }
-@keyframes il-floatbadge {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-5px); }
 }
 
 .il-hero-placeholder-text {
@@ -6010,9 +5909,9 @@ img { max-width: 100%; display: block; }
   font-family: monospace;
 }
 
-/* ═══════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SCROLL REVEAL SYSTEM
-   ═══════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 [data-reveal] {
   opacity: 0;
   transform: translateY(36px);
@@ -6030,9 +5929,9 @@ img { max-width: 100%; display: block; }
 [data-reveal-delay="5"] { transition-delay: 400ms; }
 [data-reveal-delay="6"] { transition-delay: 480ms; }
 
-/* ═══════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SHARED SECTION STYLES
-   ═══════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .il-section { padding: 7rem 0; }
 
 .il-section-head {
@@ -6073,12 +5972,15 @@ img { max-width: 100%; display: block; }
   line-height: 1.75;
 }
 
-/* ═══════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    FEATURES SECTION
-   ═══════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .il-features-section {
-  background: var(--il-white);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(245, 250, 255, 0.2)),
+    url('/images/bbc.png') center/cover no-repeat;
   position: relative;
+  isolation: isolate;
 }
 
 /* Decorative top line */
@@ -6090,6 +5992,24 @@ img { max-width: 100%; display: block; }
   background: linear-gradient(90deg, transparent, rgba(143,216,243,0.6), rgba(221,174,211,0.5), transparent);
 }
 
+.il-features-section::after,
+.il-how-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.16) 100%),
+    radial-gradient(circle at 20% 18%, rgba(143, 216, 243, 0.08), transparent 34%),
+    radial-gradient(circle at 80% 15%, rgba(221, 174, 211, 0.08), transparent 30%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.il-features-section > .il-shell,
+.il-how-section > .il-shell {
+  position: relative;
+  z-index: 1;
+}
 .il-features-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -6173,18 +6093,21 @@ img { max-width: 100%; display: block; }
 .il-feature-card--is-pink .il-feature-line  { background: linear-gradient(90deg, var(--il-rose), #c78ab9); }
 .il-feature-card--is-navy .il-feature-line  { background: linear-gradient(90deg, var(--il-blue), var(--il-navy)); }
 
-/* ═══════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HOW IT WORKS
-   ═══════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .il-how-section {
-  background: linear-gradient(160deg, #f0f8ff 0%, #faf0fd 100%);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.64), rgba(247,250,255,0.58)),
+    url('/images/bbc.png') center/cover no-repeat;
   position: relative;
   overflow: hidden;
+  isolation: isolate;
 }
 
 /* Large decorative number watermark */
 .il-how-section::before {
-  content: '✦';
+  content: '\2726';
   position: absolute;
   font-size: 40vw;
   color: rgba(143,216,243,0.07);
@@ -6264,9 +6187,9 @@ img { max-width: 100%; display: block; }
   margin: 0;
 }
 
-/* ═══════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PATHS
-   ═══════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .il-paths-section { background: var(--il-off); }
 
 .il-paths-grid {
@@ -6342,9 +6265,9 @@ img { max-width: 100%; display: block; }
   transform: scale(1.05);
 }
 
-/* ═══════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    TESTIMONIALS
-   ═══════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .il-testimonials-section {
   background: linear-gradient(160deg, #fff 0%, #f5f0ff 50%, #eef6ff 100%);
   position: relative;
@@ -6429,9 +6352,9 @@ img { max-width: 100%; display: block; }
 .il-testimonial-name { font-weight: 700; font-size: 0.9rem; color: var(--il-navy); }
 .il-testimonial-role { font-size: 0.77rem; color: var(--il-muted); }
 
-/* ═══════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    CTA BANNER
-   ═══════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .il-cta-section { padding: 6rem 0; background: var(--il-off); }
 
 .il-cta-card {
@@ -6495,9 +6418,9 @@ img { max-width: 100%; display: block; }
   position: relative; z-index: 1;
 }
 
-/* ═══════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    FOOTER
-   ═══════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .il-footer {
   background: var(--il-navy);
   padding: 3.5rem 0 2rem;
@@ -6546,9 +6469,9 @@ img { max-width: 100%; display: block; }
 
 .il-footer-copy { font-size: 0.77rem; color: rgba(255,255,255,0.26); }
 
-/* ═══════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    ANIMATIONS
-   ═══════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @keyframes il-fadeup {
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -6558,15 +6481,13 @@ img { max-width: 100%; display: block; }
   to   { opacity: 1; }
 }
 
-/* ═══════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    RESPONSIVE
-   ═══════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 1024px) {
-  .il-hero-content { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
+  .il-hero-content { justify-content: center; text-align: center; }
   .il-hero-sub { margin: 0 auto; }
-  .il-hero-actions { justify-content: center; }
-  .il-hero-visual { display: none; }
-  .il-hero-stats { grid-template-columns: repeat(2, 1fr); max-width: 440px; margin: 0 auto; }
+  .il-hero-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 520px; margin: 0 auto; }
   .il-features-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
   .il-steps { flex-direction: column; align-items: stretch; gap: 1rem; }
   .il-steps::before { display: none; }
@@ -6580,7 +6501,7 @@ img { max-width: 100%; display: block; }
   .il-section { padding: 5rem 0; }
   .il-paths-grid { grid-template-columns: 1fr 1fr; gap: 0.9rem; }
   .il-cta-card { padding: 3rem 1.5rem; }
-  .il-hero-stats { grid-template-columns: 1fr 1fr; }
+  .il-hero-stats { grid-template-columns: 1fr; max-width: 360px; }
   .il-hero-stat { padding: 0.75rem 0.9rem; }
 }
 
@@ -12275,7 +12196,7 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .pendin
 }
 
 /* ===============================
-   Notebook Modal — Pro Max Design
+   Notebook Modal â€” Pro Max Design
    =============================== */
 
 body .topbar button.topbar-notebook-trigger {
@@ -12427,7 +12348,7 @@ body .topbar button.topbar-notebook-trigger {
   animation: notebook-modal-enter 260ms cubic-bezier(0.34, 1.1, 0.64, 1) both;
 }
 
-/* ── HEADER ── */
+/* â”€â”€ HEADER â”€â”€ */
 .notebook-modal-head {
   padding: 16px 16px 12px;
 background: linear-gradient(135deg,
@@ -12512,7 +12433,7 @@ body .notebook-modal-panel .notebook-modal-close::after {
   content: none !important;
 }
 
-/* ── TABS ── */
+/* â”€â”€ TABS â”€â”€ */
 .notebook-tabs {
   padding: 10px 12px 0;
   display: grid;
@@ -12555,7 +12476,7 @@ body .notebook-modal-panel .notebook-tab::after {
   content: none !important;
 }
 
-/* ── CONTENT ── */
+/* â”€â”€ CONTENT â”€â”€ */
 .notebook-content {
   overflow-y: auto;
   padding: 14px 12px;
@@ -12577,7 +12498,7 @@ body .notebook-modal-panel .notebook-tab::after {
   border-radius: 999px;
 }
 
-/* ── INPUT ROW ── */
+/* â”€â”€ INPUT ROW â”€â”€ */
 .notebook-input-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -12637,7 +12558,7 @@ body .notebook-modal-panel .notebook-input-row button::after {
   content: none !important;
 }
 
-/* ── LISTS ── */
+/* â”€â”€ LISTS â”€â”€ */
 .notebook-list {
   display: grid;
   gap: 8px;
@@ -12651,7 +12572,7 @@ body .notebook-modal-panel .notebook-input-row button::after {
   font-weight: 500;
 }
 
-/* ── NOTE CARDS ── */
+/* â”€â”€ NOTE CARDS â”€â”€ */
 .notebook-note-card {
   display: grid;
   grid-template-columns: 3px 1fr auto;
@@ -12720,7 +12641,7 @@ body .notebook-modal-panel .notebook-input-row button::after {
   font-weight: 500;
 }
 
-/* ── DELETE BUTTON ── */
+/* â”€â”€ DELETE BUTTON â”€â”€ */
 body .notebook-modal-panel .notebook-delete-btn {
   margin-top: 2px;
   width: 26px !important;
@@ -12758,7 +12679,7 @@ body .notebook-modal-panel .notebook-delete-btn::after {
   content: none !important;
 }
 
-/* ── TODO ROWS ── */
+/* â”€â”€ TODO ROWS â”€â”€ */
 .notebook-todo-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -12855,7 +12776,7 @@ body .notebook-modal-panel .notebook-checkbox::after {
   color: black;
 }
 
-/* ── FOOTER ── */
+/* â”€â”€ FOOTER â”€â”€ */
 .notebook-footer {
   border-top: 3px solid #edf2fa;
   background: linear-gradient(135deg, #f8faff 0%, #fdf5fd 100%);
@@ -12875,7 +12796,7 @@ body .notebook-modal-panel .notebook-checkbox::after {
   font-size: 12px;
 }
 
-/* ── ANIMATION ── */
+/* â”€â”€ ANIMATION â”€â”€ */
 @keyframes notebook-modal-enter {
   from {
     opacity: 0;
@@ -12886,3 +12807,5 @@ body .notebook-modal-panel .notebook-checkbox::after {
     transform: scale(1) translateY(0);
   }
 }
+
+
