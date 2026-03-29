@@ -5722,6 +5722,21 @@ img { max-width: 100%; display: block; }
     radial-gradient(circle at 14% 20%, rgba(255,255,255,0.2), transparent 50%),
     linear-gradient(92deg, rgba(8,24,58,0.18) 0%, rgba(17,63,126,0.08) 42%, rgba(255,255,255,0.04) 100%);
 }
+
+.il-hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: clamp(88px, 12vw, 176px);
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(8, 20, 42, 0) 0%, rgba(8, 20, 42, 0.16) 58%, rgba(8, 20, 42, 0.34) 100%),
+    radial-gradient(120% 88% at 50% 100%, rgba(6, 16, 34, 0.42) 0%, rgba(6, 16, 34, 0) 68%);
+  filter: blur(0.6px);
+}
 .il-hero-bg {
   position: absolute;
   inset: 0;
@@ -5797,70 +5812,83 @@ img { max-width: 100%; display: block; }
   animation: il-fadeup 700ms 200ms ease both;
 }
 
-/* Floating stats card */
+/* Floating stats grid container */
 .il-hero-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
   width: min(860px, 100%);
+  justify-items: center;
 }
 
-/* each stat = equal size */
+/* Each stat row */
 .il-hero-stat {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 0.78rem;
-  padding: 1rem 1.2rem;
-  min-height: 108px;
-  border-radius: 30px;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.3);
-  box-shadow:
-    0 10px 30px rgba(11,45,114,0.18),
-    inset 0 1px 0 rgba(255,255,255,0.5);
+  display: flex;
+  align-items: center; /* icon left, text right */
+  gap: 1rem;
+  padding: 0.5rem 0; /* minimal padding */
+  background: transparent;
+  border: none;
+  box-shadow: none;
   animation: floatStat 6s ease-in-out infinite;
-  transition: all 0.3s ease;
-  white-space: normal;
+  transition: transform 0.3s ease;
 }
 
 /* DIFFERENT FLOAT DELAYS */
 .il-hero-stat:nth-child(2) { animation-delay: 1s; }
 .il-hero-stat:nth-child(3) { animation-delay: 2s; }
 
-/* HOVER = ALIVE */
+/* Hover lift effect */
 .il-hero-stat:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 18px 40px rgba(11,45,114,0.28);
 }
 
-/* ICON */
+/* Icon on the left */
 .il-hero-stat-icon {
-  font-size: 1.3rem;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
+  font-size: 2rem;
+  color: white; /* icon in white */
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
 }
 
-/* TEXT */
+.il-hero-stat-icon-img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));
+}
+
+/* Text container next to icon */
+.il-hero-stat-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: white !important; /* all text in white */
+}
+
+/* Number / value styling */
 .il-hero-stat-value {
-  font-weight: 800;
-  font-size: 1.2rem;
+  font-weight: 900;
+  font-size: 1.7rem;
+  line-height: 1.1;
   color: white;
 }
 
+/* Label styling */
 .il-hero-stat-label {
-  font-size: 0.8rem;
-  color: rgba(255,255,255,0.88);
+  font-weight: 700;
+  font-size: 0.95rem;
+  opacity: 0.85;
+  color: white;
 }
 
+/* Meta / small extra info */
 .il-hero-stat-meta {
-  margin-top: 0.18rem;
-  font-size: 0.74rem;
-  color: rgba(255, 255, 255, 0.72);
-  letter-spacing: 0.02em;
-  line-height: 1.35;
+  font-weight: 400;
+  font-size: 0.75rem;
+  opacity: 0.65;
 }
 
 
@@ -5947,8 +5975,8 @@ background: linear-gradient(
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--il-blue);
-  background: linear-gradient(135deg, rgba(143,216,243,0.2), rgba(221,174,211,0.15));
+  color: white;
+  background: linear-gradient(135deg, rgba(143,216,243,0.32), rgba(221,174,211,0.26));
   border: 1px solid rgba(143,216,243,0.45);
   padding: 0.35rem 1rem;
   border-radius: 999px;
@@ -5959,14 +5987,20 @@ background: linear-gradient(
   font-family: 'Sora', sans-serif;
   font-size: clamp(1.9rem, 3.8vw, 3rem);
   font-weight: 800;
-  color: var(--il-navy);
+  color: #3E3A6D;
   margin: 0 0 0.85rem;
   line-height: 1.12;
+  text-shadow:
+    0 0 5px  #fff,             /* Tight, bright core */
+    0 0 10px #fff,             /* Softening the edge */
+    0 0 20px rgba(255,255,255,0.9),  /* The "shining" layer */
+    0 0 40px rgba(255,255,255,0.8),  /* Broad atmospheric glow */
+    0 0 60px rgba(255,255,255,0.5);  /* Faint outer reach */
 }
 
 .il-section-sub {
   font-size: 1.02rem;
-  color: var(--il-muted);
+  color: white;
   max-width: 520px;
   margin: 0 auto;
   line-height: 1.75;
@@ -5976,9 +6010,7 @@ background: linear-gradient(
    FEATURES SECTION
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .il-features-section {
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(245, 250, 255, 0.2)),
-    url('/images/bbc.png') center/cover no-repeat;
+  background: transparent;
   position: relative;
   isolation: isolate;
 }
@@ -5992,8 +6024,21 @@ background: linear-gradient(
   background: linear-gradient(90deg, transparent, rgba(143,216,243,0.6), rgba(221,174,211,0.5), transparent);
 }
 
-.il-features-section::after,
-.il-how-section::after {
+.il-bbc-shared-sections {
+  position: relative;
+  isolation: isolate;
+  background: url('/images/bbc.webp') center/cover no-repeat;
+  margin-top: -1px;
+}
+
+.il-bbc-shared-sections--lower {
+  background-image: url('/images/bbc.webp');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.il-bbc-shared-sections::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -6003,6 +6048,46 @@ background: linear-gradient(
     radial-gradient(circle at 80% 15%, rgba(221, 174, 211, 0.08), transparent 30%);
   pointer-events: none;
   z-index: 0;
+}
+
+.il-bbc-shared-sections:not(.il-bbc-shared-sections--lower)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: clamp(120px, 16vw, 260px); /* blend zone */
+  z-index: 1;
+  pointer-events: none;
+
+  background:
+    /* Main fog layer (softer, less dark) */
+    linear-gradient(
+      180deg,
+      rgba(6, 16, 34, 0.35) 0%,
+      rgba(6, 16, 34, 0.25) 30%,
+      rgba(6, 16, 34, 0.15) 60%,
+      rgba(6, 16, 34, 0.06) 85%,
+      rgba(6, 16, 34, 0) 100%
+    ),
+
+    /* Soft radial depth (center blend, lighter) */
+    radial-gradient(
+      140% 100% at 50% 0%,
+      rgba(8, 20, 42, 0.28) 0%,
+      rgba(8, 20, 42, 0.15) 40%,
+      rgba(8, 20, 42, 0.08) 70%,
+      rgba(8, 20, 42, 0) 100%
+    );
+
+  /* Slight blur to remove banding */
+  filter: blur(0.6px);
+}
+
+.il-bbc-shared-sections .il-section {
+  position: relative;
+  z-index: 1;
+  background: transparent;
 }
 
 .il-features-section > .il-shell,
@@ -6015,7 +6100,8 @@ background: linear-gradient(
   grid-template-columns: repeat(3, 1fr);
   gap: 1.6rem;
 }
-
+/* Base card */
+/* Base card */
 .il-feature-card {
   border-radius: var(--il-radius);
   padding: 2.2rem;
@@ -6023,25 +6109,77 @@ background: linear-gradient(
   overflow: hidden;
   transition: transform 250ms cubic-bezier(.34,1.56,.64,1), box-shadow 250ms ease;
   cursor: default;
+
+  /* hint browser for smooth animations */
+  will-change: transform, box-shadow;
+
+  /* Floaty effect */
+  animation: floaty 6s ease-in-out infinite;
 }
+
+/* Floaty keyframes */
+@keyframes floaty {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Hover lift + shadow (pauses float on hover) */
 .il-feature-card:hover {
   transform: translateY(-8px) scale(1.01);
   box-shadow: 0 28px 56px rgba(11,45,114,0.13);
+  animation-play-state: paused; /* prevent float fight with hover */
 }
 
-.il-feature-card--is-blue {
-  background: linear-gradient(150deg, #eaf6ff 0%, #d4eeff 100%);
-  border: 1.5px solid rgba(143,216,243,0.45);
+/* Pseudo-element for glassy blur (prevents flicker) */
+.il-feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+
+  /* fallback background, overridden by card-specific backgrounds below */
+  background: inherit;
+
+  /* actual blur effect */
+  backdrop-filter: blur(12px);
 }
-.il-feature-card--is-pink {
-  background: linear-gradient(150deg, #fdf0fa 0%, #f5daf0 100%);
-  border: 1.5px solid rgba(221,174,211,0.45);
+
+/* Make card content appear above blur layer */
+.il-feature-card > * {
+  position: relative;
+  z-index: 1;
 }
+
+/* Blue / Navy Cards (glassy premium) */
+.il-feature-card--is-blue,
 .il-feature-card--is-navy {
-  background: linear-gradient(150deg, #eef3ff 0%, #d9e6ff 100%);
-  border: 1.5px solid rgba(47,115,186,0.28);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(220, 200, 240, 0.4) 100%
+  );
+  border: 1.5px solid rgba(200, 180, 240, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Pink Card (glassy) */
+.il-feature-card--is-pink {
+  background: linear-gradient(
+    150deg,
+    rgba(253, 240, 250, 0.85) 0%,
+    rgba(245, 218, 240, 0.85) 100%
+  );
+  border: 1.5px solid rgba(221,174,211,0.35);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Feature Tags */
 .il-feature-tag {
   display: inline-flex;
   font-size: 0.7rem;
@@ -6053,6 +6191,10 @@ background: linear-gradient(
   background: rgba(11,45,114,0.08);
   color: var(--il-navy);
   margin-bottom: 1.4rem;
+
+  /* subtle glass effect on tags too */
+  backdrop-filter: blur(4px);
+  transition: background 0.3s ease;
 }
 
 .il-feature-icon {
@@ -6097,9 +6239,7 @@ background: linear-gradient(
    HOW IT WORKS
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .il-how-section {
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.64), rgba(247,250,255,0.58)),
-    url('/images/bbc.png') center/cover no-repeat;
+  background: transparent;
   position: relative;
   overflow: hidden;
   isolation: isolate;
