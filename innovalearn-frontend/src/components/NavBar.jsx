@@ -1,12 +1,14 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { clearToken, getCurrentUser } from '../auth';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import NotebookModal from './NotebookModal';
 import LanguageSwitcher from './LanguageSwitcher';
 
 const FORCE_TOUR_KEY = 'innova_force_tour';
 
 export default function NavBar() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const user = getCurrentUser();
@@ -76,11 +78,11 @@ export default function NavBar() {
       </div>
       <nav className="topbar-nav">
         <div className="topbar-links">
-          {!user && <Link to="/" className="topbar-link-underline">Home</Link>}
-          <Link to="/contact" className="topbar-link-underline">Contact</Link>
+          {!user && <Link to="/" className="topbar-link-underline">{t('nav.home')}</Link>}
+          <Link to="/contact" className="topbar-link-underline">{t('nav.contact')}</Link>
           {!user && (
             <Link to="/login" className={isAuthStyledPage ? 'topbar-auth-action' : ''}>
-              Login
+              {t('common.actions.login')}
             </Link>
           )}
           {!user && (
@@ -88,22 +90,22 @@ export default function NavBar() {
               to="/signup"
               className={isAuthStyledPage ? 'topbar-auth-action topbar-auth-signup' : ''}
             >
-              Signup
+              {t('common.actions.signup')}
             </Link>
           )}
           {user?.role === 'FORMATEUR' && (
             <Link to="/formateur" className="topbar-link-underline">
-              Dashboard
+              {t('nav.dashboard')}
             </Link>
           )}
           {user?.role === 'ADMIN' && (
             <Link to="/admin" className="topbar-link-underline">
-              Dashboard
+              {t('nav.dashboard')}
             </Link>
           )}
           {user?.role === 'STUDENT' && (
             <Link to="/student" className="topbar-link-underline">
-              Dashboard
+              {t('nav.dashboard')}
             </Link>
           )}
           {showNotebook && (
@@ -113,7 +115,7 @@ export default function NavBar() {
               data-tour="navbar-notebook"
               onClick={() => setIsNotebookOpen(true)}
             >
-              My Notebook
+              {t('nav.myNotebook')}
             </button>
           )}
           {showGuideMe && (
@@ -122,14 +124,14 @@ export default function NavBar() {
               className="topbar-link-underline topbar-guide-trigger"
               onClick={openGuide}
             >
-              Guide me
+              {t('nav.guideMe')}
             </button>
           )}
         </div>
         <LanguageSwitcher variant="topbar" />
         {user && (
           <button type="button" onClick={logout} className="small-btn topbar-logout">
-            Logout
+            {t('common.actions.logout')}
           </button>
         )}
       </nav>

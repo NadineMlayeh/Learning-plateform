@@ -2,12 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const LANG_OPTIONS = [
-  { code: 'en', label: 'English', flag: '/images/uk.png' },
-  { code: 'fr', label: 'Français', flag: '/images/france.png' },
+  { code: 'en', key: 'languages.english', flag: '/images/uk.png' },
+  { code: 'fr', key: 'languages.french', flag: '/images/france.png' },
 ];
 
 export default function LanguageSwitcher({ variant = 'topbar' }) {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef(null);
 
@@ -59,14 +59,17 @@ export default function LanguageSwitcher({ variant = 'topbar' }) {
         onClick={toggle}
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        aria-label="Change language"
+        aria-label={t('nav.changeLanguage')}
       >
-        <span className="language-switcher-globe" aria-hidden="true">
-          🌐
-        </span>
+        <img
+          src="/images/globe.png"
+          alt=""
+          aria-hidden="true"
+          className="language-switcher-globe"
+        />
         <span className="language-switcher-code">{activeCode.toUpperCase()}</span>
         <span className="language-switcher-caret" aria-hidden="true">
-          ▾
+          {'\u25BE'}
         </span>
       </button>
 
@@ -89,7 +92,7 @@ export default function LanguageSwitcher({ variant = 'topbar' }) {
                 aria-hidden="true"
                 className="language-switcher-flag"
               />
-              <span>{option.label}</span>
+              <span>{t(option.key)}</span>
             </button>
           ))}
         </div>

@@ -4,5 +4,165 @@
   },
   "app": {
     "name": "InnovaLearn"
+  },
+  "languages": {
+    "english": "English",
+    "french": "French"
+  },
+  "common": {
+    "actions": {
+      "login": "Login",
+      "signup": "Signup",
+      "logout": "Logout"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "myNotebook": "My Notebook",
+    "guideMe": "Guide me",
+    "changeLanguage": "Change language"
+  },
+  "landing": {
+    "nav": {
+      "whyUs": "Why Us",
+      "programs": "Programs",
+      "reviews": "Reviews",
+      "contact": "Contact",
+      "login": "Login",
+      "getStarted": "Get Started"
+    },
+    "hero": {
+      "titleLead": "The adventure",
+      "titleAccent": "of learning",
+      "titleEnd": "starts here.",
+      "subtitleLine1": "Robotics · Code · Soft Skills",
+      "subtitleLine2": "For kids aged 6-18 who want to change the world.",
+      "stats": [
+        {
+          "label": "Students Trained",
+          "detail": "learning journeys"
+        },
+        {
+          "label": "Satisfaction",
+          "detail": "happy parents"
+        },
+        {
+          "label": "Projects Created",
+          "detail": "hands-on builds"
+        }
+      ]
+    },
+    "sections": {
+      "whyEyebrow": "Why InnovaLearn?",
+      "whyTitleLine1": "Learn differently,",
+      "whyTitleLine2": "grow together.",
+      "howEyebrow": "How it works",
+      "howTitle": "3 steps to success",
+      "pathsEyebrow": "Learning Paths",
+      "pathsTitle": "A path for every child.",
+      "pathsSubtitle": "Programs designed for each age group, with adapted and progressive content.",
+      "reviewsEyebrow": "What parents say",
+      "reviewsTitle": "They trust us."
+    },
+    "features": [
+      {
+        "tag": "Hands-on",
+        "title": "Robotics Programming",
+        "description": "Build real robots. Code real solutions. Experience real technological adventures."
+      },
+      {
+        "tag": "Essential",
+        "title": "Soft Skills & Creativity",
+        "description": "Develop confidence, communication, and leadership in a supportive environment."
+      },
+      {
+        "tag": "Fun",
+        "title": "Fun Competitions",
+        "description": "Take on team challenges, celebrate every victory, and become an innovation champion."
+      }
+    ],
+    "steps": [
+      {
+        "title": "Choose your path",
+        "description": "Select the program suited to your age and interests."
+      },
+      {
+        "title": "Learn by creating",
+        "description": "Concrete projects, fun challenges, passionate instructors."
+      },
+      {
+        "title": "Earn your badge",
+        "description": "Validate your skills with recognized certificates."
+      }
+    ],
+    "paths": [
+      {
+        "age": "6-8 yrs",
+        "label": "Little Explorers"
+      },
+      {
+        "age": "9-11 yrs",
+        "label": "Budding Inventors"
+      },
+      {
+        "age": "12-14 yrs",
+        "label": "Young Geniuses"
+      },
+      {
+        "age": "15-18+ yrs",
+        "label": "Future Experts"
+      }
+    ],
+    "testimonials": [
+      {
+        "name": "Sonia B.",
+        "role": "Lina's Mom, 10 yrs old",
+        "text": "My daughter comes back from her classes with stars in her eyes. InnovaLearn transformed her approach to learning."
+      },
+      {
+        "name": "Karim M.",
+        "role": "Yassine's Dad, 13 yrs old",
+        "text": "In 3 months my son coded his first video game. I still can't believe it. Amazing team!"
+      },
+      {
+        "name": "Amira T.",
+        "role": "Sofia's Mom, 8 yrs old",
+        "text": "Sofia talks about her robots to all her friends. The pedagogy is perfect for creative kids."
+      },
+      {
+        "name": "Mehdi R.",
+        "role": "Rayen's Dad, 12 yrs old",
+        "text": "Super coaching and very clear progression. Rayen became more confident after only a few weeks."
+      },
+      {
+        "name": "Nour H.",
+        "role": "Yasmine's Mom, 9 yrs old",
+        "text": "The classes are playful and structured at the same time. She loves showing us her mini projects."
+      },
+      {
+        "name": "Wassim K.",
+        "role": "Adam's Dad, 15 yrs old",
+        "text": "Excellent environment and serious mentors. Adam now spends his free time building useful apps."
+      },
+      {
+        "name": "Rim S.",
+        "role": "Meriem's Mom, 11 yrs old",
+        "text": "A modern way of teaching with real outcomes. We noticed major growth in problem-solving skills."
+      },
+      {
+        "name": "Hichem D.",
+        "role": "Nader's Dad, 14 yrs old",
+        "text": "The quality is professional and motivating. Nader now plans to pursue robotics in high school."
+      }
+    ],
+    "footer": {
+      "descriptionLine1": "Innovative education for tomorrow's generation.",
+      "descriptionLine2": "Empowering learners with tools that inspire",
+      "descriptionLine3": "curiosity and foster growth.",
+      "contactTitle": "CONTACT US",
+      "copyright": "© 2026 InnovaLearn. All rights reserved."
+    }
   }
 }
