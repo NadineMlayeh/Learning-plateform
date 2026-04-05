@@ -42,6 +42,7 @@ model User {
   notebookNotes NotebookNote[]
   notebookTodos NotebookTodo[]
   passwordResetTokens PasswordResetToken[]
+  contactMessages ContactMessage[]
 }
 
 enum FormationType {
@@ -216,4 +217,18 @@ model PasswordResetToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ContactMessage {
+  id              Int      @id @default(autoincrement())
+  email           String
+  noteDescription String
+  rating          Int
+  userId          Int?
+  createdAt       DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
 }

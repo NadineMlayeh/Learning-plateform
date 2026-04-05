@@ -1,6 +1,6 @@
 ﻿import { Link } from 'react-router-dom';
-import { getCurrentUser } from '../auth';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const FEATURES = [
   {
@@ -33,27 +33,30 @@ const PATHS = [
   { age: '6-8 yrs', label: 'Little Explorers', emoji: '\u{1F331}', color: '#ddaed3' },
   { age: '9-11 yrs', label: 'Budding Inventors', emoji: '\u26A1', color: '#8fd8f3' },
   { age: '12-14 yrs', label: 'Young Geniuses', emoji: '\u{1F680}', color: '#2f73ba' },
-  { age: '15-18 yrs', label: 'Future Experts', emoji: '\u{1F52C}', color: '#0b2d72' },
+  { age: '15-18+ yrs', label: 'Future Experts', emoji: '\u{1F52C}', color: '#0b2d72' },
 ];
 
 const STATS = [
   {
-    value: '2,400+',
+    target: 2400,
+    suffix: '+',
     label: 'Students Trained',
     icon: '/images/medaille.png',
-    detail: 'courses completed',
+    detail: 'learning journeys',
   },
   {
-    value: '98%',
+    target: 98,
+    suffix: '%',
     label: 'Satisfaction',
     icon: '/images/love.png',
     detail: 'happy parents',
   },
   {
-    value: '120+',
+    target: 120,
+    suffix: '+',
     label: 'Projects Created',
     icon: '/images/project.png',
-    detail: 'real projects',
+    detail: 'hands-on builds',
   },
 ];
 
@@ -79,18 +82,47 @@ const TESTIMONIALS = [
       'Sofia talks about her robots to all her friends. The pedagogy is perfect for creative kids.',
     stars: 5,
   },
+  {
+    name: 'Mehdi R.',
+    role: "Rayen's Dad, 12 yrs old",
+    text:
+      'Super coaching and very clear progression. Rayen became more confident after only a few weeks.',
+    stars: 5,
+  },
+  {
+    name: 'Nour H.',
+    role: "Yasmine's Mom, 9 yrs old",
+    text:
+      'The classes are playful and structured at the same time. She loves showing us her mini projects.',
+    stars: 5,
+  },
+  {
+    name: 'Wassim K.',
+    role: "Adam's Dad, 15 yrs old",
+    text:
+      'Excellent environment and serious mentors. Adam now spends his free time building useful apps.',
+    stars: 5,
+  },
+  {
+    name: 'Rim S.',
+    role: "Meriem's Mom, 11 yrs old",
+    text:
+      'A modern way of teaching with real outcomes. We noticed major growth in problem-solving skills.',
+    stars: 5,
+  },
+  {
+    name: 'Hichem D.',
+    role: "Nader's Dad, 14 yrs old",
+    text:
+      'The quality is professional and motivating. Nader now plans to pursue robotics in high school.',
+    stars: 5,
+  },
 ];
 
 const HERO_IMAGE = '/images/x.png';
 const HERO_OVERLAY = 0.28;
 const HERO_TEXT_ON_DARK = true;
-
-function roleHomePath(role) {
-  if (role === 'ADMIN') return '/admin';
-  if (role === 'FORMATEUR') return '/formateur';
-  if (role === 'STUDENT') return '/student';
-  return '/';
-}
+const COUNTER_DURATION_MS = 1400;
 
 function useNavScroll(ref) {
   useEffect(() => {
@@ -121,11 +153,33 @@ function useScrollReveal() {
 }
 
 export default function DashboardPage() {
-  const user = getCurrentUser();
   const navRef = useRef(null);
+  const [animatedStatValues, setAnimatedStatValues] = useState(() =>
+    STATS.map(() => 0),
+  );
 
   useNavScroll(navRef);
   useScrollReveal();
+
+  useEffect(() => {
+    let rafId;
+    const startedAt = performance.now();
+    const easeOutCubic = (t) => 1 - (1 - t) ** 3;
+
+    const update = (now) => {
+      const progress = Math.min((now - startedAt) / COUNTER_DURATION_MS, 1);
+      const eased = easeOutCubic(progress);
+
+      setAnimatedStatValues(STATS.map((stat) => Math.round(stat.target * eased)));
+
+      if (progress < 1) {
+        rafId = window.requestAnimationFrame(update);
+      }
+    };
+
+    rafId = window.requestAnimationFrame(update);
+    return () => window.cancelAnimationFrame(rafId);
+  }, []);
 
   const heroStyle = HERO_IMAGE
     ? {
@@ -158,17 +212,16 @@ export default function DashboardPage() {
             <a href="#avis" className="il-nav-link">
               Reviews
             </a>
-            <Link className="il-btn il-btn-ghost" to="/login">
+            <Link className="il-nav-link" to="/contact">
+              Contact
+            </Link>
+            <Link className="topbar-auth-action il-nav-auth-action" to="/login">
               Login
             </Link>
-            <Link className="il-btn il-btn-primary" to="/signup">
+            <Link className="topbar-auth-action topbar-auth-signup il-nav-auth-action" to="/signup">
               Get Started
             </Link>
-            {user && (
-              <Link className="il-btn il-btn-dashboard" to={roleHomePath(user.role)}>
-                My Dashboard
-              </Link>
-            )}
+            <LanguageSwitcher variant="landing" />
           </nav>
         </div>
       </header>
@@ -177,7 +230,7 @@ export default function DashboardPage() {
         <div className="il-hero-content">
           <div className="il-hero-inner">
             <h1 className="il-hero-title">
-              The adventure of <span className="il-hero-gradient">learning</span>
+              The adventure  <span className="il-hero-gradient"> of learning</span>
               <br />
               starts here.
             </h1>
@@ -187,7 +240,7 @@ export default function DashboardPage() {
               For kids aged 6–18 who want to change the world.
             </p>
             <div className="il-hero-stats">
-              {STATS.map((stat) => (
+              {STATS.map((stat, index) => (
                 <div key={stat.label} className="il-hero-stat">
                   <span className="il-hero-stat-icon">
                     {stat.icon.startsWith('/images/') ? (
@@ -197,7 +250,9 @@ export default function DashboardPage() {
                     )}
                   </span>
                   <div>
-                    <div className="il-hero-stat-value">{stat.value}</div>
+                    <div className="il-hero-stat-value">
+                      {`${animatedStatValues[index].toLocaleString('en-US')}${stat.suffix}`}
+                    </div>
                     <div className="il-hero-stat-label">{stat.label}</div>
                     <div className="il-hero-stat-meta">{stat.detail}</div>
                   </div>
@@ -297,7 +352,6 @@ export default function DashboardPage() {
                   <span className="il-path-emoji">{path.emoji}</span>
                   <div className="il-path-age">{path.age}</div>
                   <div className="il-path-label">{path.label}</div>
-                  <div className="il-path-cta">Discover \u2192</div>
                 </article>
               ))}
             </div>
@@ -310,13 +364,12 @@ export default function DashboardPage() {
               <span className="il-eyebrow">What parents say</span>
               <h2 className="il-section-title">They trust us.</h2>
             </div>
-            <div className="il-testimonials-grid">
-              {TESTIMONIALS.map((testimonial, index) => (
+            <div className="il-testimonials-marquee" data-reveal>
+              <div className="il-testimonials-track">
+                {[...TESTIMONIALS, ...TESTIMONIALS].map((testimonial, index) => (
                 <article
-                  key={testimonial.name}
+                  key={`${testimonial.name}-${index}`}
                   className="il-testimonial-card"
-                  data-reveal
-                  data-reveal-delay={index + 1}
                 >
                   <div className="il-testimonial-stars">{'\u2605'.repeat(testimonial.stars)}</div>
                   <p className="il-testimonial-text">&quot;{testimonial.text}&quot;</p>
@@ -328,7 +381,8 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </article>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -336,17 +390,105 @@ export default function DashboardPage() {
 
       <footer className="il-footer">
         <div className="il-shell il-footer-inner">
-          <div className="il-footer-brand">
-            <img src="/images/logo2.png" alt="InnovaLearn" className="il-footer-logo" />
-            <p>Innovative education for tomorrow’s generation.</p>
+          <div className="il-footer-grid">
+            <div className="il-footer-col il-footer-col-brand">
+              <img src="/images/logo2.png" alt="InnovaLearn" className="il-footer-logo" />
+              <p className="il-footer-description">
+                Innovative education for tomorrow's generation.<br />
+                Empowering learners with tools that inspire<br />
+                curiosity and foster growth.
+              </p>
+              <div className="il-footer-socials">
+                <a
+                  href="https://www.facebook.com/innovatorszone/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="il-footer-social-link"
+                  aria-label="InnovaLearn Facebook"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M13.2 21v-8.2h2.8l.4-3.2h-3.2V7.6c0-.9.3-1.6 1.7-1.6h1.8V3.1c-.3 0-1.4-.1-2.6-.1-2.6 0-4.4 1.6-4.4 4.6v2H7v3.2h2.7V21h3.5z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="https://www.instagram.com/mobtakeron.tn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="il-footer-social-link"
+                  aria-label="InnovaLearn Instagram"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M7.5 3h9A4.5 4.5 0 0 1 21 7.5v9a4.5 4.5 0 0 1-4.5 4.5h-9A4.5 4.5 0 0 1 3 16.5v-9A4.5 4.5 0 0 1 7.5 3zm0 1.8A2.7 2.7 0 0 0 4.8 7.5v9a2.7 2.7 0 0 0 2.7 2.7h9a2.7 2.7 0 0 0 2.7-2.7v-9a2.7 2.7 0 0 0-2.7-2.7h-9zm9.7 1.4a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2zM12 7.3A4.7 4.7 0 1 1 7.3 12 4.7 4.7 0 0 1 12 7.3zm0 1.8A2.9 2.9 0 1 0 14.9 12 2.9 2.9 0 0 0 12 9.1z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="#"
+                  className="il-footer-social-link"
+                  aria-label="InnovaLearn LinkedIn"
+                  onClick={(event) => event.preventDefault()}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M6.2 8.3a1.9 1.9 0 1 1 0-3.8 1.9 1.9 0 0 1 0 3.8zM4.5 9.7h3.4v9.8H4.5V9.7zm5.5 0h3.2v1.3h.1c.4-.8 1.5-1.6 3.1-1.6 3.3 0 3.9 2.2 3.9 5v5.1h-3.4v-4.5c0-1.1 0-2.4-1.5-2.4s-1.7 1.1-1.7 2.3v4.6H10V9.7z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <div className="il-footer-col il-footer-col-contact">
+              <center><h3 className="il-footer-contact-title">CONTACT US</h3></center>
+              <a
+                href="mailto:contact@mobtakeron.tn"
+                className="il-footer-contact-item"
+              >
+                <span className="il-footer-contact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M4 6h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm8 6 7-4H5l7 4zm0 2-7-4v6h14v-6l-7 4z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </span>
+                <span>contact@mobtakeron.tn</span>
+              </a>
+              <a href="tel:+21655500333" className="il-footer-contact-item">
+                <span className="il-footer-contact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M6.6 10.8a15.4 15.4 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.2c1 .4 2 .6 3.1.6a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17.5 17.5 0 0 1 3 4a1 1 0 0 1 1-1h3.4a1 1 0 0 1 1 1c0 1.1.2 2.1.6 3.1a1 1 0 0 1-.2 1l-2.2 2.2z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </span>
+                <span>+216 55 500 333</span>
+              </a>
+              <div className="il-footer-contact-item is-static">
+                <span className="il-footer-contact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M12 2a7 7 0 0 1 7 7c0 4.9-7 13-7 13S5 13.9 5 9a7 7 0 0 1 7-7zm0 9.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </span>
+                <span>
+                  Avenue Habib Bourguiba Moknine, 5050
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="il-footer-links">
-            <span className="il-footer-link">Home</span>
-            <span className="il-footer-link">Programs</span>
-            <span className="il-footer-link">Instructors</span>
-            <span className="il-footer-link">Contact</span>
+
+          <div className="il-footer-bottom">
+            <center><p className="il-footer-copy">© 2026 InnovaLearn. All rights reserved.</p></center>
           </div>
-          <p className="il-footer-copy">{'\u00A9'} 2026 InnovaLearn. All rights reserved.</p>
         </div>
       </footer>
     </div>

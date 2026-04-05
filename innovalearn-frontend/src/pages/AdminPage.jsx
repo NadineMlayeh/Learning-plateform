@@ -10,6 +10,7 @@ import AdminRevenuePage from './AdminRevenuePage';
 
 const PAGE_SIZE = 3;
 const INVOICE_DETAILS_PAGE_SIZE = 5;
+const REVIEWS_PAGE_SIZE = 5;
 
 function statusTone(status) {
   if (status === 'APPROVED') return 'green';
@@ -43,12 +44,14 @@ export default function AdminPage({ pushToast }) {
     currentAdminPath === '/admin/formateurs' ||
     dashboardAnchor === 'formateur-approvals';
   const isInvoicesAnchorActive = dashboardAnchor === 'invoices';
+  const isReviewsActive = currentAdminPath === '/admin/reviews';
   const isSettingsActive = currentAdminPath === '/admin/settings';
 
   const [globalOverview, setGlobalOverview] = useState(null);
   const [formateurs, setFormateurs] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [adminInvoices, setAdminInvoices] = useState([]);
+  const [adminReviews, setAdminReviews] = useState([]);
 
   const [processingFormateurId, setProcessingFormateurId] = useState(null);
   const [processingEnrollmentId, setProcessingEnrollmentId] =
@@ -75,6 +78,11 @@ export default function AdminPage({ pushToast }) {
     useState(null);
   const [invoiceDetailsSearch, setInvoiceDetailsSearch] = useState('');
   const [invoiceDetailsPage, setInvoiceDetailsPage] = useState(1);
+  const [reviewsSearch, setReviewsSearch] = useState('');
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const [reviewsTotalPages, setReviewsTotalPages] = useState(1);
+  const [reviewsTotal, setReviewsTotal] = useState(0);
+  const [loadingReviews, setLoadingReviews] = useState(false);
   const [adminSettingsEmail, setAdminSettingsEmail] = useState('');
   const [adminPasswordForm, setAdminPasswordForm] = useState({
     oldPassword: '',
@@ -113,6 +121,29 @@ export default function AdminPage({ pushToast }) {
       setAdminInvoices(data);
     } catch (err) {
       pushToast(err.message, 'error');
+    }
+  }
+
+  async function loadAdminReviews(page = reviewsPage, search = reviewsSearch) {
+    setLoadingReviews(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        pageSize: String(REVIEWS_PAGE_SIZE),
+      });
+      if (search.trim()) {
+        params.set('search', search.trim());
+      }
+      const data = await apiRequest(`/contact/admin/reviews?${params.toString()}`, {
+        token: user.token,
+      });
+      setAdminReviews(Array.isArray(data?.rows) ? data.rows : []);
+      setReviewsTotal(Number(data?.total || 0));
+      setReviewsTotalPages(Math.max(1, Number(data?.totalPages || 1)));
+    } catch (err) {
+      pushToast(err.message, 'error');
+    } finally {
+      setLoadingReviews(false);
     }
   }
 
@@ -467,6 +498,11 @@ export default function AdminPage({ pushToast }) {
   }, [isSettingsActive]);
 
   useEffect(() => {
+    if (!isReviewsActive) return;
+    loadAdminReviews(reviewsPage, reviewsSearch);
+  }, [isReviewsActive, reviewsPage, reviewsSearch]);
+
+  useEffect(() => {
     if (!isDashboardSection) return;
     if (!dashboardAnchor) return;
     const section = document.getElementById(dashboardAnchor);
@@ -498,6 +534,10 @@ export default function AdminPage({ pushToast }) {
   }, [invoiceDetailsSearch]);
 
   useEffect(() => {
+    setReviewsPage(1);
+  }, [reviewsSearch]);
+
+  useEffect(() => {
     if (enrollmentPage > enrollmentTotalPages) {
       setEnrollmentPage(enrollmentTotalPages);
     }
@@ -520,6 +560,12 @@ export default function AdminPage({ pushToast }) {
       setInvoiceDetailsPage(invoiceDetailsTotalPages);
     }
   }, [invoiceDetailsPage, invoiceDetailsTotalPages]);
+
+  useEffect(() => {
+    if (reviewsPage > reviewsTotalPages) {
+      setReviewsPage(reviewsTotalPages);
+    }
+  }, [reviewsPage, reviewsTotalPages]);
 
   function navItemClass(path) {
     return currentAdminPath === path
@@ -599,6 +645,12 @@ export default function AdminPage({ pushToast }) {
               <img src="/images/euro.png" alt="" className="admin-saas-nav-icon-img" />
             </span>
             Revenue
+          </Link>
+          <Link className={navItemClass('/admin/reviews')} to="/admin/reviews">
+            <span className="admin-saas-nav-icon" aria-hidden="true">
+              <img src="/images/rating.png" alt="" className="admin-saas-nav-icon-img" />
+            </span>
+            Reviews
           </Link>
           <Link
             className={`admin-saas-nav-item${isInvoicesAnchorActive ? ' is-active' : ''}`}
@@ -1199,10 +1251,91 @@ export default function AdminPage({ pushToast }) {
           <AdminFormationsPage pushToast={pushToast} embedded />
         ) : currentAdminPath === '/admin/revenue' ? (
           <AdminRevenuePage pushToast={pushToast} embedded />
+        ) : currentAdminPath === '/admin/reviews' ? (
+          <div className="card admin-saas-section">
+            <div className="card-head-row">
+              <h2>Reviews</h2>
+              <StatusBadge
+                label={`${reviewsTotal} reviews`}
+                tone={reviewsTotal > 0 ? 'blue' : 'gray'}
+              />
+            </div>
+
+            <div className="table-toolbar">
+              <input
+                type="text"
+                value={reviewsSearch}
+                onChange={(event) => setReviewsSearch(event.target.value)}
+                placeholder="Search by email"
+              />
+            </div>
+
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Note Description</th>
+                    <th>Stars</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminReviews.map((entry) => (
+                    <tr key={entry.id}>
+                      <td>{entry.email}</td>
+                      <td>{entry.noteDescription}</td>
+                      <td>
+                        <span aria-label={`${entry.rating} out of 5 stars`}>
+                          {'★'.repeat(Number(entry.rating || 0))}
+                          {'☆'.repeat(Math.max(0, 5 - Number(entry.rating || 0)))}
+                        </span>
+                      </td>
+                      <td>{new Date(entry.createdAt).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                  {!loadingReviews && adminReviews.length === 0 && (
+                    <tr>
+                      <td colSpan={4}>No reviews match your search.</td>
+                    </tr>
+                  )}
+                  {loadingReviews && (
+                    <tr>
+                      <td colSpan={4}>Loading reviews...</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="pagination-bar">
+              <button
+                type="button"
+                className="action-btn action-page"
+                onClick={() => setReviewsPage((prev) => Math.max(1, prev - 1))}
+                disabled={reviewsPage === 1 || loadingReviews}
+              >
+                Prev
+              </button>
+              <span>
+                Page {reviewsPage} / {reviewsTotalPages}
+              </span>
+              <button
+                type="button"
+                className="action-btn action-page"
+                onClick={() =>
+                  setReviewsPage((prev) => Math.min(reviewsTotalPages, prev + 1))
+                }
+                disabled={reviewsPage === reviewsTotalPages || loadingReviews}
+              >
+                Next
+              </button>
+            </div>
+          </div>
         ) : currentAdminPath === '/admin/settings' ? (
           <div className="card admin-saas-section admin-settings-section">
             
-            <h2>⚙️ Password Settings</h2>
+            <h2> Password Settings</h2>
             <form className="admin-settings-password-form" onSubmit={saveAdminPassword}>
               <label className="profile-edit-field">
                 <span>Email</span>
@@ -1245,7 +1378,7 @@ export default function AdminPage({ pushToast }) {
               </label>
 
               <label className="profile-edit-field">
-                <span>New password again</span>
+                <span>Confirm password</span>
                 <input
                   type="password"
                   value={adminPasswordForm.confirmNewPassword}

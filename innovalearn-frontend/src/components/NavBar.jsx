@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { clearToken, getCurrentUser } from '../auth';
 import { useState } from 'react';
 import NotebookModal from './NotebookModal';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const FORCE_TOUR_KEY = 'innova_force_tour';
 
@@ -10,11 +11,12 @@ export default function NavBar() {
   const location = useLocation();
   const user = getCurrentUser();
   const [isNotebookOpen, setIsNotebookOpen] = useState(false);
-  const isAuthPage =
+  const isAuthStyledPage =
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
     location.pathname === '/forgot-password' ||
-    location.pathname === '/reset-password';
+    location.pathname === '/reset-password' ||
+    location.pathname === '/contact';
   const isDashboardArea =
     location.pathname.startsWith('/admin') ||
     location.pathname.startsWith('/formateur') ||
@@ -75,20 +77,20 @@ export default function NavBar() {
       <nav className="topbar-nav">
         <div className="topbar-links">
           {!user && <Link to="/" className="topbar-link-underline">Home</Link>}
+          <Link to="/contact" className="topbar-link-underline">Contact</Link>
           {!user && (
-            <Link to="/login" className={isAuthPage ? 'topbar-auth-action' : ''}>
+            <Link to="/login" className={isAuthStyledPage ? 'topbar-auth-action' : ''}>
               Login
             </Link>
           )}
           {!user && (
             <Link
               to="/signup"
-              className={isAuthPage ? 'topbar-auth-action topbar-auth-signup' : ''}
+              className={isAuthStyledPage ? 'topbar-auth-action topbar-auth-signup' : ''}
             >
               Signup
             </Link>
           )}
-          {user && <Link to="/" className="topbar-link-underline">Home</Link>}
           {user?.role === 'FORMATEUR' && (
             <Link to="/formateur" className="topbar-link-underline">
               Dashboard
@@ -124,6 +126,7 @@ export default function NavBar() {
             </button>
           )}
         </div>
+        <LanguageSwitcher variant="topbar" />
         {user && (
           <button type="button" onClick={logout} className="small-btn topbar-logout">
             Logout

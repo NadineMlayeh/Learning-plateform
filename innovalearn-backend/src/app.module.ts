@@ -15,6 +15,7 @@ import { QuizModule } from './quiz/quiz.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { NotebookModule } from './notebook/notebook.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { NotebookModule } from './notebook/notebook.module';
     EnrollmentModule,
     InvoiceModule,
     NotebookModule,
+    ContactModule,
   ],
   controllers: [TestController],
   providers: [AppService],

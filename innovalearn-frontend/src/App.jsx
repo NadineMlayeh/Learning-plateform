@@ -9,6 +9,7 @@ import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import DashboardPage from './pages/DashboardPage';
+import ContactPage from './pages/ContactPage';
 import AdminPage from './pages/AdminPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminFormationPage from './pages/AdminFormationPage';
@@ -26,6 +27,7 @@ export default function App() {
   const { toasts, pushToast, removeToast } = useToast();
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
+  const isContactPage = location.pathname === '/contact';
   const isAuthPage =
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
@@ -100,6 +102,8 @@ export default function App() {
         className={
           isLandingPage
             ? 'landing-main'
+            : isContactPage
+              ? 'contact-main'
             : isAuthPage
               ? 'auth-main'
               : isStudentFormationDetailsPage
@@ -113,6 +117,7 @@ export default function App() {
       >
         <Routes>
           <Route path="/" element={<DashboardPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -152,6 +157,14 @@ export default function App() {
           />
           <Route
             path="/admin/revenue"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminPage pushToast={pushToast} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reviews"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AdminPage pushToast={pushToast} />
