@@ -4,6 +4,7 @@ import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
 import StatusBadge from '../components/StatusBadge';
 import LoadingButton from '../components/LoadingButton';
+import { useTranslation } from 'react-i18next';
 
 const FORMATION_PUBLISH_TS_KEY = 'formateur_published_at_map_v1';
 
@@ -66,6 +67,7 @@ function toDateInputValue(value) {
 }
 
 export default function AdminFormationPage({ pushToast }) {
+  const { t } = useTranslation();
   const user = getCurrentUser();
   const navigate = useNavigate();
   const { formationId } = useParams();
@@ -171,7 +173,7 @@ export default function AdminFormationPage({ pushToast }) {
         published: updated.published,
         publishedAt: updated?.publishedAt || prev?.publishedAt || null,
       }));
-      pushToast('Formation published.', 'success');
+      pushToast(t('formateur.manage.formationPublishedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -194,7 +196,7 @@ export default function AdminFormationPage({ pushToast }) {
             : course,
         ),
       }));
-      pushToast('Course published.', 'success');
+      pushToast(t('formateur.manage.coursePublishedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -212,7 +214,7 @@ export default function AdminFormationPage({ pushToast }) {
       await refreshFormation();
       setConfirmDeleteCourseId(null);
       pushToast(
-        response?.message || 'Pending course deleted successfully.',
+        response?.message || t('formateur.manage.pendingCourseDeletedSuccess'),
         'success',
       );
     } catch (err) {
@@ -289,7 +291,7 @@ export default function AdminFormationPage({ pushToast }) {
 
       setFormation((prev) => ({ ...prev, ...updated, profileImageUrl: url }));
       setThumbnailName(file.name || 'thumbnail');
-      pushToast('Thumbnail updated.', 'success');
+      pushToast(t('formateur.manage.thumbnailUpdatedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -312,7 +314,7 @@ export default function AdminFormationPage({ pushToast }) {
         editingFormationField === 'description') &&
       !nextRaw
     ) {
-      pushToast('This field cannot be empty.', 'error');
+      pushToast(t('formateur.manage.fieldCannotBeEmpty'), 'error');
       return;
     }
 
@@ -320,7 +322,7 @@ export default function AdminFormationPage({ pushToast }) {
     if (editingFormationField === 'price') {
       const parsed = Number(nextRaw);
       if (!Number.isFinite(parsed) || parsed < 0) {
-        pushToast('Price must be a valid non-negative number.', 'error');
+        pushToast(t('formateur.manage.priceInvalid'), 'error');
         return;
       }
       payload = { price: parsed };
@@ -346,7 +348,7 @@ export default function AdminFormationPage({ pushToast }) {
       }));
       setEditingFormationField(null);
       setFormationFieldValue('');
-      pushToast('Formation updated.', 'success');
+      pushToast(t('formateur.manage.formationUpdatedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -375,7 +377,7 @@ export default function AdminFormationPage({ pushToast }) {
 
     const title = newCourseTitle.trim();
     if (!title) {
-      pushToast('Course title is required.', 'error');
+      pushToast(t('formateur.manage.courseTitleRequired'), 'error');
       return;
     }
 
@@ -388,7 +390,7 @@ export default function AdminFormationPage({ pushToast }) {
       });
       await refreshFormation();
       closeAddCourseModal();
-      pushToast('Course created.', 'success');
+      pushToast(t('formateur.manage.courseCreatedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -415,7 +417,7 @@ export default function AdminFormationPage({ pushToast }) {
     const pdfUrl = newLessonForm.pdfUrl.trim();
 
     if (!title || !pdfUrl) {
-      pushToast('Lesson title and PDF URL are required.', 'error');
+      pushToast(t('formateur.manage.lessonTitleAndPdfRequired'), 'error');
       return;
     }
 
@@ -428,7 +430,7 @@ export default function AdminFormationPage({ pushToast }) {
       });
       await refreshFormation();
       closeAddLessonModal();
-      pushToast('Lesson created.', 'success');
+      pushToast(t('formateur.manage.lessonCreatedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -488,23 +490,23 @@ export default function AdminFormationPage({ pushToast }) {
       .filter((choice) => choice.text);
 
     if (!title) {
-      pushToast('Quiz title is required.', 'error');
+      pushToast(t('formateur.manage.quizTitleRequired'), 'error');
       return;
     }
 
     if (!questionText) {
-      pushToast('Question is required.', 'error');
+      pushToast(t('formateur.manage.questionRequired'), 'error');
       return;
     }
 
     if (choices.length < 2) {
-      pushToast('At least 2 choices are required.', 'error');
+      pushToast(t('formateur.manage.atLeastTwoChoices'), 'error');
       return;
     }
 
     const correctCount = choices.filter((choice) => choice.isCorrect).length;
     if (correctCount !== 1) {
-      pushToast('You should select exactly one correct choice.', 'error');
+      pushToast(t('formateur.manage.exactlyOneCorrectChoice'), 'error');
       return;
     }
 
@@ -527,7 +529,7 @@ export default function AdminFormationPage({ pushToast }) {
 
       await refreshFormation();
       closeAddQuizModal();
-      pushToast('Quiz created.', 'success');
+      pushToast(t('formateur.manage.quizCreatedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -546,7 +548,7 @@ export default function AdminFormationPage({ pushToast }) {
 
   async function saveLessonEdit(courseId, lessonId) {
     if (!lessonForm.title.trim() || !lessonForm.pdfUrl.trim()) {
-      pushToast('Lesson title and PDF URL are required.', 'error');
+      pushToast(t('formateur.manage.lessonTitleAndPdfRequired'), 'error');
       return;
     }
 
@@ -576,7 +578,7 @@ export default function AdminFormationPage({ pushToast }) {
       }));
 
       setEditingLessonId(null);
-      pushToast('Lesson updated.', 'success');
+      pushToast(t('formateur.manage.lessonUpdatedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -596,7 +598,7 @@ export default function AdminFormationPage({ pushToast }) {
         setEditingLessonId(null);
       }
       setConfirmDeleteLessonId(null);
-      pushToast(response?.message || 'Lesson deleted.', 'success');
+      pushToast(response?.message || t('formateur.manage.lessonDeletedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -662,15 +664,15 @@ export default function AdminFormationPage({ pushToast }) {
       .filter((choice) => choice.text);
 
     if (!quizForm.title.trim()) {
-      return { error: 'Quiz title is required.' };
+      return { error: t('formateur.manage.quizTitleRequired') };
     }
 
     if (!normalizedQuestion) {
-      return { error: 'Question is required.' };
+      return { error: t('formateur.manage.questionRequired') };
     }
 
     if (normalizedChoices.length < 2) {
-      return { error: 'At least 2 choices are required.' };
+      return { error: t('formateur.manage.atLeastTwoChoices') };
     }
 
     const correctCount = normalizedChoices.filter(
@@ -679,7 +681,7 @@ export default function AdminFormationPage({ pushToast }) {
 
     if (correctCount !== 1) {
       return {
-        error: 'You should select exactly one correct choice.',
+        error: t('formateur.manage.exactlyOneCorrectChoice'),
       };
     }
 
@@ -722,7 +724,7 @@ export default function AdminFormationPage({ pushToast }) {
       }));
 
       setEditingQuizId(null);
-      pushToast('Quiz updated.', 'success');
+      pushToast(t('formateur.manage.quizUpdatedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -742,7 +744,7 @@ export default function AdminFormationPage({ pushToast }) {
         setEditingQuizId(null);
       }
       setConfirmDeleteQuizId(null);
-      pushToast(response?.message || 'Quiz deleted.', 'success');
+      pushToast(response?.message || t('formateur.manage.quizDeletedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -827,11 +829,11 @@ export default function AdminFormationPage({ pushToast }) {
     };
 
     if (!payload.title || !payload.description) {
-      pushToast('Title and description are required.', 'error');
+      pushToast(t('formateur.manage.titleAndDescriptionRequired'), 'error');
       return;
     }
     if (!Number.isFinite(payload.price) || payload.price < 0) {
-      pushToast('Price must be a valid non-negative number.', 'error');
+      pushToast(t('formateur.manage.priceInvalid'), 'error');
       return;
     }
 
@@ -849,7 +851,7 @@ export default function AdminFormationPage({ pushToast }) {
         body: payload,
       });
       setFormation((prev) => ({ ...prev, ...updated }));
-      pushToast('Formation updated.', 'success');
+      pushToast(t('formateur.manage.formationUpdatedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -860,7 +862,7 @@ export default function AdminFormationPage({ pushToast }) {
   if (isLoading || !formation) {
     return (
       <section className="card">
-        <p>{isLoading ? 'Loading formation...' : 'Formation not found.'}</p>
+        <p>{isLoading ? t('admin.formations.loadingFormation') : t('student.formationDetails.formationNotFound')}</p>
       </section>
     );
   }
@@ -900,10 +902,10 @@ export default function AdminFormationPage({ pushToast }) {
                     <img src="/images/gallery.png" alt="" />
                     <span>
                       {thumbnailUploading
-                        ? 'Uploading thumbnail...'
+                        ? t('admin.dashboard.uploadingThumbnail')
                         : formation.profileImageUrl
-                        ? 'Change Thumbnail Photo'
-                        : 'Add Thumbnail Photo'}
+                        ? t('admin.dashboard.changeThumbnail')
+                        : t('admin.dashboard.addThumbnail')}
                     </span>
                   </label>
                   {thumbnailName ? (
@@ -915,19 +917,23 @@ export default function AdminFormationPage({ pushToast }) {
             <div className="formation-summary-text">
               <h2>{formation.title}</h2>
               <p className="hint">{formation.description}</p>
-              <p className="hint">Price: {formation.price}</p>
+              <p className="hint">{t('formateur.manage.priceLabel', { value: formation.price })}</p>
               {formation.type === 'PRESENTIEL' && (
                 <>
-                  <p className="hint">Location: {formation.location || '-'}</p>
+                  <p className="hint">{t('formateur.manage.locationLabel', { value: formation.location || '-' })}</p>
                   <p className="hint">
-                    Start: {toDateOnlyLabel(formation.startDate)}
+                    {t('formateur.manage.startLabel', { value: toDateOnlyLabel(formation.startDate) })}
                   </p>
-                  <p className="hint">End: {toDateOnlyLabel(formation.endDate)}</p>
+                  <p className="hint">{t('formateur.manage.endLabel', { value: toDateOnlyLabel(formation.endDate) })}</p>
                 </>
               )}
               <div className="row">
                 <StatusBadge
-                  label={formation.type}
+                  label={
+                    formation.type === 'ONLINE'
+                      ? t('formateur.manage.online')
+                      : t('formateur.manage.presentiel')
+                  }
                   tone={formation.type === 'ONLINE' ? 'blue' : 'orange'}
                 />
               </div>
@@ -943,24 +949,24 @@ export default function AdminFormationPage({ pushToast }) {
                   onClick={openAddCourseModal}
                 >
                   <img src="/images/courses.png" alt="" className="btn-inline-icon" />
-                  Add Course
+                  {t('formateur.manage.addCourse')}
                 </button>
               )}
               {formation.published ? (
                 <div className="formation-head-published-status">
-                  <StatusBadge label="Published" tone="green" />
+                  <StatusBadge label={t('admin.dashboard.published')} tone="green" />
                 </div>
               ) : (
                 <LoadingButton
                   className="btn-publish-formation formation-head-action-right"
                   type="button"
                   isLoading={publishingFormation}
-                  loadingText="Publishing..."
+                  loadingText={t('admin.dashboard.publishing')}
                   disabled={false}
                   onClick={publishFormation}
                 >
                   <img src="/images/send.png" alt="" className="btn-inline-icon" />
-                  Publish Formation
+                  {t('formateur.manage.publishFormation')}
                 </LoadingButton>
               )}
             </div>
@@ -968,7 +974,7 @@ export default function AdminFormationPage({ pushToast }) {
             <form className="formation-edit-form" onSubmit={saveDraftForm}>
               <div className="formation-edit-row">
                 <label>
-                  <span>Title</span>
+                  <span>{t('admin.dashboard.formTitle')}</span>
                   <input
                     name="title"
                     value={formationDraftForm.title}
@@ -980,7 +986,7 @@ export default function AdminFormationPage({ pushToast }) {
               </div>
               <div className="formation-edit-row">
                 <label>
-                  <span>Description</span>
+                  <span>{t('admin.dashboard.formDescription')}</span>
                   <textarea
                     name="description"
                     rows={4}
@@ -993,7 +999,7 @@ export default function AdminFormationPage({ pushToast }) {
               </div>
               <div className="formation-edit-row formation-edit-row-split">
                 <label>
-                  <span>Price</span>
+                  <span>{t('admin.dashboard.formPrice')}</span>
                   <input
                     name="price"
                     type="number"
@@ -1007,7 +1013,7 @@ export default function AdminFormationPage({ pushToast }) {
                 </label>
                 {formation.type === 'PRESENTIEL' && (
                   <label>
-                    <span>Location</span>
+                    <span>{t('formateur.manage.location')}</span>
                     <input
                       name="location"
                       value={formationDraftForm.location}
@@ -1020,7 +1026,7 @@ export default function AdminFormationPage({ pushToast }) {
               {formation.type === 'PRESENTIEL' && (
                 <div className="formation-edit-row formation-edit-row-split">
                   <label>
-                    <span>Start Date</span>
+                    <span>{t('formateur.manage.startDate')}</span>
                     <input
                       name="startDate"
                       type="date"
@@ -1030,7 +1036,7 @@ export default function AdminFormationPage({ pushToast }) {
                     />
                   </label>
                   <label>
-                    <span>End Date</span>
+                    <span>{t('formateur.manage.endDate')}</span>
                     <input
                       name="endDate"
                       type="date"
@@ -1048,7 +1054,7 @@ export default function AdminFormationPage({ pushToast }) {
                     className="modal-save-btn"
                     disabled={savingFormationDraft}
                   >
-                    {savingFormationDraft ? 'Saving...' : 'Save'}
+                    {savingFormationDraft ? t('formateur.manage.saving') : t('formateur.manage.save')}
                   </button>
                 </div>
               )}
@@ -1063,31 +1069,33 @@ export default function AdminFormationPage({ pushToast }) {
             type="button"
             className="admin-modal-backdrop"
             onClick={closeFormationFieldEditor}
-            aria-label="Close edit modal"
+            aria-label={t('formateur.manage.closeEditModal')}
           />
           <article className="admin-modal-card">
             <div className="admin-modal-head">
               <h2>
-                Edit{' '}
-                {editingFormationField === 'title'
-                  ? 'Title'
-                  : editingFormationField === 'description'
-                    ? 'Description'
-                    : editingFormationField === 'price'
-                      ? 'Price'
-                      : editingFormationField === 'location'
-                        ? 'Location'
-                        : editingFormationField === 'startDate'
-                          ? 'Start Date'
-                          : editingFormationField === 'endDate'
-                            ? 'End Date'
-                            : 'Field'}
+                {t('formateur.manage.editFieldTitle', {
+                  field:
+                    editingFormationField === 'title'
+                      ? t('admin.dashboard.formTitle')
+                      : editingFormationField === 'description'
+                        ? t('admin.dashboard.formDescription')
+                        : editingFormationField === 'price'
+                          ? t('admin.dashboard.formPrice')
+                          : editingFormationField === 'location'
+                            ? t('formateur.manage.location')
+                            : editingFormationField === 'startDate'
+                              ? t('formateur.manage.startDate')
+                              : editingFormationField === 'endDate'
+                                ? t('formateur.manage.endDate')
+                                : t('formateur.manage.fieldFallback'),
+                })}
               </h2>
               <button
                 type="button"
                 className="admin-modal-close"
                 onClick={closeFormationFieldEditor}
-                aria-label="Close edit modal"
+                aria-label={t('formateur.manage.closeEditModal')}
               >
                 x
               </button>
@@ -1124,7 +1132,7 @@ export default function AdminFormationPage({ pushToast }) {
                 )}
                 <div className="row">
                   <button type="submit" className="modal-save-btn" disabled={savingFormationField}>
-                    {savingFormationField ? 'Saving...' : 'Save'}
+                    {savingFormationField ? t('formateur.manage.saving') : t('formateur.manage.save')}
                   </button>
                   <button
                     type="button"
@@ -1132,7 +1140,7 @@ export default function AdminFormationPage({ pushToast }) {
                     onClick={closeFormationFieldEditor}
                     disabled={savingFormationField}
                   >
-                    Cancel
+                    {t('formateur.manage.cancel')}
                   </button>
                 </div>
               </form>
@@ -1147,23 +1155,25 @@ export default function AdminFormationPage({ pushToast }) {
             type="button"
             className="admin-modal-backdrop"
             onClick={closeAddLessonModal}
-            aria-label="Close lesson modal"
+            aria-label={t('formateur.manage.closeLessonModal')}
           />
           <article className="admin-modal-card">
             <div className="admin-modal-head">
-              <h2>Add Lesson</h2>
+              <h2>{t('formateur.manage.addLessonTitle')}</h2>
               <button
                 type="button"
                 className="admin-modal-close"
                 onClick={closeAddLessonModal}
-                aria-label="Close lesson modal"
+                aria-label={t('formateur.manage.closeLessonModal')}
               >
                 x
               </button>
             </div>
             <div className="admin-modal-body">
               <p className="hint">
-                Course: {addingLessonCourse?.title || `#${addingLessonCourseId}`}
+                {t('formateur.manage.coursePrefix', {
+                  name: addingLessonCourse?.title || `#${addingLessonCourseId}`,
+                })}
               </p>
               <form className="grid" onSubmit={createLesson}>
                 <input
@@ -1174,7 +1184,7 @@ export default function AdminFormationPage({ pushToast }) {
                       title: event.target.value,
                     }))
                   }
-                  placeholder="Lesson title"
+                  placeholder={t('formateur.manage.lessonTitlePlaceholder')}
                   required
                 />
                 <input
@@ -1185,12 +1195,12 @@ export default function AdminFormationPage({ pushToast }) {
                       pdfUrl: event.target.value,
                     }))
                   }
-                  placeholder="PDF URL"
+                  placeholder={t('formateur.manage.pdfUrlPlaceholder')}
                   required
                 />
                 <div className="row">
                   <button type="submit" className="modal-save-btn" disabled={creatingLesson}>
-                    {creatingLesson ? 'Creating...' : 'Create Lesson'}
+                    {creatingLesson ? t('formateur.manage.creating') : t('formateur.manage.createLesson')}
                   </button>
                   <button
                     type="button"
@@ -1198,7 +1208,7 @@ export default function AdminFormationPage({ pushToast }) {
                     onClick={closeAddLessonModal}
                     disabled={creatingLesson}
                   >
-                    Cancel
+                    {t('formateur.manage.cancel')}
                   </button>
                 </div>
               </form>
@@ -1213,32 +1223,32 @@ export default function AdminFormationPage({ pushToast }) {
             type="button"
             className="admin-modal-backdrop"
             onClick={closeAddCourseModal}
-            aria-label="Close add course modal"
+            aria-label={t('formateur.manage.closeAddCourseModal')}
           />
           <article className="admin-modal-card">
             <div className="admin-modal-head">
-              <h2>Add Course</h2>
+              <h2>{t('formateur.manage.addCourseTitle')}</h2>
               <button
                 type="button"
                 className="admin-modal-close"
                 onClick={closeAddCourseModal}
-                aria-label="Close add course modal"
+                aria-label={t('formateur.manage.closeAddCourseModal')}
               >
                 x
               </button>
             </div>
             <div className="admin-modal-body">
-              <p className="hint">Formation: {formation.title}</p>
+              <p className="hint">{t('formateur.manage.formationPrefix', { name: formation.title })}</p>
               <form className="grid" onSubmit={createCourse}>
                 <input
                   value={newCourseTitle}
                   onChange={(event) => setNewCourseTitle(event.target.value)}
-                  placeholder="Course title"
+                  placeholder={t('formateur.manage.courseTitlePlaceholder')}
                   required
                 />
                 <div className="row">
                   <button type="submit" className="modal-save-btn" disabled={creatingCourse}>
-                    {creatingCourse ? 'Creating...' : 'Create Course'}
+                    {creatingCourse ? t('formateur.manage.creating') : t('formateur.manage.createCourse')}
                   </button>
                   <button
                     type="button"
@@ -1246,7 +1256,7 @@ export default function AdminFormationPage({ pushToast }) {
                     onClick={closeAddCourseModal}
                     disabled={creatingCourse}
                   >
-                    Cancel
+                    {t('formateur.manage.cancel')}
                   </button>
                 </div>
               </form>
@@ -1261,23 +1271,25 @@ export default function AdminFormationPage({ pushToast }) {
             type="button"
             className="admin-modal-backdrop"
             onClick={closeAddQuizModal}
-            aria-label="Close quiz modal"
+            aria-label={t('formateur.manage.closeQuizModal')}
           />
           <article className="admin-modal-card">
             <div className="admin-modal-head">
-              <h2>Add Quiz</h2>
+              <h2>{t('formateur.manage.addQuizTitle')}</h2>
               <button
                 type="button"
                 className="admin-modal-close"
                 onClick={closeAddQuizModal}
-                aria-label="Close quiz modal"
+                aria-label={t('formateur.manage.closeQuizModal')}
               >
                 x
               </button>
             </div>
             <div className="admin-modal-body">
               <p className="hint">
-                Course: {addingQuizCourse?.title || `#${addingQuizCourseId}`}
+                {t('formateur.manage.coursePrefix', {
+                  name: addingQuizCourse?.title || `#${addingQuizCourseId}`,
+                })}
               </p>
               <form className="grid" onSubmit={createQuiz}>
                 <input
@@ -1288,7 +1300,7 @@ export default function AdminFormationPage({ pushToast }) {
                       title: event.target.value,
                     }))
                   }
-                  placeholder="Quiz title"
+                  placeholder={t('formateur.manage.quizTitlePlaceholder')}
                   required
                 />
                 <textarea
@@ -1299,7 +1311,7 @@ export default function AdminFormationPage({ pushToast }) {
                       questionText: event.target.value,
                     }))
                   }
-                  placeholder="Question"
+                  placeholder={t('formateur.manage.questionPlaceholder')}
                   required
                 />
                 <div className="nested-grid">
@@ -1310,7 +1322,7 @@ export default function AdminFormationPage({ pushToast }) {
                         onChange={(event) =>
                           updateNewQuizChoice(index, 'text', event.target.value)
                         }
-                        placeholder={`Choice ${index + 1}`}
+                        placeholder={t('formateur.manage.choicePlaceholder', { index: index + 1 })}
                         required={index < 2}
                       />
                       <label className="hint">
@@ -1320,14 +1332,14 @@ export default function AdminFormationPage({ pushToast }) {
                           checked={choice.isCorrect}
                           onChange={() => setNewCorrectChoice(index)}
                         />
-                        Correct
+                        {t('formateur.manage.correct')}
                       </label>
                     </div>
                   ))}
                 </div>
                 <div className="row">
                   <button type="submit" className="modal-save-btn" disabled={creatingQuiz}>
-                    {creatingQuiz ? 'Creating...' : 'Create Quiz'}
+                    {creatingQuiz ? t('formateur.manage.creating') : t('formateur.manage.createQuiz')}
                   </button>
                   <button
                     type="button"
@@ -1335,7 +1347,7 @@ export default function AdminFormationPage({ pushToast }) {
                     onClick={closeAddQuizModal}
                     disabled={creatingQuiz}
                   >
-                    Cancel
+                    {t('formateur.manage.cancel')}
                   </button>
                 </div>
               </form>
@@ -1348,13 +1360,13 @@ export default function AdminFormationPage({ pushToast }) {
         {sortedCourses.map((course) => (
           <article key={course.id} className="card course-card">
             <div className="card-head-row course-head-row">
-              <h2 className="formation-course-title" title={`Course: ${course.title}`}>
-                Course: {course.title}
+              <h2 className="formation-course-title" title={t('formateur.manage.coursePrefix', { name: course.title })}>
+                {t('formateur.manage.coursePrefix', { name: course.title })}
               </h2>
               <div className="row course-head-actions">
                 {course.published && (
                   <StatusBadge
-                    label="Published"
+                    label={t('admin.dashboard.published')}
                     tone="green"
                   />
                 )}
@@ -1363,19 +1375,19 @@ export default function AdminFormationPage({ pushToast }) {
                     className="course-publish-btn"
                     type="button"
                     isLoading={publishingCourseId === course.id}
-                    loadingText="Publishing..."
+                    loadingText={t('admin.dashboard.publishing')}
                     disabled={false}
                     onClick={() => publishCourse(course.id)}
                   >
                     <img src="/images/send.png" alt="" className="btn-inline-icon" />
-                    Publish Course
+                    {t('formateur.manage.publishCourse')}
                   </LoadingButton>
                 )}
                 {!isCourseLocked(course) && (
                   <button
                     type="button"
                     className="course-delete-showcase-btn"
-                    aria-label="Delete pending course"
+                    aria-label={t('formateur.manage.deleteCourseTitle')}
                     onClick={() => openDeleteCourseConfirmation(course.id)}
                     disabled={deletingCourseId === course.id}
                   >
@@ -1393,13 +1405,13 @@ export default function AdminFormationPage({ pushToast }) {
             <div className="nested-sections">
               <section className="formation-subsection">
                 <div className="formation-subsection-head">
-                  <h3 className="formation-subsection-title">Lessons</h3>
+                  <h3 className="formation-subsection-title">{t('formateur.manage.lessons')}</h3>
                 </div>
                 <div className="formation-subsection-body">
                   <div className="nested-grid formation-subsection-list">
-                    {course.lessons.length === 0 && <p className="hint">No lessons yet.</p>}
+                    {course.lessons.length === 0 && <p className="hint">{t('formateur.manage.noLessonsYet')}</p>}
                     {(course.published || formation.published) && (
-                      <p className="hint">Locked: published content is view only.</p>
+                      <p className="hint">{t('formateur.manage.lockedHint')}</p>
                     )}
 
                     {course.lessons.map((lesson) => (
@@ -1414,7 +1426,7 @@ export default function AdminFormationPage({ pushToast }) {
                                   title: event.target.value,
                                 }))
                               }
-                              placeholder="Lesson title"
+                              placeholder={t('formateur.manage.lessonTitlePlaceholder')}
                             />
                             <input
                               value={lessonForm.pdfUrl}
@@ -1424,7 +1436,7 @@ export default function AdminFormationPage({ pushToast }) {
                                   pdfUrl: event.target.value,
                                 }))
                               }
-                              placeholder="PDF URL"
+                              placeholder={t('formateur.manage.pdfUrlPlaceholder')}
                             />
                             <div className="row lesson-edit-actions">
                               <button
@@ -1433,7 +1445,7 @@ export default function AdminFormationPage({ pushToast }) {
                                 onClick={() => saveLessonEdit(course.id, lesson.id)}
                                 disabled={savingLessonId === lesson.id}
                               >
-                                {savingLessonId === lesson.id ? 'Saving...' : 'Save'}
+                                {savingLessonId === lesson.id ? t('formateur.manage.saving') : t('formateur.manage.save')}
                               </button>
                               <button
                                 type="button"
@@ -1441,7 +1453,7 @@ export default function AdminFormationPage({ pushToast }) {
                                 onClick={() => setEditingLessonId(null)}
                                 disabled={savingLessonId === lesson.id}
                               >
-                                Cancel
+                                {t('formateur.manage.cancel')}
                               </button>
                             </div>
                           </div>
@@ -1450,7 +1462,7 @@ export default function AdminFormationPage({ pushToast }) {
                         <article key={lesson.id} className="item small-item">
                           <p><strong>{lesson.title}</strong></p>
                           <a href={lesson.pdfUrl} target="_blank" rel="noreferrer" className="hint">
-                            Open PDF
+                            {t('formateur.manage.openPdf')}
                           </a>
                         </article>
                       ) : (
@@ -1463,12 +1475,12 @@ export default function AdminFormationPage({ pushToast }) {
                         >
                           <p><strong>{lesson.title}</strong></p>
                           <a href={lesson.pdfUrl} target="_blank" rel="noreferrer" className="hint">
-                            Open PDF
+                            {t('formateur.manage.openPdf')}
                           </a>
                           <button
                             type="button"
                             className="content-delete-btn-inline"
-                            aria-label="Delete lesson"
+                            aria-label={t('formateur.manage.deleteLessonAria')}
                             onClick={(event) => {
                               event.stopPropagation();
                               openDeleteLessonConfirmation(lesson.id);
@@ -1495,7 +1507,7 @@ export default function AdminFormationPage({ pushToast }) {
                         onClick={() => openAddLessonModal(course)}
                       >
                         <img src="/images/book.png" alt="" className="btn-inline-icon" />
-                        Add Lesson
+                        {t('formateur.manage.addLessonTitle')}
                       </button>
                     </div>
                   )}
@@ -1504,13 +1516,13 @@ export default function AdminFormationPage({ pushToast }) {
 
               <section className="formation-subsection">
                 <div className="formation-subsection-head">
-                  <h3 className="formation-subsection-title">Quizzes</h3>
+                  <h3 className="formation-subsection-title">{t('formateur.manage.quizzes')}</h3>
                 </div>
                 <div className="formation-subsection-body">
                   <div className="nested-grid formation-subsection-list">
-                    {course.quizzes.length === 0 && <p className="hint">No quizzes yet.</p>}
+                    {course.quizzes.length === 0 && <p className="hint">{t('formateur.manage.noQuizzesYet')}</p>}
                     {(course.published || formation.published) && (
-                      <p className="hint">Locked: published content is view only.</p>
+                      <p className="hint">{t('formateur.manage.lockedHint')}</p>
                     )}
 
                     {course.quizzes.map((quiz) => {
@@ -1528,7 +1540,7 @@ export default function AdminFormationPage({ pushToast }) {
                                     title: event.target.value,
                                   }))
                                 }
-                                placeholder="Quiz title"
+                                placeholder={t('formateur.manage.quizTitlePlaceholder')}
                               />
                               <textarea
                                 value={quizForm.questionText}
@@ -1538,7 +1550,7 @@ export default function AdminFormationPage({ pushToast }) {
                                     questionText: event.target.value,
                                   }))
                                 }
-                                placeholder="Question"
+                                placeholder={t('formateur.manage.questionPlaceholder')}
                               />
 
                               <div className="nested-grid">
@@ -1553,7 +1565,7 @@ export default function AdminFormationPage({ pushToast }) {
                                           event.target.value,
                                         )
                                       }
-                                      placeholder={`Choice ${index + 1}`}
+                                      placeholder={t('formateur.manage.choicePlaceholder', { index: index + 1 })}
                                     />
                                     <label className="hint">
                                       <input
@@ -1564,7 +1576,7 @@ export default function AdminFormationPage({ pushToast }) {
                                           setCorrectQuizChoice(index)
                                         }
                                       />
-                                      Correct
+                                      {t('formateur.manage.correct')}
                                     </label>
                                   </div>
                                 ))}
@@ -1577,7 +1589,7 @@ export default function AdminFormationPage({ pushToast }) {
                                   onClick={() => saveQuizEdit(course.id, quiz.id)}
                                   disabled={savingQuizId === quiz.id}
                                 >
-                                  {savingQuizId === quiz.id ? 'Saving...' : 'Save'}
+                                  {savingQuizId === quiz.id ? t('formateur.manage.saving') : t('formateur.manage.save')}
                                 </button>
                                 <button
                                   type="button"
@@ -1585,7 +1597,7 @@ export default function AdminFormationPage({ pushToast }) {
                                   onClick={() => setEditingQuizId(null)}
                                   disabled={savingQuizId === quiz.id}
                                 >
-                                  Cancel
+                                  {t('formateur.manage.cancel')}
                                 </button>
                               </div>
                             </div>
@@ -1605,7 +1617,7 @@ export default function AdminFormationPage({ pushToast }) {
                           <p className="hint">
                             {primaryQuestion
                               ? primaryQuestion.text
-                              : 'No question yet.'}
+                              : t('formateur.manage.noQuestionYet')}
                           </p>
                         </article>
                       ) : (
@@ -1620,12 +1632,12 @@ export default function AdminFormationPage({ pushToast }) {
                           <p className="hint">
                             {primaryQuestion
                               ? primaryQuestion.text
-                              : 'No question yet.'}
+                              : t('formateur.manage.noQuestionYet')}
                           </p>
                           <button
                             type="button"
                             className="content-delete-btn-inline"
-                            aria-label="Delete quiz"
+                            aria-label={t('formateur.manage.deleteQuizAria')}
                             onClick={(event) => {
                               event.stopPropagation();
                               openDeleteQuizConfirmation(quiz.id);
@@ -1652,7 +1664,7 @@ export default function AdminFormationPage({ pushToast }) {
                         onClick={() => openAddQuizModal(course)}
                       >
                         <img src="/images/brain.png" alt="" className="btn-inline-icon" />
-                        Add Quiz
+                        {t('formateur.manage.addQuizTitle')}
                       </button>
                     </div>
                   )}
@@ -1668,28 +1680,24 @@ export default function AdminFormationPage({ pushToast }) {
               type="button"
               className="admin-modal-backdrop"
               onClick={closeDeleteCourseConfirmation}
-              aria-label="Close delete confirmation"
+              aria-label={t('formateur.manage.closeDeleteConfirmation')}
               disabled={Boolean(deletingCourseId)}
             />
             <article className="admin-modal-card confirm-delete-modal">
               <div className="admin-modal-head">
-                <h2>Delete Course</h2>
+                <h2>{t('formateur.manage.deleteCourseTitle')}</h2>
                 <button
                   type="button"
                   className="admin-modal-close"
                   onClick={closeDeleteCourseConfirmation}
-                  aria-label="Close delete confirmation"
+                  aria-label={t('formateur.manage.closeDeleteConfirmation')}
                   disabled={Boolean(deletingCourseId)}
                 >
                   x
                 </button>
               </div>
               <div className="admin-modal-body">
-                <p>
-                  Are you sure you want to delete this pending course
-                  {courseToDelete ? ` "${courseToDelete.title}"` : ''}?
-                  This action cannot be undone.
-                </p>
+                <p>{t('formateur.manage.deleteCourseConfirm', { name: courseToDelete?.title || '' })}</p>
                 <div className="row confirm-delete-actions">
                   <button
                     type="button"
@@ -1697,17 +1705,17 @@ export default function AdminFormationPage({ pushToast }) {
                     onClick={closeDeleteCourseConfirmation}
                     disabled={Boolean(deletingCourseId)}
                   >
-                    Cancel
+                    {t('formateur.manage.cancel')}
                   </button>
                   <LoadingButton
                     type="button"
                     className="action-btn action-delete"
                     isLoading={deletingCourseId === confirmDeleteCourseId}
-                    loadingText="Deleting..."
+                    loadingText={t('admin.dashboard.deleting')}
                     disabled={false}
                     onClick={() => deletePendingCourse(confirmDeleteCourseId)}
                   >
-                    Delete
+                    {t('admin.dashboard.deleteContent')}
                   </LoadingButton>
                 </div>
               </div>
@@ -1721,30 +1729,26 @@ export default function AdminFormationPage({ pushToast }) {
               type="button"
               className="admin-modal-backdrop"
               onClick={closeDeleteLessonConfirmation}
-              aria-label="Close lesson delete confirmation"
+              aria-label={t('formateur.manage.closeLessonDeleteConfirmation')}
               disabled={deletingLessonId === confirmDeleteLessonId}
             />
             <article className="admin-modal-card confirm-delete-modal">
               <div className="admin-modal-head">
-                <h2>Delete Lesson</h2>
+                <h2>{t('formateur.manage.deleteLessonTitle')}</h2>
                 <button
                   type="button"
                   className="admin-modal-close"
                   onClick={closeDeleteLessonConfirmation}
-                  aria-label="Close lesson delete confirmation"
+                  aria-label={t('formateur.manage.closeLessonDeleteConfirmation')}
                   disabled={deletingLessonId === confirmDeleteLessonId}
                 >
                   x
                 </button>
               </div>
               <div className="admin-modal-body">
-                <p>
-                  Are you sure you want to delete this lesson
-                  {lessonToDelete ? ` "${lessonToDelete.title}"` : ''}?
-                  This action cannot be undone.
-                </p>
+                <p>{t('formateur.manage.deleteLessonConfirm', { name: lessonToDelete?.title || '' })}</p>
                 {lessonToDelete?.courseTitle && (
-                  <p className="hint">Course: {lessonToDelete.courseTitle}</p>
+                  <p className="hint">{t('formateur.manage.coursePrefix', { name: lessonToDelete.courseTitle })}</p>
                 )}
                 <div className="row confirm-delete-actions">
                   <button
@@ -1753,17 +1757,17 @@ export default function AdminFormationPage({ pushToast }) {
                     onClick={closeDeleteLessonConfirmation}
                     disabled={deletingLessonId === confirmDeleteLessonId}
                   >
-                    Cancel
+                    {t('formateur.manage.cancel')}
                   </button>
                   <LoadingButton
                     type="button"
                     className="action-btn action-delete"
                     isLoading={deletingLessonId === confirmDeleteLessonId}
-                    loadingText="Deleting..."
+                    loadingText={t('admin.dashboard.deleting')}
                     disabled={false}
                     onClick={() => deleteLesson(confirmDeleteLessonId)}
                   >
-                    Delete
+                    {t('admin.dashboard.deleteContent')}
                   </LoadingButton>
                 </div>
               </div>
@@ -1777,30 +1781,26 @@ export default function AdminFormationPage({ pushToast }) {
               type="button"
               className="admin-modal-backdrop"
               onClick={closeDeleteQuizConfirmation}
-              aria-label="Close quiz delete confirmation"
+              aria-label={t('formateur.manage.closeQuizDeleteConfirmation')}
               disabled={deletingQuizId === confirmDeleteQuizId}
             />
             <article className="admin-modal-card confirm-delete-modal">
               <div className="admin-modal-head">
-                <h2>Delete Quiz</h2>
+                <h2>{t('formateur.manage.deleteQuizTitle')}</h2>
                 <button
                   type="button"
                   className="admin-modal-close"
                   onClick={closeDeleteQuizConfirmation}
-                  aria-label="Close quiz delete confirmation"
+                  aria-label={t('formateur.manage.closeQuizDeleteConfirmation')}
                   disabled={deletingQuizId === confirmDeleteQuizId}
                 >
                   x
                 </button>
               </div>
               <div className="admin-modal-body">
-                <p>
-                  Are you sure you want to delete this quiz
-                  {quizToDelete ? ` "${quizToDelete.title}"` : ''}?
-                  This action cannot be undone.
-                </p>
+                <p>{t('formateur.manage.deleteQuizConfirm', { name: quizToDelete?.title || '' })}</p>
                 {quizToDelete?.courseTitle && (
-                  <p className="hint">Course: {quizToDelete.courseTitle}</p>
+                  <p className="hint">{t('formateur.manage.coursePrefix', { name: quizToDelete.courseTitle })}</p>
                 )}
                 <div className="row confirm-delete-actions">
                   <button
@@ -1809,17 +1809,17 @@ export default function AdminFormationPage({ pushToast }) {
                     onClick={closeDeleteQuizConfirmation}
                     disabled={deletingQuizId === confirmDeleteQuizId}
                   >
-                    Cancel
+                    {t('formateur.manage.cancel')}
                   </button>
                   <LoadingButton
                     type="button"
                     className="action-btn action-delete"
                     isLoading={deletingQuizId === confirmDeleteQuizId}
-                    loadingText="Deleting..."
+                    loadingText={t('admin.dashboard.deleting')}
                     disabled={false}
                     onClick={() => deleteQuiz(confirmDeleteQuizId)}
                   >
-                    Delete
+                    {t('admin.dashboard.deleteContent')}
                   </LoadingButton>
                 </div>
               </div>
@@ -1833,25 +1833,25 @@ export default function AdminFormationPage({ pushToast }) {
               type="button"
               className="admin-modal-backdrop"
               onClick={closeQuizViewer}
-              aria-label="Close quiz viewer"
+              aria-label={t('formateur.manage.closeQuizViewer')}
             />
             <article className="admin-modal-card quiz-view-modal">
               <div className="admin-modal-head">
-                <h2>Quiz Details</h2>
+                <h2>{t('formateur.manage.quizDetailsTitle')}</h2>
                 <button
                   type="button"
                   className="admin-modal-close"
                   onClick={closeQuizViewer}
-                  aria-label="Close quiz viewer"
+                  aria-label={t('formateur.manage.closeQuizViewer')}
                 >
                   x
                 </button>
               </div>
               <div className="admin-modal-body">
-                <p className="hint">Course: {viewingQuiz.courseTitle}</p>
+                <p className="hint">{t('formateur.manage.coursePrefix', { name: viewingQuiz.courseTitle })}</p>
                 <h3>{viewingQuiz.quiz.title}</h3>
                 {(viewingQuiz.quiz.questions || []).length === 0 ? (
-                  <p className="hint">No questions yet for this quiz.</p>
+                  <p className="hint">{t('formateur.manage.noQuestionsYetForQuiz')}</p>
                 ) : (
                   <div className="grid quiz-view-list">
                     {viewingQuiz.quiz.questions.map((question, questionIndex) => (
@@ -1868,7 +1868,7 @@ export default function AdminFormationPage({ pushToast }) {
                               className={choice.isCorrect ? 'is-correct' : ''}
                             >
                               {choice.text}
-                              {choice.isCorrect ? ' (Correct answer)' : ''}
+                              {choice.isCorrect ? t('formateur.manage.correctAnswerSuffix') : ''}
                             </li>
                           ))}
                         </ul>
@@ -1882,7 +1882,7 @@ export default function AdminFormationPage({ pushToast }) {
                     className="modal-cancel-btn"
                     onClick={closeQuizViewer}
                   >
-                    Close
+                    {t('formateur.manage.close')}
                   </button>
                 </div>
               </div>
@@ -1893,7 +1893,7 @@ export default function AdminFormationPage({ pushToast }) {
         {formation.courses.length === 0 && formation.type !== 'PRESENTIEL' && (
           <div className="card">
             <p className="hint">
-              No course yet for this formation.
+              {t('formateur.manage.noCourseYetForFormation')}
             </p>
           </div>
         )}

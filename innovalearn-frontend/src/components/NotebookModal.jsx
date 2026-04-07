@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { apiRequest } from '../api';
+import { useTranslation } from 'react-i18next';
 
 function formatDateLabel(value) {
   try {
@@ -18,6 +19,7 @@ function sortTodos(items) {
 }
 
 export default function NotebookModal({ isOpen, onClose, token }) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('notes');
   const [notes, setNotes] = useState([]);
   const [todos, setTodos] = useState([]);
@@ -28,7 +30,7 @@ export default function NotebookModal({ isOpen, onClose, token }) {
   const [editingTodoId, setEditingTodoId] = useState(null);
   const [editingTodoValue, setEditingTodoValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [saveState, setSaveState] = useState('✓ All saved');
+  const [saveState, setSaveState] = useState(t('notebook.allSaved'));
 
   useEffect(() => {
     if (!isOpen || !token) return;
@@ -48,7 +50,7 @@ export default function NotebookModal({ isOpen, onClose, token }) {
         if (!isAlive) return;
         setNotes([]);
         setTodos([]);
-        setSaveState('Unable to load');
+        setSaveState(t('notebook.unableToLoad'));
       })
       .finally(() => {
         if (isAlive) setIsLoading(false);
@@ -73,16 +75,16 @@ export default function NotebookModal({ isOpen, onClose, token }) {
   const totalDone = todos.filter((todo) => todo.completed).length;
   const footerText =
     activeTab === 'notes'
-      ? `${notes.length} ${notes.length === 1 ? 'note' : 'notes'}`
-      : `${totalDone}/${todos.length} done`;
+      ? `${notes.length} ${notes.length === 1 ? t('notebook.note') : t('notebook.notes')}`
+      : `${totalDone}/${todos.length} ${t('notebook.done')}`;
 
   async function withSaving(action) {
-    setSaveState('Saving...');
+    setSaveState(t('notebook.saving'));
     try {
       await action();
-      setSaveState('✓ All saved');
+      setSaveState(t('notebook.allSaved'));
     } catch {
-      setSaveState('Save failed');
+      setSaveState(t('notebook.saveFailed'));
     }
   }
 
@@ -204,7 +206,7 @@ export default function NotebookModal({ isOpen, onClose, token }) {
       className="notebook-modal-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="My Notebook"
+      aria-label={t('notebook.title')}
       onClick={onClose}
     >
       <article
@@ -216,13 +218,13 @@ export default function NotebookModal({ isOpen, onClose, token }) {
             <span className="notebook-modal-title-icon" aria-hidden="true">
               📋
             </span>
-            <h2>My Notebook</h2>
+            <h2>{t('notebook.title')}</h2>
           </div>
           <button
             type="button"
             className="notebook-modal-close"
             onClick={onClose}
-            aria-label="Close notebook"
+            aria-label={t('notebook.close')}
           >
             ✕
           </button>
@@ -234,14 +236,14 @@ export default function NotebookModal({ isOpen, onClose, token }) {
             className={`notebook-tab ${activeTab === 'notes' ? 'is-active' : ''}`}
             onClick={() => setActiveTab('notes')}
           >
-            📝 Quick Notes
+            {t('notebook.quickNotes')}
           </button>
           <button
             type="button"
             className={`notebook-tab ${activeTab === 'todos' ? 'is-active' : ''}`}
             onClick={() => setActiveTab('todos')}
           >
-            ✅ To-Do List
+            {t('notebook.todoList')}
           </button>
         </nav>
 
@@ -253,7 +255,7 @@ export default function NotebookModal({ isOpen, onClose, token }) {
                   type="text"
                   value={newNote}
                   onChange={(event) => setNewNote(event.target.value)}
-                  placeholder="Write a quick note..."
+                  placeholder={t('notebook.writeNote')}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') {
                       event.preventDefault();
@@ -268,7 +270,7 @@ export default function NotebookModal({ isOpen, onClose, token }) {
 
               <div className="notebook-list">
                 {!isLoading && notes.length === 0 && (
-                  <p className="notebook-empty">No notes yet.</p>
+                  <p className="notebook-empty">{t('notebook.noNotes')}</p>
                 )}
                 {notes.map((note) => {
                   const isEditing = editingNoteId === note.id;
@@ -308,7 +310,7 @@ export default function NotebookModal({ isOpen, onClose, token }) {
                         type="button"
                         className="notebook-delete-btn"
                         onClick={() => deleteNote(note.id)}
-                        aria-label="Delete note"
+                        aria-label={t('notebook.deleteNote')}
                       >
                         ✕
                       </button>
@@ -326,7 +328,7 @@ export default function NotebookModal({ isOpen, onClose, token }) {
                   type="text"
                   value={newTodo}
                   onChange={(event) => setNewTodo(event.target.value)}
-                  placeholder="Add a todo..."
+                  placeholder={t('notebook.addTodo')}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') {
                       event.preventDefault();
@@ -341,7 +343,7 @@ export default function NotebookModal({ isOpen, onClose, token }) {
 
               <div className="notebook-list">
                 {!isLoading && orderedTodos.length === 0 && (
-                  <p className="notebook-empty">No todos yet.</p>
+                  <p className="notebook-empty">{t('notebook.noTodos')}</p>
                 )}
                 {orderedTodos.map((todo) => {
                   const isEditing = editingTodoId === todo.id;
@@ -354,7 +356,7 @@ export default function NotebookModal({ isOpen, onClose, token }) {
                         type="button"
                         className={`notebook-checkbox ${todo.completed ? 'is-checked' : ''}`}
                         onClick={() => toggleTodo(todo)}
-                        aria-label={todo.completed ? 'Mark as not done' : 'Mark as done'}
+                        aria-label={todo.completed ? t('notebook.markNotDone') : t('notebook.markDone')}
                       >
                         {todo.completed ? '✓' : ''}
                       </button>
@@ -389,7 +391,7 @@ export default function NotebookModal({ isOpen, onClose, token }) {
                         type="button"
                         className="notebook-delete-btn"
                         onClick={() => deleteTodo(todo.id)}
-                        aria-label="Delete todo"
+                        aria-label={t('notebook.deleteTodo')}
                       >
                         ✕
                       </button>

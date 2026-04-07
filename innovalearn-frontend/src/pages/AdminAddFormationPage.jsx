@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminAddFormationPage({ pushToast }) {
+  const { t } = useTranslation();
   const user = getCurrentUser();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,7 +63,7 @@ export default function AdminAddFormationPage({ pushToast }) {
         body: payload,
       });
 
-      pushToast('Formation created.', 'success');
+      pushToast(t('formateur.manage.formationCreatedSuccess'), 'success');
       navigate(`/formateur/formations/${created.id}`);
     } catch (err) {
       pushToast(err.message, 'error');
@@ -85,7 +87,7 @@ export default function AdminAddFormationPage({ pushToast }) {
       const url = data?.url || '';
       setForm((prev) => ({ ...prev, profileImageUrl: url }));
       setThumbnailName(file.name || 'thumbnail');
-      pushToast('Thumbnail uploaded.', 'success');
+      pushToast(t('formateur.manage.thumbnailUploadedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -96,7 +98,7 @@ export default function AdminAddFormationPage({ pushToast }) {
 
   return (
     <section className="card">
-      <h1>Add Formation</h1>
+      <h1>{t('admin.dashboard.addFormation')}</h1>
       <form className="grid" onSubmit={handleSubmit}>
         <input
           id="add-formation-thumb"
@@ -110,30 +112,30 @@ export default function AdminAddFormationPage({ pushToast }) {
           <img src="/images/gallery.png" alt="" />
           <span>
             {thumbnailUploading
-              ? 'Uploading thumbnail...'
+              ? t('admin.dashboard.uploadingThumbnail')
               : form.profileImageUrl
-              ? 'Change Thumbnail Photo'
-              : 'Add Thumbnail Photo'}
+              ? t('admin.dashboard.changeThumbnail')
+              : t('admin.dashboard.addThumbnail')}
           </span>
         </label>
         {thumbnailName ? (
           <p className="hint formation-thumb-name">{thumbnailName}</p>
         ) : null}
-        <input name="title" value={form.title} onChange={updateField} placeholder="Title" required />
-        <textarea name="description" value={form.description} onChange={updateField} placeholder="Description" required />
-        <input name="price" type="number" min="0" value={form.price} onChange={updateField} placeholder="Price" required />
+        <input name="title" value={form.title} onChange={updateField} placeholder={t('admin.dashboard.formTitle')} required />
+        <textarea name="description" value={form.description} onChange={updateField} placeholder={t('admin.dashboard.formDescription')} required />
+        <input name="price" type="number" min="0" value={form.price} onChange={updateField} placeholder={t('admin.dashboard.formPrice')} required />
         <select name="type" value={form.type} onChange={updateField}>
-          <option value="ONLINE">ONLINE</option>
-          <option value="PRESENTIEL">PRESENTIEL</option>
+          <option value="ONLINE">{t('formateur.manage.online')}</option>
+          <option value="PRESENTIEL">{t('formateur.manage.presentiel')}</option>
         </select>
         {form.type === 'PRESENTIEL' && (
           <>
-            <input name="location" value={form.location} onChange={updateField} placeholder="Location (optional)" />
+            <input name="location" value={form.location} onChange={updateField} placeholder={t('admin.dashboard.locationOptional')} />
             <input name="startDate" type="date" value={form.startDate} onChange={updateField} />
             <input name="endDate" type="date" value={form.endDate} onChange={updateField} />
           </>
         )}
-        <button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating...' : 'Create Formation'}</button>
+        <button type="submit" disabled={isSubmitting}>{isSubmitting ? t('formateur.manage.creating') : t('admin.dashboard.createFormation')}</button>
       </form>
     </section>
   );

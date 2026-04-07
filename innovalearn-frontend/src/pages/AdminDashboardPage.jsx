@@ -5,6 +5,7 @@ import { getCurrentUser } from '../auth';
 import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 import LoadingButton from '../components/LoadingButton';
+import { useTranslation } from 'react-i18next';
 import {
   hasLocalTourDone,
   markTourSeen,
@@ -129,6 +130,7 @@ function DonutChart({ segments, label, valueText, size = 120, thickness = 20 }) 
 }
 
 export default function AdminDashboardPage({ pushToast }) {
+  const { t } = useTranslation();
   const user = getCurrentUser();
   const navigate = useNavigate();
   const formateurTourRef = useRef(null);
@@ -236,45 +238,38 @@ export default function AdminDashboardPage({ pushToast }) {
 
   function launchFormateurTour() {
     const tour = startOnboardingTour({
+      labels: {
+        next: t('formateur.tour.next'),
+        prev: t('formateur.tour.prev'),
+        done: t('formateur.tour.done'),
+      },
       steps: [
         {
           element: '[data-tour="formateur-header-card"]',
           popover: {
-            title: 'Dashboard header',
-            description:
-              'Welcome! This is your Formateur Dashboard where you manage all your formations.',
+            title: t('formateur.tour.headerTitle'),
+            description: t('formateur.tour.headerDescription'),
           },
         },
         {
           element: '[data-tour="formateur-kpi-cards"]',
           popover: {
-            title: 'KPI cards',
-            description:
-              'These show your total formations, published count, drafts and enrolled students at a glance.',
+            title: t('formateur.tour.kpiTitle'),
+            description: t('formateur.tour.kpiDescription'),
           },
         },
         {
           element: '[data-tour="formateur-pending-table"]',
           popover: {
-            title: 'Pending formations',
-            description:
-              'Your draft formations appear here. Open, publish or delete them from this table.',
+            title: t('formateur.tour.pendingTitle'),
+            description: t('formateur.tour.pendingDescription'),
           },
         },
         {
           element: '[data-tour="formateur-analytics-table"]',
           popover: {
-            title: 'Formation analytics',
-            description:
-              'Your published formations are here. Click Stats to see detailed student performance analytics.',
-          },
-        },
-        {
-          element: '[data-tour="formateur-add-formation-btn"]',
-          popover: {
-            title: 'Create formation',
-            description:
-              'Ready to create? Click here to add a new formation and start building your course content.',
+            title: t('formateur.tour.analyticsTitle'),
+            description: t('formateur.tour.analyticsDescription'),
           },
         },
       ],
@@ -313,7 +308,7 @@ export default function AdminDashboardPage({ pushToast }) {
         ),
       );
       await loadAnalytics();
-      pushToast('Formation published successfully.', 'success');
+      pushToast(t('formateur.manage.formationPublishedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -338,7 +333,7 @@ export default function AdminDashboardPage({ pushToast }) {
       }
 
       pushToast(
-        response?.message || 'Pending formation deleted successfully.',
+        response?.message || t('formateur.manage.pendingFormationDeletedSuccess'),
         'success',
       );
       setConfirmDeleteFormationId(null);
@@ -677,8 +672,8 @@ export default function AdminDashboardPage({ pushToast }) {
 
   function openAnalyticsForFormation(formationId) {
     const exists = analyticsByFormationId.has(formationId);
-    if (!exists) {
-      pushToast('Analytics data for this formation is not ready yet.', 'error');
+      if (!exists) {
+      pushToast(t('formateur.manage.analyticsNotReady'), 'error');
       return;
     }
 
@@ -745,7 +740,7 @@ export default function AdminDashboardPage({ pushToast }) {
       const url = data?.url || '';
       setCreateFormationForm((prev) => ({ ...prev, profileImageUrl: url }));
       setCreateFormationThumbName(file.name || 'thumbnail');
-      pushToast('Thumbnail uploaded.', 'success');
+      pushToast(t('formateur.manage.thumbnailUploadedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -786,7 +781,7 @@ export default function AdminDashboardPage({ pushToast }) {
       setPendingPage(1);
       closeCreateFormationModal(true);
       setCreateFormationThumbName('');
-      pushToast('Formation created.', 'success');
+      pushToast(t('formateur.manage.formationCreatedSuccess'), 'success');
     } catch (err) {
       pushToast(err.message, 'error');
     } finally {
@@ -827,9 +822,9 @@ export default function AdminDashboardPage({ pushToast }) {
             </svg>
           </span>
           <div className="admin-saas-header-copy">
-            <h1>Formateur Dashboard</h1>
+            <h1>{t('admin.dashboard.title')}</h1>
             <p className="hint">
-              Manage your formations and monitor student learning analytics.
+              {t('admin.dashboard.subtitle')}
             </p>
           </div>
         </div>
@@ -840,22 +835,22 @@ export default function AdminDashboardPage({ pushToast }) {
             data-tour="formateur-add-formation-btn"
             onClick={openCreateFormationModal}
           >
-            +  Add Formation
+            {t('admin.dashboard.addFormation')}
           </button>
         </div>
       </div>
 
       <div className="card formateur-global-overview-card">
         <div className="card-head-row">
-          <h2>Global Overview</h2>
+          <h2>{t('admin.dashboard.globalOverview')}</h2>
           <div className="row">
             <StatusBadge
-              label={`${globalOverview.totalFormations} formations`}
+              label={t('admin.dashboard.formationsCount', { count: globalOverview.totalFormations })}
               tone={globalOverview.totalFormations > 0 ? 'blue' : 'gray'}
             />
             {analyticsLoading && (
               <span className="hint formateur-overview-loading">
-                Refreshing...
+                {t('admin.dashboard.refreshing')}
               </span>
             )}
           </div>
@@ -865,28 +860,28 @@ export default function AdminDashboardPage({ pushToast }) {
           data-tour="formateur-kpi-cards"
         >
           <article className="admin-saas-kpi-card">
-            <p className="hint">Total Formations</p>
+            <p className="hint">{t('admin.dashboard.totalFormations')}</p>
             <strong>{globalOverview.totalFormations}</strong>
             <span className="admin-saas-kpi-icon" aria-hidden="true">
               <img src="/images/learning.png" alt="" className="admin-saas-kpi-icon-img" />
             </span>
           </article>
           <article className="admin-saas-kpi-card">
-            <p className="hint">Published</p>
+            <p className="hint">{t('admin.dashboard.published')}</p>
             <strong>{globalOverview.publishedFormations}</strong>
             <span className="admin-saas-kpi-icon" aria-hidden="true">
               <img src="/images/send.png" alt="" className="admin-saas-kpi-icon-img" />
             </span>
           </article>
           <article className="admin-saas-kpi-card">
-            <p className="hint">Draft</p>
+            <p className="hint">{t('admin.dashboard.draft')}</p>
             <strong>{globalOverview.draftFormations}</strong>
             <span className="admin-saas-kpi-icon" aria-hidden="true">
               <img src="/images/draft.png" alt="" className="admin-saas-kpi-icon-img" />
             </span>
           </article>
           <article className="admin-saas-kpi-card">
-            <p className="hint">Students Enrolled</p>
+            <p className="hint">{t('admin.dashboard.studentsEnrolled')}</p>
             <strong>{globalOverview.totalStudentsEnrolled}</strong>
             <span className="admin-saas-kpi-icon" aria-hidden="true">
               <img src="/images/grad.png" alt="" className="admin-saas-kpi-icon-img" />
@@ -900,7 +895,7 @@ export default function AdminDashboardPage({ pushToast }) {
             <span className="admin-saas-highlight-badge" aria-hidden="true">
               %
             </span>
-            <p className="hint">Completion Rate</p>
+            <p className="hint">{t('admin.dashboard.completionRate')}</p>
             <strong>{globalOverview.completionRate.toFixed(2)}%</strong>
           </article>
           <article className="admin-saas-highlight-card">
@@ -908,7 +903,7 @@ export default function AdminDashboardPage({ pushToast }) {
             <span className="admin-saas-highlight-badge" aria-hidden="true">
               %
             </span>
-            <p className="hint">Success Rate</p>
+            <p className="hint">{t('admin.dashboard.successRate')}</p>
             <strong>{globalOverview.successRate.toFixed(2)}%</strong>
           </article>
         </div>
@@ -920,9 +915,9 @@ export default function AdminDashboardPage({ pushToast }) {
         data-tour="formateur-pending-table"
       >
         <div className="card-head-row">
-          <h2>Pending Formations</h2>
+          <h2>{t('admin.dashboard.pendingFormations')}</h2>
           <StatusBadge
-            label={`${pendingFormations.length} drafts`}
+            label={t('admin.dashboard.draftsCount', { count: pendingFormations.length })}
             tone={pendingFormations.length > 0 ? 'orange' : 'gray'}
           />
         </div>
@@ -931,22 +926,22 @@ export default function AdminDashboardPage({ pushToast }) {
             type="text"
             value={titleSearch}
             onChange={(event) => setTitleSearch(event.target.value)}
-            placeholder="Search by formation title"
+            placeholder={t('admin.dashboard.searchByTitle')}
           />
           <select
             value={pendingTypeFilter}
             onChange={(event) => setPendingTypeFilter(event.target.value)}
           >
-            <option value="ALL">All types</option>
-            <option value="ONLINE">Online only</option>
-            <option value="PRESENTIEL">Presentiel only</option>
+            <option value="ALL">{t('admin.dashboard.allTypes')}</option>
+            <option value="ONLINE">{t('admin.dashboard.onlineOnly')}</option>
+            <option value="PRESENTIEL">{t('admin.dashboard.presentielOnly')}</option>
           </select>
           <select
             value={createdSort}
             onChange={(event) => setCreatedSort(event.target.value)}
           >
-            <option value="newest_first">Newest first (Default)</option>
-            <option value="oldest_first">Oldest first</option>
+            <option value="newest_first">{t('admin.dashboard.newestFirst')}</option>
+            <option value="oldest_first">{t('admin.dashboard.oldestFirst')}</option>
           </select>
         </div>
 
@@ -954,12 +949,12 @@ export default function AdminDashboardPage({ pushToast }) {
           <table className="formateur-formations-table pending-formations-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Action</th>
+                <th>{t('admin.tables.id')}</th>
+                <th>{t('admin.tables.title')}</th>
+                <th>{t('admin.tables.type')}</th>
+                <th>{t('admin.tables.price')}</th>
+                <th>{t('admin.tables.status')}</th>
+                <th>{t('admin.tables.action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -975,14 +970,18 @@ export default function AdminDashboardPage({ pushToast }) {
                   <td>
                     <StatusBadge
                       tone={formation.type === 'ONLINE' ? 'blue' : 'orange'}
-                      label={formation.type}
+                      label={
+                        formation.type === 'ONLINE'
+                          ? t('formateur.manage.online')
+                          : t('formateur.manage.presentiel')
+                      }
                     />
                   </td>
                   <td>{formation.price}</td>
                   <td>
                     <StatusBadge
                       tone="gray"
-                      label="Draft"
+                      label={t('admin.dashboard.draft')}
                     />
                   </td>
                   <td>
@@ -1003,31 +1002,31 @@ export default function AdminDashboardPage({ pushToast }) {
                         }}
                       >
                         <img src="/images/share.png" alt="" className="btn-inline-icon" />
-                        Open
+                        {t('admin.dashboard.openBtn')}
                       </button>
                       <LoadingButton
                         className="action-btn action-publish"
                         type="button"
                         isLoading={publishingId === formation.id}
-                        loadingText="Working..."
+                        loadingText={t('admin.dashboard.working')}
                         disabled={false}
                         onClick={() => publishFormation(formation.id)}
                       >
                         <img src="/images/send.png" alt="" className="btn-inline-icon" />
-                        Publish
+                        {t('admin.dashboard.publishBtn')}
                       </LoadingButton>
                       <LoadingButton
                         className="action-btn action-delete pending-formation-delete-btn"
                         type="button"
                         isLoading={deletingId === formation.id}
-                        loadingText="Deleting..."
+                        loadingText={t('admin.dashboard.deleting')}
                         disabled={false}
                         onClick={() => openDeleteConfirmation(formation.id)}
                       >
                         <span className="action-delete-icon" aria-hidden="true">
                           {'\uD83D\uDDD1'}
                         </span>
-                        Delete
+                        {t('admin.dashboard.deleteContent')}
                       </LoadingButton>
                     </div>
                   </td>
@@ -1035,7 +1034,7 @@ export default function AdminDashboardPage({ pushToast }) {
               ))}
               {pendingRows.length === 0 && (
                 <tr>
-                  <td colSpan={6}>No pending draft formations.</td>
+                  <td colSpan={6}>{t('admin.tables.noPending')}</td>
                 </tr>
               )}
             </tbody>
@@ -1049,10 +1048,10 @@ export default function AdminDashboardPage({ pushToast }) {
             onClick={() => setPendingPage((prev) => Math.max(1, prev - 1))}
             disabled={pendingPage === 1}
           >
-            Prev
+            {t('admin.pagination.prev')}
           </button>
           <span>
-            Page {pendingPage} / {pendingTotalPages}
+            {t('admin.pagination.page', { current: pendingPage, total: pendingTotalPages })}
           </span>
           <button
             type="button"
@@ -1062,7 +1061,7 @@ export default function AdminDashboardPage({ pushToast }) {
             }
             disabled={pendingPage === pendingTotalPages}
           >
-            Next
+            {t('admin.pagination.next')}
           </button>
         </div>
       </div>
@@ -1073,52 +1072,52 @@ export default function AdminDashboardPage({ pushToast }) {
         data-tour="formateur-analytics-table"
       >
         <div className="card-head-row">
-          <h2>Formation Analytics</h2>
+          <h2>{t('admin.dashboard.formationAnalytics')}</h2>
           <StatusBadge
-            label={`${publishedFormations.length} published`}
+            label={t('admin.dashboard.publishedCount', { count: publishedFormations.length })}
             tone={publishedFormations.length > 0 ? 'green' : 'gray'}
           />
         </div>
         {analyticsData?.generatedAt && (
           <p className="hint">
-            Last refresh: {new Date(analyticsData.generatedAt).toLocaleString()}
+            {t('admin.dashboard.lastRefresh')}{new Date(analyticsData.generatedAt).toLocaleString()}
           </p>
         )}
 
-        {analyticsLoading && <p className="hint">Loading analytics...</p>}
+        {analyticsLoading && <p className="hint">{t('admin.dashboard.loadingAnalytics')}</p>}
         <div className="table-toolbar">
           <input
             type="text"
             value={titleSearch}
             onChange={(event) => setTitleSearch(event.target.value)}
-            placeholder="Search by formation title"
+            placeholder={t('admin.dashboard.searchByTitle')}
           />
           <select
             value={publishedTypeFilter}
             onChange={(event) => setPublishedTypeFilter(event.target.value)}
           >
-            <option value="ALL">All types</option>
-            <option value="ONLINE">Online only</option>
-            <option value="PRESENTIEL">Presentiel only</option>
+            <option value="ALL">{t('admin.dashboard.allTypes')}</option>
+            <option value="ONLINE">{t('admin.dashboard.onlineOnly')}</option>
+            <option value="PRESENTIEL">{t('admin.dashboard.presentielOnly')}</option>
           </select>
           <select
             value={createdSort}
             onChange={(event) => setCreatedSort(event.target.value)}
           >
-            <option value="newest_first">Newest first (Default)</option>
-            <option value="oldest_first">Oldest first</option>
+            <option value="newest_first">{t('admin.dashboard.newestFirst')}</option>
+            <option value="oldest_first">{t('admin.dashboard.oldestFirst')}</option>
           </select>
         </div>
         <div className="table-wrap">
           <table className="formateur-formations-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Action</th>
+                <th>{t('admin.tables.id')}</th>
+                <th>{t('admin.tables.title')}</th>
+                <th>{t('admin.tables.type')}</th>
+                <th>{t('admin.tables.price')}</th>
+                <th>{t('admin.tables.status')}</th>
+                <th>{t('admin.tables.action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -1134,12 +1133,16 @@ export default function AdminDashboardPage({ pushToast }) {
                   <td>
                     <StatusBadge
                       tone={formation.type === 'ONLINE' ? 'blue' : 'orange'}
-                      label={formation.type}
+                      label={
+                        formation.type === 'ONLINE'
+                          ? t('formateur.manage.online')
+                          : t('formateur.manage.presentiel')
+                      }
                     />
                   </td>
                   <td>{formation.price}</td>
                   <td>
-                    <StatusBadge tone="green" label="Published" />
+                    <StatusBadge tone="green" label={t('admin.dashboard.published')} />
                   </td>
                   <td>
                     <div className="row action-btn-group">
@@ -1159,7 +1162,7 @@ export default function AdminDashboardPage({ pushToast }) {
                         }}
                       >
                         <img src="/images/analyzing.png" alt="" className="btn-inline-icon" />
-                        View
+                        {t('admin.dashboard.viewBtn')}
                       </button>
                       <button
                         type="button"
@@ -1167,7 +1170,7 @@ export default function AdminDashboardPage({ pushToast }) {
                         onClick={() => openAnalyticsForFormation(formation.id)}
                       >
                         <img src="/images/graph.png" alt="" className="btn-inline-icon" />
-                        Stats
+                        {t('admin.dashboard.statsBtn')}
                       </button>
                     </div>
                   </td>
@@ -1175,7 +1178,7 @@ export default function AdminDashboardPage({ pushToast }) {
               ))}
               {publishedRows.length === 0 && (
                 <tr>
-                  <td colSpan={6}>No published formations yet.</td>
+                  <td colSpan={6}>{t('admin.tables.noPublished')}</td>
                 </tr>
               )}
             </tbody>
@@ -1189,10 +1192,10 @@ export default function AdminDashboardPage({ pushToast }) {
             onClick={() => setPublishedPage((prev) => Math.max(1, prev - 1))}
             disabled={publishedPage === 1}
           >
-            Prev
+            {t('admin.pagination.prev')}
           </button>
           <span>
-            Page {publishedPage} / {publishedTotalPages}
+            {t('admin.pagination.page', { current: publishedPage, total: publishedTotalPages })}
           </span>
           <button
             type="button"
@@ -1202,7 +1205,7 @@ export default function AdminDashboardPage({ pushToast }) {
             }
             disabled={publishedPage === publishedTotalPages}
           >
-            Next
+            {t('admin.pagination.next')}
           </button>
         </div>
       </div>
@@ -1211,12 +1214,12 @@ export default function AdminDashboardPage({ pushToast }) {
         <div className="formateur-analytics-modal-backdrop" role="dialog" aria-modal="true">
           <article className="formateur-analytics-modal">
             <div className="formateur-analytics-modal-head">
-              <h2>Formation Analytics</h2>
+              <h2>{t('admin.dashboard.formationAnalytics')}</h2>
               <button
                 type="button"
                 className="formateur-analytics-modal-close"
                 onClick={closeAnalyticsModal}
-                aria-label="Close analytics window"
+                aria-label={t('formateur.manage.closeAnalyticsWindow')}
               >
                 x
               </button>
@@ -1239,15 +1242,20 @@ export default function AdminDashboardPage({ pushToast }) {
                         <h3 className="formateur-analytics-title" title={formation.title}>
                           {formation.title}
                         </h3>
-                        <p className="hint">{formation.type} | Price: {formation.price}</p>
+                        <p className="hint">
+                          {formation.type === 'ONLINE'
+                            ? t('formateur.manage.online')
+                            : t('formateur.manage.presentiel')}{' '}
+                          | {t('admin.dashboard.formPrice')}: {formation.price}
+                        </p>
                       </div>
                       <div className="row">
                         <StatusBadge
-                          label={formation.published ? 'Published' : 'Draft'}
+                          label={formation.published ? t('admin.dashboard.published') : t('admin.dashboard.draft')}
                           tone={formation.published ? 'green' : 'gray'}
                         />
                         <StatusBadge
-                          label={`${courses.length} courses`}
+                          label={t('formateur.manage.coursesCount', { count: courses.length })}
                           tone="blue"
                         />
                       </div>
@@ -1255,25 +1263,25 @@ export default function AdminDashboardPage({ pushToast }) {
 
                     <div className="formateur-metric-grid">
                       <article>
-                        <span>Total Enrolled</span>
+                        <span>{t('admin.dashboard.studentsEnrolled')}</span>
                         <strong>{stats.totalStudentsEnrolled}</strong>
                       </article>
                       <article>
-                        <span>Approved</span>
+                        <span>{t('formateur.manage.approved')}</span>
                         <strong>{stats.totalApprovedStudents}</strong>
                       </article>
                       {!isPresentiel && (
                         <>
                           <article>
-                            <span>Completed</span>
+                            <span>{t('admin.tables.completed')}</span>
                             <strong>{stats.totalCompletedStudents}</strong>
                           </article>
                           <article>
-                            <span>Completion Rate</span>
+                            <span>{t('admin.dashboard.completionRate')}</span>
                             <strong>{Number(stats.completionRate || 0).toFixed(2)}%</strong>
                           </article>
                           <article>
-                            <span>Success Rate</span>
+                            <span>{t('admin.dashboard.successRate')}</span>
                             <strong>{Number(stats.successRate || 0).toFixed(2)}%</strong>
                           </article>
                         </>
@@ -1283,7 +1291,7 @@ export default function AdminDashboardPage({ pushToast }) {
                     {!isPresentiel && (
                       <div className="formateur-chart-row">
                         <DonutChart
-                          label="Completion Rate"
+                          label={t('admin.dashboard.completionRate')}
                           valueText={`${Number(stats.completionRate || 0).toFixed(1)}%`}
                           segments={[
                             { value: completedTotal, color: '#1ca36a' },
@@ -1295,9 +1303,9 @@ export default function AdminDashboardPage({ pushToast }) {
                         />
 
                         <div className="formateur-bars">
-                          <h4>Average Score per Course</h4>
+                          <h4>{t('formateur.manage.averageScorePerCourse')}</h4>
                           {courses.length === 0 && (
-                            <p className="hint">No course statistics yet.</p>
+                            <p className="hint">{t('admin.tables.noCourseStats')}</p>
                           )}
                           {courses.map((course) => (
                             <div key={course.id} className="formateur-bar-row">
@@ -1330,17 +1338,17 @@ export default function AdminDashboardPage({ pushToast }) {
                           onChange={(event) =>
                             setAnalyticsStudentSearch(event.target.value)
                           }
-                          placeholder="Search student by name"
+                          placeholder={t('admin.tables.searchStudent')}
                         />
                       </div>
                       <table>
                         <thead>
                           <tr>
-                            <th>Student</th>
-                            <th>Email</th>
-                            <th>Phone Number</th>
-                            {!isPresentiel && <th>Completion</th>}
-                            {!isPresentiel && <th>Certificate</th>}
+                            <th>{t('admin.tables.student')}</th>
+                            <th>{t('admin.tables.email')}</th>
+                            <th>{t('admin.tables.phoneNumber')}</th>
+                            {!isPresentiel && <th>{t('admin.tables.completion')}</th>}
+                            {!isPresentiel && <th>{t('admin.tables.certificate')}</th>}
                           </tr>
                         </thead>
                         <tbody>
@@ -1360,7 +1368,7 @@ export default function AdminDashboardPage({ pushToast }) {
                                   <td>
                                     <StatusBadge
                                       label={
-                                        isCompleted ? 'Completed' : 'In Progress'
+                                        isCompleted ? t('admin.tables.completed') : t('admin.tables.inProgress')
                                       }
                                       tone={isCompleted ? 'green' : 'orange'}
                                     />
@@ -1370,7 +1378,7 @@ export default function AdminDashboardPage({ pushToast }) {
                                   <td>
                                     <StatusBadge
                                       label={
-                                        student.certificateIssued ? 'Yes' : 'No'
+                                        student.certificateIssued ? t('admin.tables.yes') : t('admin.tables.no')
                                       }
                                       tone={
                                         student.certificateIssued
@@ -1386,7 +1394,7 @@ export default function AdminDashboardPage({ pushToast }) {
                           {analyticsStudentRows.length === 0 && (
                             <tr>
                               <td colSpan={isPresentiel ? 3 : 5}>
-                                No students match this search.
+                                {t('admin.tables.noStudents')}
                               </td>
                             </tr>
                           )}
@@ -1402,10 +1410,13 @@ export default function AdminDashboardPage({ pushToast }) {
                         }
                         disabled={analyticsStudentPage === 1}
                       >
-                        Prev
+                        {t('admin.tables.prev')}
                       </button>
                       <span>
-                        Page {analyticsStudentPage} / {analyticsStudentTotalPages}
+                        {t('admin.tables.page', {
+                          current: analyticsStudentPage,
+                          total: analyticsStudentTotalPages,
+                        })}
                       </span>
                       <button
                         type="button"
@@ -1417,7 +1428,7 @@ export default function AdminDashboardPage({ pushToast }) {
                         }
                         disabled={analyticsStudentPage === analyticsStudentTotalPages}
                       >
-                        Next
+                        {t('admin.tables.next')}
                       </button>
                     </div>
 
@@ -1426,11 +1437,11 @@ export default function AdminDashboardPage({ pushToast }) {
                         <table>
                           <thead>
                             <tr>
-                              <th>Course</th>
-                              <th>Passed</th>
-                              <th>Failed</th>
-                              <th>Average Score</th>
-                              <th>Pass/Fail</th>
+                              <th>{t('admin.tables.course')}</th>
+                              <th>{t('admin.tables.passed')}</th>
+                              <th>{t('admin.tables.failed')}</th>
+                              <th>{t('admin.tables.averageScore')}</th>
+                              <th>{t('admin.tables.passFail')}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1464,7 +1475,7 @@ export default function AdminDashboardPage({ pushToast }) {
                             ))}
                             {courses.length === 0 && (
                               <tr>
-                                <td colSpan={5}>No course statistics yet.</td>
+                                <td colSpan={5}>{t('admin.tables.noCourseStats')}</td>
                               </tr>
                             )}
                           </tbody>
@@ -1485,17 +1496,17 @@ export default function AdminDashboardPage({ pushToast }) {
             type="button"
             className="admin-modal-backdrop"
             onClick={closeCreateFormationModal}
-            aria-label="Close create formation modal"
+            aria-label={t('formateur.manage.closeCreateFormationModal')}
             disabled={creatingFormation}
           />
           <article className="admin-modal-card create-formation-modal">
             <div className="admin-modal-head">
-              <h2>Create Formation</h2>
+              <h2>{t('admin.dashboard.createFormation')}</h2>
               <button
                 type="button"
                 className="admin-modal-close create-formation-close-btn"
                 onClick={closeCreateFormationModal}
-                aria-label="Close create formation modal"
+                aria-label={t('formateur.manage.closeCreateFormationModal')}
                 disabled={creatingFormation}
               >
                 x
@@ -1518,10 +1529,10 @@ export default function AdminDashboardPage({ pushToast }) {
                   <img src="/images/gallery.png" alt="" />
                   <span>
                     {createFormationThumbUploading
-                      ? 'Uploading thumbnail...'
+                      ? t('admin.dashboard.uploadingThumbnail')
                       : createFormationForm.profileImageUrl
-                      ? 'Change Thumbnail Photo'
-                      : 'Add Thumbnail Photo'}
+                      ? t('admin.dashboard.changeThumbnail')
+                      : t('admin.dashboard.addThumbnail')}
                   </span>
                 </label>
                 {createFormationThumbName ? (
@@ -1533,14 +1544,14 @@ export default function AdminDashboardPage({ pushToast }) {
                   name="title"
                   value={createFormationForm.title}
                   onChange={updateCreateFormationField}
-                  placeholder="Title"
+                  placeholder={t('admin.dashboard.formTitle')}
                   required
                 />
                 <textarea
                   name="description"
                   value={createFormationForm.description}
                   onChange={updateCreateFormationField}
-                  placeholder="Description"
+                  placeholder={t('admin.dashboard.formDescription')}
                   required
                 />
                 <input
@@ -1549,7 +1560,7 @@ export default function AdminDashboardPage({ pushToast }) {
                   min="0"
                   value={createFormationForm.price}
                   onChange={updateCreateFormationField}
-                  placeholder="Price"
+                  placeholder={t('admin.dashboard.formPrice')}
                   required
                 />
                 <select
@@ -1557,8 +1568,8 @@ export default function AdminDashboardPage({ pushToast }) {
                   value={createFormationForm.type}
                   onChange={updateCreateFormationField}
                 >
-                  <option value="ONLINE">ONLINE</option>
-                  <option value="PRESENTIEL">PRESENTIEL</option>
+                  <option value="ONLINE">{t('formateur.manage.online')}</option>
+                  <option value="PRESENTIEL">{t('formateur.manage.presentiel')}</option>
                 </select>
                 {createFormationForm.type === 'PRESENTIEL' && (
                   <>
@@ -1566,7 +1577,7 @@ export default function AdminDashboardPage({ pushToast }) {
                       name="location"
                       value={createFormationForm.location}
                       onChange={updateCreateFormationField}
-                      placeholder="Location (optional)"
+                      placeholder={t('admin.dashboard.locationOptional')}
                     />
                     <input
                       name="startDate"
@@ -1588,7 +1599,7 @@ export default function AdminDashboardPage({ pushToast }) {
                     className="action-btn modal-save-btn create-formation-save-btn formateur-popup-save-btn"
                     disabled={creatingFormation}
                   >
-                    {creatingFormation ? 'Creating...' : 'Create'}
+                    {creatingFormation ? t('admin.dashboard.creating') : t('admin.dashboard.create')}
                   </button>
                   <button
                     type="button"
@@ -1596,7 +1607,7 @@ export default function AdminDashboardPage({ pushToast }) {
                     onClick={closeCreateFormationModal}
                     disabled={creatingFormation}
                   >
-                    Cancel
+                    {t('admin.dashboard.cancel')}
                   </button>
                 </div>
               </form>
@@ -1609,12 +1620,12 @@ export default function AdminDashboardPage({ pushToast }) {
         <div className="formateur-analytics-modal-backdrop" role="dialog" aria-modal="true">
           <article className="formateur-analytics-modal confirm-delete-modal">
             <div className="formateur-analytics-modal-head">
-              <h2>Delete Formation</h2>
+              <h2>{t('formateur.manage.deleteFormationTitle')}</h2>
               <button
                 type="button"
                 className="formateur-analytics-modal-close"
                 onClick={closeDeleteConfirmation}
-                aria-label="Close delete confirmation"
+                aria-label={t('formateur.manage.closeDeleteConfirmation')}
                 disabled={Boolean(deletingId)}
               >
                 x
@@ -1623,9 +1634,9 @@ export default function AdminDashboardPage({ pushToast }) {
 
             <div className="grid">
               <p>
-                Are you sure you want to delete this pending formation
-                {formationToDelete ? ` "${formationToDelete.title}"` : ''}?
-                This action cannot be undone.
+                {t('formateur.manage.deleteFormationConfirm', {
+                  name: formationToDelete?.title || '',
+                })}
               </p>
               <div className="row confirm-delete-actions">
                 <button
@@ -1634,20 +1645,20 @@ export default function AdminDashboardPage({ pushToast }) {
                   onClick={closeDeleteConfirmation}
                   disabled={Boolean(deletingId)}
                 >
-                  Cancel
+                  {t('formateur.manage.cancel')}
                 </button>
                 <LoadingButton
                   type="button"
                   className="action-btn action-delete formateur-confirm-delete-btn"
                   isLoading={deletingId === confirmDeleteFormationId}
-                  loadingText="Deleting..."
+                  loadingText={t('admin.dashboard.deleting')}
                   disabled={false}
                   onClick={() => deletePendingFormation(confirmDeleteFormationId)}
                 >
                   <span className="action-delete-icon" aria-hidden="true">
                     {'\uD83D\uDDD1'}
                   </span>
-                  Delete
+                  {t('admin.dashboard.deleteContent')}
                 </LoadingButton>
               </div>
             </div>

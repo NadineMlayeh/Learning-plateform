@@ -4,6 +4,7 @@ import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
 import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
+import { useTranslation } from 'react-i18next';
 
 const PAGE_SIZE = 6;
 const ANALYTICS_STUDENT_PAGE_SIZE = 5;
@@ -105,6 +106,7 @@ function DonutChart({ segments, label, valueText, size = 120, thickness = 20 }) 
 }
 
 export default function AdminFormationsPage({ pushToast, embedded = false }) {
+  const { t } = useTranslation();
   const user = getCurrentUser();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -394,18 +396,18 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
       {!embedded && (
         <div className="card panel-head">
           <div>
-            <h1>Formation Management</h1>
-            <p className="hint">Filter formations and inspect details and analytics by formation.</p>
+            <h1>{t('admin.formationsPage.title')}</h1>
+            <p className="hint">{t('admin.formationsPage.subtitle')}</p>
           </div>
           <div className="row">
             <Link className="link-btn small-btn" to="/admin">
-              Back to Admin
+              {t('admin.formationsPage.backToAdmin')}
             </Link>
             <Link className="link-btn small-btn" to="/admin/students">
-              Students
+              {t('admin.formationsPage.studentsBtn')}
             </Link>
             <Link className="link-btn small-btn" to="/admin/formateurs">
-              Formateurs
+              {t('admin.formationsPage.formateursBtn')}
             </Link>
           </div>
         </div>
@@ -413,8 +415,8 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
 
       <div className={embedded ? 'card admin-saas-section' : 'card'}>
         <div className="card-head-row">
-          <h2>Formations</h2>
-          <StatusBadge label={`${data.total} total`} tone="blue" />
+          <h2>{t('admin.formationsPage.formations')}</h2>
+          <StatusBadge label={t('admin.formationsPage.totalCount', { total: data.total })} tone="blue" />
         </div>
 
         <div className="table-toolbar">
@@ -422,23 +424,23 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by formation title"
+            placeholder={t('admin.dashboard.searchByTitle')}
           />
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
           >
-            <option value="ALL">All statuses</option>
-            <option value="DRAFT">Draft only</option>
-            <option value="PUBLISHED">Published only</option>
+            <option value="ALL">{t('admin.formationsPage.allStatuses')}</option>
+            <option value="DRAFT">{t('admin.formationsPage.draftOnly')}</option>
+            <option value="PUBLISHED">{t('admin.formationsPage.publishedOnly')}</option>
           </select>
           <select
             value={typeFilter}
             onChange={(event) => setTypeFilter(event.target.value)}
           >
-            <option value="ALL">All types</option>
-            <option value="ONLINE">Online only</option>
-            <option value="PRESENTIEL">Presentiel only</option>
+            <option value="ALL">{t('admin.dashboard.allTypes')}</option>
+            <option value="ONLINE">{t('admin.dashboard.onlineOnly')}</option>
+            <option value="PRESENTIEL">{t('admin.dashboard.presentielOnly')}</option>
           </select>
         </div>
 
@@ -446,11 +448,11 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
           <table className="admin-formations-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th className="action-col">Action</th>
+                <th>{t('admin.tables.id')}</th>
+                <th>{t('admin.tables.title')}</th>
+                <th>{t('admin.tables.type')}</th>
+                <th>{t('admin.tables.status')}</th>
+                <th className="action-col">{t('admin.tables.action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -482,27 +484,27 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                         className="action-btn action-page"
                         onClick={() => openDetails(formation.id)}
                       >
-                        Details
+                        {t('admin.formationsPage.detailsBtn')}
                       </button>
                       <button
                         type="button"
                         className="action-btn action-analytics"
                         onClick={() => openAnalytics(formation.id)}
                       >
-                        Analytics
+                        {t('admin.formationsPage.analyticsBtn')}
                       </button>
                       <button
                         type="button"
                         className="action-btn action-approve"
                         onClick={() => openEditFormation(formation.id)}
                       >
-                        Edit
+                        {t('admin.formationsPage.editBtn')}
                       </button>
                       <button
                         type="button"
                         className="action-btn admin-square-trash-btn"
-                        aria-label={`Delete formation ${formation.title}`}
-                        title="Delete"
+                        aria-label={t('admin.dashboard.deleteContent')}
+                        title={t('admin.dashboard.deleteContent')}
                         onClick={() => setDeleteTarget(formation)}
                       >
                         <img src="/images/trash.png" alt="" className="admin-square-trash-icon" />
@@ -513,7 +515,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
               ))}
               {data.items.length === 0 && (
                 <tr>
-                  <td colSpan={5}>{loading ? 'Loading formations...' : 'No formations found.'}</td>
+                  <td colSpan={5}>{loading ? t('admin.formationsPage.loadingFormations') : t('admin.formationsPage.noFormations')}</td>
                 </tr>
               )}
             </tbody>
@@ -527,10 +529,10 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
             disabled={page <= 1}
             onClick={() => setPage((prev) => Math.max(1, prev - 1))}
           >
-            Prev
+            {t('admin.pagination.prev')}
           </button>
           <span>
-            Page {data.page} / {data.totalPages}
+            {t('admin.pagination.page', { current: data.page, total: data.totalPages })}
           </span>
           <button
             type="button"
@@ -538,48 +540,48 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
             disabled={page >= data.totalPages}
             onClick={() => setPage((prev) => Math.min(data.totalPages, prev + 1))}
           >
-            Next
+            {t('admin.pagination.next')}
           </button>
         </div>
       </div>
 
       <Modal
         open={detailsOpen}
-        title={`Formation #${detailsTarget?.id || ''}`}
+        title={t('admin.formationsPage.formationModalTitle', { id: detailsTarget?.id || '' })}
         onClose={closeDetails}
         wide
       >
-        {detailsLoading && <p className="hint">Loading formation details...</p>}
+        {detailsLoading && <p className="hint">{t('admin.formationsPage.loadingDetails')}</p>}
         {detailsTarget && !detailsLoading && (
           <div className="stack">
             <div className="admin-metric-grid admin-user-detail-cards">
               <article className="admin-metric-card">
-                <p className="hint">Title</p>
+                <p className="hint">{t('admin.details.title')}</p>
                 <strong>{detailsTarget.title}</strong>
               </article>
               <article className="admin-metric-card">
-                <p className="hint">Type</p>
+                <p className="hint">{t('admin.details.type')}</p>
                 <strong>{detailsTarget.type}</strong>
               </article>
               <article className="admin-metric-card">
-                <p className="hint">Status</p>
+                <p className="hint">{t('admin.details.status')}</p>
                 <strong>{detailsTarget.published ? 'PUBLISHED' : 'DRAFT'}</strong>
               </article>
               <article className="admin-metric-card">
-                <p className="hint">Formateur</p>
+                <p className="hint">{t('admin.details.formateur')}</p>
                 <strong>{detailsTarget.formateur?.name || '-'}</strong>
               </article>
               <article className="admin-metric-card">
-                <p className="hint">Students Enrolled</p>
+                <p className="hint">{t('admin.dashboard.studentsEnrolled')}</p>
                 <strong>{detailsTarget.totalStudentsEnrolled ?? 0}</strong>
               </article>
               <article className="admin-metric-card">
-                <p className="hint">Revenue</p>
+                <p className="hint">{t('admin.details.revenue')}</p>
                 <strong>{money(detailsTarget.revenueGenerated)}</strong>
               </article>
               {detailsTarget.type === 'PRESENTIEL' && (
                 <article className="admin-metric-card">
-                  <p className="hint">Start / End Dates</p>
+                  <p className="hint">{t('admin.details.startEndDates')}</p>
                   <strong>
                     {formatDate(detailsTarget.startDate)} - {formatDate(detailsTarget.endDate)}
                   </strong>
@@ -587,7 +589,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
               )}
               {detailsTarget.type === 'PRESENTIEL' && (
                 <article className="admin-metric-card">
-                  <p className="hint">Location</p>
+                  <p className="hint">{t('admin.details.location')}</p>
                   <strong>{detailsTarget.location || '-'}</strong>
                 </article>
               )}
@@ -598,11 +600,11 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                 <table>
                   <thead>
                     <tr>
-                      <th>Course ID</th>
-                      <th>Course Name</th>
-                      <th>Description</th>
-                      <th>Status</th>
-                      <th>Lessons & Quizzes</th>
+                      <th>{t('admin.details.courseId')}</th>
+                      <th>{t('admin.details.courseName')}</th>
+                      <th>{t('admin.details.description')}</th>
+                      <th>{t('admin.details.status')}</th>
+                      <th>{t('admin.details.lessonsAndQuizzes')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -626,14 +628,14 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                             className="action-btn action-page"
                             onClick={() => setCourseContentTarget(course)}
                           >
-                            View
+                            {t('admin.dashboard.viewBtn')}
                           </button>
                         </td>
                       </tr>
                     ))}
                     {(detailsTarget.courses || []).length === 0 && (
                       <tr>
-                        <td colSpan={5}>No courses found for this formation.</td>
+                        <td colSpan={5}>{t('admin.details.noCourses')}</td>
                       </tr>
                     )}
                   </tbody>
@@ -646,31 +648,31 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
 
       <Modal
         open={Boolean(courseContentTarget)}
-        title={`Course Content #${courseContentTarget?.id || ''}`}
+        title={t('admin.details.courseContentTitle', { id: courseContentTarget?.id || '' })}
         onClose={() => setCourseContentTarget(null)}
         wide
       >
         {courseContentTarget && (
           <div className="admin-course-content-grid">
             <section className="admin-course-content-column">
-              <h3>Lessons</h3>
+              <h3>{t('admin.details.lessons')}</h3>
               {(courseContentTarget.lessons || []).length === 0 && (
-                <p className="hint">No lessons in this course.</p>
+                <p className="hint">{t('admin.details.noLessons')}</p>
               )}
               {(courseContentTarget.lessons || []).map((lesson) => (
                 <article key={lesson.id} className="admin-course-content-item">
                   <strong>{lesson.title}</strong>
                   <a href={lesson.pdfUrl} target="_blank" rel="noreferrer">
-                    Open PDF
+                    {t('admin.details.openPdf')}
                   </a>
                 </article>
               ))}
             </section>
 
             <section className="admin-course-content-column">
-              <h3>Quizzes</h3>
+              <h3>{t('admin.details.quizzes')}</h3>
               {(courseContentTarget.quizzes || []).length === 0 && (
-                <p className="hint">No quizzes in this course.</p>
+                <p className="hint">{t('admin.details.noQuizzes')}</p>
               )}
               {(courseContentTarget.quizzes || []).map((quiz) => (
                 <article key={quiz.id} className="admin-course-content-item">
@@ -703,7 +705,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
         <div className="formateur-analytics-modal-backdrop" role="dialog" aria-modal="true">
           <article className="formateur-analytics-modal">
             <div className="formateur-analytics-modal-head">
-              <h2>Formation Analytics</h2>
+              <h2>{t('admin.dashboard.formationAnalytics')}</h2>
               <button
                 type="button"
                 className="formateur-analytics-modal-close"
@@ -714,7 +716,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
               </button>
             </div>
 
-            {analytics.loading && <p className="hint">Loading analytics...</p>}
+            {analytics.loading && <p className="hint">{t('admin.dashboard.loadingAnalytics')}</p>}
 
             {analytics.data && (() => {
               const entry = analytics.data;
@@ -733,20 +735,20 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                         <h3 className="formateur-analytics-title" title={formation.title}>
                           {formation.title}
                         </h3>
-                        <p className="hint">{formation.type} | Price: {formation.price}</p>
+                        <p className="hint">{formation.type} | {t('admin.dashboard.formPrice')}: {formation.price}</p>
                       </div>
                       <div className="row">
                         <StatusBadge
-                          label={formation.published ? 'Published' : 'Draft'}
+                          label={formation.published ? t('admin.dashboard.published') : t('admin.dashboard.draft')}
                           tone={formation.published ? 'green' : 'gray'}
                         />
-                        <StatusBadge label={`${courses.length} courses`} tone="blue" />
+                        <StatusBadge label={`${courses.length} ${t('admin.tables.course').toLowerCase()}s`} tone="blue" />
                       </div>
                     </div>
 
                     <div className="formateur-metric-grid">
                       <article>
-                        <span>Total Enrolled</span>
+                        <span>{t('admin.dashboard.studentsEnrolled')}</span>
                         <strong>{stats.totalStudentsEnrolled}</strong>
                       </article>
                       <article>
@@ -756,15 +758,15 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                       {!isPresentiel && (
                         <>
                           <article>
-                            <span>Completed</span>
+                            <span>{t('admin.tables.completed')}</span>
                             <strong>{stats.totalCompletedStudents}</strong>
                           </article>
                           <article>
-                            <span>Completion Rate</span>
+                            <span>{t('admin.dashboard.completionRate')}</span>
                             <strong>{Number(stats.completionRate || 0).toFixed(2)}%</strong>
                           </article>
                           <article>
-                            <span>Success Rate</span>
+                            <span>{t('admin.dashboard.successRate')}</span>
                             <strong>{Number(stats.successRate || 0).toFixed(2)}%</strong>
                           </article>
                         </>
@@ -774,7 +776,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                     {!isPresentiel && (
                       <div className="formateur-chart-row">
                         <DonutChart
-                          label="Completion Rate"
+                          label={t('admin.dashboard.completionRate')}
                           valueText={`${Number(stats.completionRate || 0).toFixed(1)}%`}
                           segments={[
                             { value: completedTotal, color: '#1ca36a' },
@@ -785,7 +787,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                         <div className="formateur-bars">
                           <h4>Average Score per Course</h4>
                           {courses.length === 0 && (
-                            <p className="hint">No course statistics yet.</p>
+                            <p className="hint">{t('admin.tables.noCourseStats')}</p>
                           )}
                           {courses.map((course) => (
                             <div key={course.id} className="formateur-bar-row">
@@ -816,17 +818,17 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                           onChange={(event) =>
                             setAnalyticsStudentSearch(event.target.value)
                           }
-                          placeholder="Search student by name"
+                          placeholder={t('admin.tables.searchStudent')}
                         />
                       </div>
                       <table>
                         <thead>
                           <tr>
-                            <th>Student</th>
-                            <th>Email</th>
-                            <th>Phone Number</th>
-                            {!isPresentiel && <th>Completion</th>}
-                            {!isPresentiel && <th>Certificate</th>}
+                            <th>{t('admin.tables.student')}</th>
+                            <th>{t('admin.tables.email')}</th>
+                            <th>{t('admin.tables.phoneNumber')}</th>
+                            {!isPresentiel && <th>{t('admin.tables.completion')}</th>}
+                            {!isPresentiel && <th>{t('admin.tables.certificate')}</th>}
                           </tr>
                         </thead>
                         <tbody>
@@ -845,7 +847,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                                 {!isPresentiel && (
                                   <td>
                                     <StatusBadge
-                                      label={isCompleted ? 'Completed' : 'In Progress'}
+                                      label={isCompleted ? t('admin.tables.completed') : t('admin.tables.inProgress')}
                                       tone={isCompleted ? 'green' : 'orange'}
                                     />
                                   </td>
@@ -853,7 +855,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                                 {!isPresentiel && (
                                   <td>
                                     <StatusBadge
-                                      label={student.certificateIssued ? 'Yes' : 'No'}
+                                      label={student.certificateIssued ? t('admin.tables.yes') : t('admin.tables.no')}
                                       tone={student.certificateIssued ? 'green' : 'gray'}
                                     />
                                   </td>
@@ -864,7 +866,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                           {analyticsStudentRows.length === 0 && (
                             <tr>
                               <td colSpan={isPresentiel ? 3 : 5}>
-                                No students match this search.
+                                {t('admin.tables.noStudents')}
                               </td>
                             </tr>
                           )}
@@ -880,10 +882,10 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                         }
                         disabled={analyticsStudentPage === 1}
                       >
-                        Prev
+                        {t('admin.pagination.prev')}
                       </button>
                       <span>
-                        Page {analyticsStudentPage} / {analyticsStudentTotalPages}
+                        {t('admin.pagination.page', { current: analyticsStudentPage, total: analyticsStudentTotalPages })}
                       </span>
                       <button
                         type="button"
@@ -895,7 +897,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                         }
                         disabled={analyticsStudentPage === analyticsStudentTotalPages}
                       >
-                        Next
+                        {t('admin.pagination.next')}
                       </button>
                     </div>
 
@@ -904,11 +906,11 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                         <table>
                           <thead>
                             <tr>
-                              <th>Course</th>
-                              <th>Passed</th>
-                              <th>Failed</th>
-                              <th>Average Score</th>
-                              <th>Pass/Fail</th>
+                              <th>{t('admin.tables.course')}</th>
+                              <th>{t('admin.tables.passed')}</th>
+                              <th>{t('admin.tables.failed')}</th>
+                              <th>{t('admin.tables.averageScore')}</th>
+                              <th>{t('admin.tables.passFail')}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -936,7 +938,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                             ))}
                             {courses.length === 0 && (
                               <tr>
-                                <td colSpan={5}>No course statistics yet.</td>
+                                <td colSpan={5}>{t('admin.tables.noCourseStats')}</td>
                               </tr>
                             )}
                           </tbody>
@@ -953,17 +955,17 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
 
       <Modal
         open={Boolean(editModel) || editLoading}
-        title={`Edit Formation #${editModel?.id || ''}`}
+        title={t('admin.formationsPage.editModalTitle', { id: editModel?.id || '' })}
         onClose={() => {
           if (updating || editLoading || courseDeletingId) return;
           setEditModel(null);
         }}
       >
-        {editLoading && <p className="hint">Loading formation...</p>}
+        {editLoading && <p className="hint">{t('admin.formationsPage.loadingFormation')}</p>}
         {editModel && (
           <form className="grid" onSubmit={onSaveFormation}>
             <label className="grid">
-              <span>Title</span>
+              <span>{t('admin.dashboard.formTitle')}</span>
               <input
                 type="text"
                 value={editModel.title}
@@ -974,7 +976,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
               />
             </label>
             <label className="grid">
-              <span>Description</span>
+              <span>{t('admin.dashboard.formDescription')}</span>
               <textarea
                 value={editModel.description}
                 onChange={(event) =>
@@ -987,7 +989,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
               />
             </label>
             <label className="grid">
-              <span>Price</span>
+              <span>{t('admin.dashboard.formPrice')}</span>
               <input
                 type="number"
                 min="0"
@@ -999,13 +1001,13 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
               />
             </label>
             <label className="grid">
-              <span>Type</span>
+              <span>{t('admin.details.type')}</span>
               <input type="text" value={editModel.type} disabled />
             </label>
             {editModel.type === 'PRESENTIEL' && (
               <>
                 <label className="grid">
-                  <span>Location</span>
+                  <span>{t('admin.details.location')}</span>
                   <input
                     type="text"
                     value={editModel.location}
@@ -1015,7 +1017,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                   />
                 </label>
                 <label className="grid">
-                  <span>Start Date</span>
+                  <span>{t('admin.details.startEndDates').split('/')[0].trim()}</span>
                   <input
                     type="date"
                     value={editModel.startDate}
@@ -1025,7 +1027,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                   />
                 </label>
                 <label className="grid">
-                  <span>End Date</span>
+                  <span>{t('admin.details.startEndDates').split('/')[1]?.trim() || 'End Date'}</span>
                   <input
                     type="date"
                     value={editModel.endDate}
@@ -1038,9 +1040,9 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
             )}
             {editModel.type === 'ONLINE' && (
               <div className="grid admin-edit-course-list">
-                <h3>Courses</h3>
+                <h3>{t('admin.formationsPage.courses')}</h3>
                 {(editModel.courses || []).length === 0 && (
-                  <p className="hint">No courses in this formation.</p>
+                  <p className="hint">{t('admin.formationsPage.noCoursesInFormation')}</p>
                 )}
                 {(editModel.courses || []).map((course) => (
                   <div key={course.id} className="admin-edit-course-row">
@@ -1055,8 +1057,8 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                     <button
                       type="button"
                       className="action-btn admin-edit-course-trash-btn"
-                      aria-label={`Delete course ${course.title}`}
-                      title="Delete course"
+                      aria-label={t('admin.formationsPage.deleteCourseBtn')}
+                      title={t('admin.formationsPage.deleteCourseBtn')}
                       onClick={() => deleteEditCourse(course.id)}
                       disabled={Boolean(courseDeletingId)}
                     >
@@ -1072,7 +1074,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                 className="action-btn admin-student-edit-save"
                 disabled={updating || Boolean(courseDeletingId)}
               >
-                {updating ? 'Saving...' : 'Save'}
+                {updating ? t('admin.formationsPage.saving') : t('admin.formationsPage.saveBtn')}
               </button>
               <button
                 type="button"
@@ -1080,16 +1082,16 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
                 onClick={() => setEditModel(null)}
                 disabled={updating || Boolean(courseDeletingId)}
               >
-                Cancel
+                {t('admin.formationsPage.cancelBtn')}
               </button>
             </div>
           </form>
         )}
       </Modal>
 
-      <Modal open={Boolean(deleteTarget)} title="Delete Formation" onClose={() => setDeleteTarget(null)}>
+      <Modal open={Boolean(deleteTarget)} title={t('admin.formationsPage.deleteModalTitle')} onClose={() => setDeleteTarget(null)}>
         <div className="grid">
-          <p>Are you sure you want to delete this formation? This action cannot be undone.</p>
+          <p>{t('admin.formationsPage.confirmDeleteFormation')}</p>
           <div className="row">
             <button
               type="button"
@@ -1097,7 +1099,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
               onClick={deleteFormation}
               disabled={saving}
             >
-              {saving ? 'Deleting...' : 'Confirm'}
+              {saving ? t('admin.formationsPage.deleting') : t('admin.formationsPage.confirmBtn')}
             </button>
             <button
               type="button"
@@ -1105,7 +1107,7 @@ export default function AdminFormationsPage({ pushToast, embedded = false }) {
               onClick={() => setDeleteTarget(null)}
               disabled={saving}
             >
-              Cancel
+              {t('admin.formationsPage.cancelBtn')}
             </button>
           </div>
         </div>

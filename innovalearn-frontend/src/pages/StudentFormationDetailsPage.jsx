@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
 import StatusBadge from '../components/StatusBadge';
+import { useTranslation } from 'react-i18next';
 
 function extractDriveFileId(url) {
   if (!url) return null;
@@ -68,6 +69,7 @@ function normalizeCourseResultFromFinalize(result) {
 }
 
 function ResultPopup({ result, onClose }) {
+  const { t } = useTranslation();
   if (!result) return null;
 
   const passed = Boolean(result.passed);
@@ -145,27 +147,27 @@ function ResultPopup({ result, onClose }) {
         onClick={(event) => event.stopPropagation()}
       >
         <div className="card-head-row">
-          <h2>{passed ? ' Great Job! 🎉' : 'Keep Going!'}</h2>
-          <StatusBadge label={passed ? 'PASSED' : 'FAILED'} tone={passed ? 'green' : 'orange'} />
+          <h2>{passed ? t('student.details.greatJob') : t('student.details.keepGoing')}</h2>
+          <StatusBadge label={passed ? t('student.details.passed') : t('student.details.failed')} tone={passed ? 'green' : 'orange'} />
         </div>
 
         <p className="hint">
-          <strong>Course:</strong> {result.courseTitle}
+          <strong>{t('student.details.course')}</strong> {result.courseTitle}
         </p>
 
         <div className="result-stats-grid">
           <article>
-            <span>Score</span>
+            <span>{t('student.details.score')}</span>
             <strong>{formatScore(result.score)}%</strong>
           </article>
           <article>
-            <span>Correct</span>
+            <span>{t('student.details.correct')}</span>
             <strong>
               {result.correctAnswers}/{result.totalQuestions}
             </strong>
           </article>
           <article>
-            <span>Required</span>
+            <span>{t('student.details.required')}</span>
             <strong>{result.requiredCorrect}</strong>
           </article>
         </div>
@@ -184,7 +186,7 @@ function ResultPopup({ result, onClose }) {
                 alt=""
                 aria-hidden="true"
               />
-              Download Badge
+              {t('student.details.downloadBadge')}
             </a>
           </div>
         )}
@@ -206,7 +208,7 @@ function ResultPopup({ result, onClose }) {
                     alt=""
                     aria-hidden="true"
                   />
-                  Download Final Certificate
+                  {t('student.details.downloadCertificate')}
                 </a>
               </div> 
             )
@@ -218,7 +220,7 @@ function ResultPopup({ result, onClose }) {
           className="student-final-submit-btn"
           onClick={onClose}
         >
-          Close Review
+          {t('student.details.closeReview')}
         </button>
       </div>
     </div>
@@ -226,6 +228,7 @@ function ResultPopup({ result, onClose }) {
 }
 
 export default function StudentFormationDetailsPage({ pushToast }) {
+  const { t } = useTranslation();
   const user = getCurrentUser();
   const navigate = useNavigate();
   const { formationId } = useParams();
@@ -567,7 +570,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
   if (isLoading || !formation) {
     return (
       <section className="card">
-        <p>{isLoading ? 'Loading formation content...' : 'Formation not found.'}</p>
+        <p>{isLoading ? t('student.details.loadingFormation') : t('student.details.formationNotFound')}</p>
       </section>
     );
   }
@@ -582,9 +585,9 @@ export default function StudentFormationDetailsPage({ pushToast }) {
               label={
                 formationResult
                   ? formationResult.completed
-                    ? 'Completed (Success)'
-                    : 'Completed (Fail)'
-                  : 'In progress'
+                    ? t('student.details.completedSuccess')
+                    : t('student.details.completedFail')
+                  : t('student.details.inProgress')
               }
               tone={
                 formationResult
@@ -596,7 +599,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
             />
           </div>
           <p>{formation.description}</p>
-          <p className="hint">Price: {formation.price}</p>
+          <p className="hint">{t('student.details.price')} {formation.price}</p>
           {formationResult?.certificateUrl && (
             <div className="student-details-header-actions">
 
@@ -614,7 +617,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                       <path d="M4 6.5h16M4 12h16M4 17.5h10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                     </svg>
                   </span>
-                  <h3>Courses</h3>
+                  <h3>{t('student.details.courses')}</h3>
                 </div>
                 <span className="hint">
                   {Math.min(activeCourseIndex + 1, formation.courses.length)}/{formation.courses.length}
@@ -702,14 +705,14 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                       className={`student-tab-btn ${activeTab === 'lessons' ? 'is-active' : ''}`}
                       onClick={() => setActiveTab('lessons')}
                     >
-                      Lessons
+                      {t('student.details.lessons')}
                     </button>
                     <button
                       type="button"
                       className={`student-tab-btn ${activeTab === 'quizzes' ? 'is-active' : ''}`}
                       onClick={() => setActiveTab('quizzes')}
                     >
-                      Quizzes
+                      {t('student.details.quizzes')}
                     </button>
                     <span className="student-tab-indicator" aria-hidden="true" />
                   </div>
@@ -739,7 +742,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                       <div className={`student-lesson-deck ${lessonViewActive ? 'is-viewer' : ''}`}>
                         <div className="student-lesson-list">
                           {course.lessons.length === 0 && (
-                            <p className="hint">No lesson available for this course yet.</p>
+                            <p className="hint">{t('student.details.noLessonAvailable')}</p>
                           )}
                           {course.lessons.map((lesson) => (
                             <article key={lesson.id} className="student-lesson-card">
@@ -771,7 +774,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                                   }));
                                 }}
                               >
-                                Open Content
+                                {t('student.details.openContent')}
                               </button>
                             </article>
                           ))}
@@ -785,10 +788,10 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                                   <p className="student-pdf-title">
                                     {activeLesson.title}
                                   </p>
-                                  <p className="hint">Scroll the document here.</p>
+                                  <p className="hint">{t('student.details.scrollDocument')}</p>
                                   {course.lessons.length > 1 && (
                                     <p className="hint">
-                                      Showing lesson {course.lessons.findIndex((l) => l.id === activeLesson.id) + 1} of {course.lessons.length}.
+                                      {t('student.details.showingLesson', { current: course.lessons.findIndex((l) => l.id === activeLesson.id) + 1, total: course.lessons.length })}
                                     </p>
                                   )}
                                 </div>
@@ -799,7 +802,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                                     target="_blank"
                                     rel="noreferrer"
                                   >
-                                    Download PDF
+                                    {t('student.details.downloadPdf')}
                                   </a>
                                 </div>
                               </div>
@@ -815,7 +818,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
 
                               {getLessonPdfLinks(activeLesson.pdfUrl).isDrive && (
                                 <p className="hint">
-                                  Google Drive preview mode is used for inline view.
+                                  {t('student.details.googleDrivePreview')}
                                 </p>
                               )}
                             </div>
@@ -835,7 +838,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                               <span className="student-back-icon" aria-hidden="true">
                                 &lt;
                               </span>
-                              Back to lessons
+                              {t('student.details.backToLessons')}
                             </button>
                           </div>
                         </div>
@@ -846,16 +849,16 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                   {activeTab === 'quizzes' && (
                     <div className="student-tab-panel student-quizzes-panel">
                       {loadingAnswers && !showQuizzes && (
-                        <p className="hint">Loading quizzes...</p>
+                        <p className="hint">{t('student.details.loadingQuizzes')}</p>
                       )}
                       {!hasQuizzes && (
-                        <p className="hint">No quizzes in this course.</p>
+                        <p className="hint">{t('student.details.noQuizzesInCourse')}</p>
                       )}
 
                       {showQuizzes && (
                         <section className="student-quiz-stack">
                   <div className="student-quiz-toolbar">
-                    <h3>Quizzes for this lesson</h3>
+                    <h3>{t('student.details.quizzesForLesson')}</h3>
                     {totalQuizzes > 0 && (
                       <div className="student-quiz-pager">
                         <button
@@ -886,7 +889,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                   </div>
 
                   {totalQuizzes === 0 && (
-                    <p className="hint">No quizzes in this course.</p>
+                    <p className="hint">{t('student.details.noQuizzesInCourse')}</p>
                   )}
 
                   {activeQuiz && (() => {
@@ -905,10 +908,10 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                           <StatusBadge
                             label={
                               courseLocked
-                                ? 'Locked'
+                                ? t('student.details.locked')
                                 : fullyAnswered
-                                  ? 'Answered'
-                                  : 'In progress'
+                                  ? t('student.details.answered')
+                                  : t('student.details.inProgress')
                             }
                             tone={
                               courseLocked || fullyAnswered
@@ -933,7 +936,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                             >
                               <p className="student-question-title">
                                 <strong>
-                                  Question {questionIndex + 1}:
+                                  {t('student.details.question', { index: questionIndex + 1 })}
                                 </strong>{' '}
                                 {question.text}
                               </p>
@@ -979,10 +982,10 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                                 <p
                                   className={`student-review-note ${reviewQuestion.isCorrect ? 'is-ok' : 'is-bad'}`}
                                 >
-                                  Your answer:{' '}
+                                  {t('student.details.yourAnswer')}{' '}
                                   {reviewQuestion.selectedChoiceText || '-'}
                                   {' | '}
-                                  Correct:{' '}
+                                  {t('student.details.correctAnswer')}{' '}
                                   {reviewQuestion.correctChoiceText || '-'}
                                 </p>
                               )}
@@ -992,7 +995,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
 
                         {!courseLocked && !isLastQuiz && (
                           <p className="hint">
-                            Go to the next quiz to unlock final submission.
+                            {t('student.details.goToNextQuiz')}
                           </p>
                         )}
 
@@ -1005,8 +1008,8 @@ export default function StudentFormationDetailsPage({ pushToast }) {
                               onClick={() => submitCourseAnswers(course)}
                             >
                               {submittingCourseId === course.id
-                                ? 'Submitting Final Answers...'
-                                : 'Submit Final Answers'}
+                                ? t('student.details.submittingFinal')
+                                : t('student.details.submitFinal')}
                             </button>
 
                           </div>
@@ -1024,7 +1027,7 @@ export default function StudentFormationDetailsPage({ pushToast }) {
           </div>
         ) : (
           <div className="card student-details-glass">
-            <p className="hint">No published online courses yet.</p>
+            <p className="hint">{t('student.details.noPublishedCourses')}</p>
           </div>
         )}
       </div>

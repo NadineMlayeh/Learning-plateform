@@ -69,6 +69,7 @@ function keepExistingSteps(steps) {
 export function startOnboardingTour({
   steps,
   onFinish,
+  labels = { next: 'Next', prev: 'Previous', done: 'Done' },
   popoverClass = 'innova-tour-popover',
 }) {
   const availableSteps = keepExistingSteps(steps);
@@ -98,9 +99,9 @@ export function startOnboardingTour({
     showProgress: true,
     allowClose: true,
     popoverClass,
-    nextBtnText: 'Next',
-    prevBtnText: 'Previous',
-    doneBtnText: 'Done',
+    nextBtnText: labels.next,
+    prevBtnText: labels.prev,
+    doneBtnText: labels.done,
     onCloseClick: () => handleClose(),
     onDestroyStarted: () => doneOnce(),
     onDestroyed: () => doneOnce(),

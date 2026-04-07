@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminAddQuizPage({ pushToast }) {
+  const { t } = useTranslation();
   const user = getCurrentUser();
   const navigate = useNavigate();
   const { courseId } = useParams();
@@ -49,20 +51,17 @@ export default function AdminAddQuizPage({ pushToast }) {
     ).length;
 
     if (!normalizedQuestion) {
-      pushToast('Question is required.', 'error');
+      pushToast(t('formateur.manage.questionRequired'), 'error');
       return;
     }
 
     if (filledChoices.length < 2) {
-      pushToast('At least 2 choices are required.', 'error');
+      pushToast(t('formateur.manage.atLeastTwoChoices'), 'error');
       return;
     }
 
     if (correctCount !== 1) {
-      pushToast(
-        'You should select exactly one correct choice.',
-        'error',
-      );
+      pushToast(t('formateur.manage.exactlyOneCorrectChoice'), 'error');
       return;
     }
 
@@ -84,7 +83,7 @@ export default function AdminAddQuizPage({ pushToast }) {
         },
       });
 
-      pushToast('Quiz created.', 'success');
+      pushToast(t('formateur.manage.quizCreatedSuccess'), 'success');
       navigate(formationId ? `/formateur/formations/${formationId}` : '/formateur');
     } catch (err) {
       pushToast(err.message, 'error');
@@ -107,14 +106,14 @@ export default function AdminAddQuizPage({ pushToast }) {
         }
       >
         <span aria-hidden="true">&lt;</span>
-        <span>Back to Formation</span>
+        <span>{t('formateur.manage.backToFormation')}</span>
       </button>
 
       <section className="card">
-        <h1>Add Quiz</h1>
+        <h1>{t('formateur.manage.addQuizTitle')}</h1>
         <form className="grid" onSubmit={handleSubmit}>
-          <input value={quizTitle} onChange={(event) => setQuizTitle(event.target.value)} placeholder="Quiz title" required />
-          <textarea value={questionText} onChange={(event) => setQuestionText(event.target.value)} placeholder="Question" required />
+          <input value={quizTitle} onChange={(event) => setQuizTitle(event.target.value)} placeholder={t('formateur.manage.quizTitlePlaceholder')} required />
+          <textarea value={questionText} onChange={(event) => setQuestionText(event.target.value)} placeholder={t('formateur.manage.questionPlaceholder')} required />
 
           <div className="nested-grid">
             {choices.map((choice, index) => (
@@ -122,7 +121,7 @@ export default function AdminAddQuizPage({ pushToast }) {
                 <input
                   value={choice.text}
                   onChange={(event) => updateChoice(index, 'text', event.target.value)}
-                  placeholder={`Choice ${index + 1}`}
+                  placeholder={t('formateur.manage.choicePlaceholder', { index: index + 1 })}
                   required={index < 2}
                 />
                 <label className="hint">
@@ -132,13 +131,13 @@ export default function AdminAddQuizPage({ pushToast }) {
                     checked={choice.isCorrect}
                     onChange={() => setCorrectChoice(index)}
                   />
-                  Correct
+                  {t('formateur.manage.correct')}
                 </label>
               </div>
             ))}
           </div>
 
-          <button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating...' : 'Create Quiz'}</button>
+          <button type="submit" disabled={isSubmitting}>{isSubmitting ? t('formateur.manage.creating') : t('formateur.manage.createQuiz')}</button>
         </form>
       </section>
     </>

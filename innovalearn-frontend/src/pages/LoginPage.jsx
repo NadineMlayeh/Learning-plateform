@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { apiRequest } from '../api';
 import { getCurrentUser, setToken } from '../auth';
 
@@ -11,6 +12,7 @@ function roleHomePath(role) {
 }
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
@@ -40,8 +42,8 @@ export default function LoginPage() {
     <section className="auth-page">
       <article className="card auth-card">
         <div className="auth-head">
-          <h1>Welcome Back</h1>
-          <p className="hint">Log in to access your learning dashboard.</p>
+          <h1>{t('login.title')}</h1>
+          <p className="hint">{t('login.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="grid auth-form">
@@ -54,7 +56,7 @@ export default function LoginPage() {
             </span>
             <input
               type="email"
-              placeholder="Email address"
+              placeholder={t('login.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -70,7 +72,7 @@ export default function LoginPage() {
             </span>
             <input
               type="password"
-              placeholder="Password"
+              placeholder={t('login.passwordPlaceholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -78,28 +80,28 @@ export default function LoginPage() {
           </label>
 
           <button type="submit" className="auth-submit-btn">
-            Login
+            {t('login.submitButton')}
           </button>
         </form>
 
         <div className="auth-forgot-row">
           <Link to="/forgot-password" className="auth-inline-link">
-            Forgot your password?
+            {t('login.forgotPassword')}
           </Link>
         </div>
 
         {error && (
           <article className="auth-error-box" role="alert" aria-live="assertive">
-            <p className="auth-error-title">[!] Login Failed</p>
+            <p className="auth-error-title">{t('login.errorTitle')}</p>
             <p className="auth-error-body">{error}</p>
           </article>
         )}
 
         <div className="auth-foot">
           <p className="hint">
-            New here?{' '}
+            {t('login.noAccount')}{' '}
             <Link to="/signup" className="auth-inline-link">
-              Create account
+              {t('login.createAccount')}
             </Link>
           </p>
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiRequest, resolveApiAssetUrl } from '../api';
+import { useTranslation } from 'react-i18next';
 
 function formatDate(value) {
   if (!value) return '-';
@@ -76,6 +77,7 @@ function MetaIcon({ kind }) {
 }
 
 export default function ProfileSidebar({ user }) {
+  const { t } = useTranslation();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPasswordMode, setIsPasswordMode] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -202,13 +204,13 @@ export default function ProfileSidebar({ user }) {
 
   const infoItems = useMemo(
     () => [
-      { key: 'bio', label: 'Bio', value: profile?.bio?.trim() || '-', icon: 'bio' },
-      { key: 'phone', label: 'Phone', value: profile?.phoneNumber || '-', icon: 'phone' },
-      { key: 'email', label: 'Email', value: profile?.email || '-', icon: 'email' },
-      { key: 'dob', label: 'Date of Birth', value: formatDate(profile?.dateOfBirth), icon: 'dob' },
-      { key: 'member', label: 'Member Since', value: formatDate(profile?.createdAt), icon: 'member' },
+      { key: 'bio', label: t('student.sidebar.bio'), value: profile?.bio?.trim() || '-', icon: 'bio' },
+      { key: 'phone', label: t('student.sidebar.phone'), value: profile?.phoneNumber || '-', icon: 'phone' },
+      { key: 'email', label: t('student.sidebar.email'), value: profile?.email || '-', icon: 'email' },
+      { key: 'dob', label: t('student.sidebar.dob'), value: formatDate(profile?.dateOfBirth), icon: 'dob' },
+      { key: 'member', label: t('student.sidebar.memberSince'), value: formatDate(profile?.createdAt), icon: 'member' },
     ],
-    [profile?.bio, profile?.phoneNumber, profile?.email, profile?.dateOfBirth, profile?.createdAt],
+    [profile?.bio, profile?.phoneNumber, profile?.email, profile?.dateOfBirth, profile?.createdAt, t],
   );
 
   async function handleAvatarSelection(event) {
@@ -274,7 +276,7 @@ export default function ProfileSidebar({ user }) {
     setPasswordSuccess('');
 
     if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
-      setPasswordError('New passwords do not match.');
+      setPasswordError(t('student.sidebar.newPasswordsDoNotMatch'));
       return;
     }
 
@@ -379,13 +381,13 @@ export default function ProfileSidebar({ user }) {
               >
                 <img src="/images/import.png" alt="" className="profile-glass-upload-icon" />
                 <span className="profile-glass-upload-text">
-                  {uploadingAvatar ? 'uploading...' : 'change photo'}
+                  {uploadingAvatar ? t('student.sidebar.uploading') : t('student.sidebar.changePhoto')}
                 </span>
               </button>
             </div>
 
             <label className="profile-edit-field">
-              <span>Name</span>
+              <span>{t('student.sidebar.name')}</span>
               <input
                 type="text"
                 value={form.name}
@@ -397,7 +399,7 @@ export default function ProfileSidebar({ user }) {
             </label>
 
             <label className="profile-edit-field">
-              <span>Bio</span>
+              <span>{t('student.sidebar.bio')}</span>
               <textarea
                 rows={3}
                 maxLength={220}
@@ -409,7 +411,7 @@ export default function ProfileSidebar({ user }) {
             </label>
 
             <label className="profile-edit-field">
-              <span>Phone number</span>
+              <span>{t('student.sidebar.phoneNumber')}</span>
               <div className="profile-edit-input-wrap">
                 <span className="profile-edit-input-icon" aria-hidden="true">
                   <MetaIcon kind="phone" />
@@ -428,7 +430,7 @@ export default function ProfileSidebar({ user }) {
             </label>
 
             <label className="profile-edit-field">
-              <span>Date of birth</span>
+              <span>{t('student.sidebar.dateOfBirth')}</span>
               <div className="profile-edit-input-wrap">
                 <span className="profile-edit-input-icon" aria-hidden="true">
                   <MetaIcon kind="dob" />
@@ -452,7 +454,7 @@ export default function ProfileSidebar({ user }) {
                 className="profile-save-btn"
                 disabled={savingProfile}
               >
-                {savingProfile ? 'Saving...' : 'Save'}
+                {savingProfile ? t('student.sidebar.saving') : t('student.sidebar.save')}
               </button>
               <button
                 type="button"
@@ -464,7 +466,7 @@ export default function ProfileSidebar({ user }) {
                 }}
                 disabled={savingProfile}
               >
-                Cancel
+                {t('student.sidebar.cancel')}
               </button>
             </div>
 
@@ -482,7 +484,7 @@ export default function ProfileSidebar({ user }) {
               <span className="profile-change-password-icon" aria-hidden="true">
                 <MetaIcon kind="password" />
               </span>
-              <span>Change password</span>
+              <span>{t('student.sidebar.changePassword')}</span>
             </button>
           </form>
         )}
@@ -490,7 +492,7 @@ export default function ProfileSidebar({ user }) {
         {isPasswordMode && canEditProfile && (
           <form className="profile-glass-edit-panel profile-glass-password-panel" onSubmit={savePassword}>
             <label className="profile-edit-field">
-              <span>Email</span>
+              <span>{t('student.sidebar.email')}</span>
               <input
                 type="email"
                 value={passwordForm.email}
@@ -505,7 +507,7 @@ export default function ProfileSidebar({ user }) {
             </label>
 
             <label className="profile-edit-field">
-              <span>Old password</span>
+              <span>{t('student.sidebar.oldPassword')}</span>
               <input
                 type="password"
                 value={passwordForm.oldPassword}
@@ -520,7 +522,7 @@ export default function ProfileSidebar({ user }) {
             </label>
 
             <label className="profile-edit-field">
-              <span>New password</span>
+              <span>{t('student.sidebar.newPassword')}</span>
               <input
                 type="password"
                 value={passwordForm.newPassword}
@@ -535,7 +537,7 @@ export default function ProfileSidebar({ user }) {
             </label>
 
             <label className="profile-edit-field">
-              <span>New password again</span>
+              <span>{t('student.sidebar.newPasswordAgain')}</span>
               <input
                 type="password"
                 value={passwordForm.confirmNewPassword}
@@ -551,7 +553,7 @@ export default function ProfileSidebar({ user }) {
 
             {passwordError && (
               <article className="auth-error-box profile-password-error" role="alert" aria-live="assertive">
-                <p className="auth-error-title">⚠ Password Reset Failed</p>
+                <p className="auth-error-title">⚠ {t('student.sidebar.resetPasswordFailed')}</p>
                 <p className="auth-error-body">{passwordError}</p>
               </article>
             )}
@@ -564,7 +566,7 @@ export default function ProfileSidebar({ user }) {
                 className="profile-save-btn"
                 disabled={changingPassword}
               >
-                {changingPassword ? 'Resetting...' : 'Reset'}
+                {changingPassword ? t('student.sidebar.resetting') : t('student.sidebar.reset')}
               </button>
               <button
                 type="button"
@@ -577,7 +579,7 @@ export default function ProfileSidebar({ user }) {
                 }}
                 disabled={changingPassword}
               >
-                Cancel
+                {t('student.sidebar.cancel')}
               </button>
             </div>
           </form>
@@ -604,8 +606,8 @@ export default function ProfileSidebar({ user }) {
               <MetaIcon kind="settings" />
             </span>
             <span className="profile-glass-item-text">
-              <strong>Settings</strong>
-              <small>Edit profile</small>
+              <strong>{t('student.sidebar.settings')}</strong>
+              <small>{t('student.sidebar.editProfile')}</small>
             </span>
           </button>
         </div>

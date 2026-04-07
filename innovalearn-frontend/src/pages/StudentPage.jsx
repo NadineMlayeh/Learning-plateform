@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
@@ -136,7 +137,8 @@ function SearchableFormateurSelect({
   onChange,
   options,
   placeholder,
-  allLabel = 'All formateurs',
+  allLabel,
+  noResultLabel,
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(value || '');
@@ -222,7 +224,7 @@ function SearchableFormateurSelect({
             </button>
           ))}
           {filteredOptions.length === 0 && (
-            <div className="student-v2-searchable-empty">No formateur found</div>
+            <div className="student-v2-searchable-empty">{noResultLabel || 'No formateur found'}</div>
           )}
         </div>
       )}
@@ -343,6 +345,7 @@ function QuickActionCard({
 }
 
 export default function StudentPage({ pushToast }) {
+  const { t } = useTranslation();
   const user = getCurrentUser();
   const navigate = useNavigate();
   const studentTourRef = useRef(null);
@@ -437,38 +440,39 @@ export default function StudentPage({ pushToast }) {
 
   function launchStudentTour() {
     const tour = startOnboardingTour({
+      labels: {
+        next: t('student.tour.next'),
+        prev: t('student.tour.prev'),
+        done: t('student.tour.done'),
+      },
       steps: [
         {
           element: '[data-tour="app-navbar"]',
           popover: {
-            title: 'Navigation',
-            description:
-              'Welcome to InnovaLearn! This is your navigation bar. Use it to access your dashboard, notebook and profile.',
+            title: t('student.tour.navTitle'),
+            description: t('student.tour.navDescription'),
           },
         },
         {
           element: '[data-tour="student-quick-stats"]',
           popover: {
-            title: 'Quick stats',
-            description:
-              'These cards show your enrolled courses, certificates earned, payments and pending requests at a glance.',
+            title: t('student.tour.statsTitle'),
+            description: t('student.tour.statsDescription'),
           },
         },
         {
           element: '[data-tour="student-first-formation-card"]',
           popover: {
-            title: 'Enrolled formations',
-            description:
-              'These are your enrolled formations. Click to start learning.',
+            title: t('student.tour.formationsTitle'),
+            description: t('student.tour.formationsDescription'),
           },
         },
 
         {
           element: '[data-tour="profile-sidebar-trigger"]',
           popover: {
-            title: 'Profile settings',
-            description:
-              'Click here to update your profile photo and personal information.',
+            title: t('student.tour.profileTitle'),
+            description: t('student.tour.profileDescription'),
           },
         },
       ],
@@ -502,7 +506,7 @@ export default function StudentPage({ pushToast }) {
         ];
       });
 
-      pushToast('Enrollment submitted. Status is now PENDING.', 'success');
+      pushToast(t('student.courses.enrollmentSubmitted'), 'success');
       await loadEnrollments();
     } catch (err) {
       pushToast(err.message, 'error');
@@ -720,7 +724,7 @@ export default function StudentPage({ pushToast }) {
     [invoices],
   );
 
-  const recentApprovedName = approvedEnrollments[0]?.formation?.title || 'No active course yet';
+  const recentApprovedName = approvedEnrollments[0]?.formation?.title || t('student.quickCards.noActiveCourse');
 
   const overallProgress = useMemo(() => {
     if (approvedEnrollments.length === 0) return 0;
@@ -809,37 +813,37 @@ export default function StudentPage({ pushToast }) {
       key: DASH_SECTIONS.COURSES,
       iconSrc: '/images/course.png',
       iconAlt: 'Courses',
-      title: 'My Courses',
-      metric: `${approvedEnrollments.length} enrolled`,
-      subtitle: `Recent: ${recentApprovedName}`,
-      cta: 'Continue Learning',
+      title: t('student.quickCards.myCourses'),
+      metric: `${approvedEnrollments.length} ${t('student.quickCards.enrolled')}`,
+      subtitle: `${t('student.quickCards.recent')} ${recentApprovedName}`,
+      cta: t('student.quickCards.continueLearning'),
     },
     {
       key: DASH_SECTIONS.CERTIFICATES,
       iconSrc: '/images/certif.png',
       iconAlt: 'Certificates',
-      title: 'My Certificates',
-      metric: `${certificateCount + badgeCount} earned`,
-      subtitle: `${certificateCount} certificates • ${badgeCount} badges`,
-      cta: 'View Certificates',
+      title: t('student.quickCards.myCertificates'),
+      metric: `${certificateCount + badgeCount} ${t('student.quickCards.earned')}`,
+      subtitle: `${certificateCount} ${t('student.quickCards.certificates')} • ${badgeCount} ${t('student.quickCards.badges')}`,
+      cta: t('student.quickCards.viewCertificates'),
     },
     {
       key: DASH_SECTIONS.PAYMENTS,
       iconSrc: '/images/facture.png',
       iconAlt: 'Payments',
-      title: 'My Payments',
-      metric: `${invoices.length} invoices`,
-      subtitle: `${pendingInvoicesCount} pending`,
-      cta: 'View Invoices',
+      title: t('student.quickCards.myPayments'),
+      metric: `${invoices.length} ${t('student.quickCards.invoices')}`,
+      subtitle: `${pendingInvoicesCount} ${t('student.quickCards.pending')}`,
+      cta: t('student.quickCards.viewInvoices'),
     },
     {
       key: DASH_SECTIONS.PENDING,
       iconSrc: '/images/pending.png',
       iconAlt: 'Pending',
-      title: 'Pending Requests',
-      metric: `${pendingEnrollments.length} pending`,
-      subtitle: 'Waiting for admin review',
-      cta: 'Track Status',
+      title: t('student.quickCards.pendingRequests'),
+      metric: `${pendingEnrollments.length} ${t('student.quickCards.pending')}`,
+      subtitle: t('student.quickCards.waitingForAdmin'),
+      cta: t('student.quickCards.trackStatus'),
     },
   ];
 
@@ -851,22 +855,22 @@ export default function StudentPage({ pushToast }) {
             <div className="student-v2-empty-illustration">
               <IconRocket />
             </div>
-            <h3>You haven&apos;t enrolled in a course yet. Let&apos;s start your learning journey!</h3>
-            <p className="hint">Pick a formation below and send your enrollment request.</p>
+            <h3>{t('student.courses.emptyTitle')}</h3>
+            <p className="hint">{t('student.courses.emptyHint')}</p>
           </div>
         )}
 
         {approvedEnrollments.length > 0 && (
           <div className="student-v2-group student-v2-enrolled-group">
             <div className="student-v2-group-head">
-              <h3>Enrolled Formations</h3>
-              <p className="hint">Open online content and continue where you left off.</p>
+              <h3>{t('student.courses.enrolledTitle')}</h3>
+              <p className="hint">{t('student.courses.enrolledHint')}</p>
             </div>
             <div className="student-v2-enrolled-controls">
               <input
                 type="text"
                 className="student-v2-enrolled-search"
-                placeholder="Search by formation name"
+                placeholder={t('student.courses.searchByFormation')}
                 value={enrolledSearch}
                 onChange={(event) => setEnrolledSearch(event.target.value)}
               />
@@ -874,20 +878,22 @@ export default function StudentPage({ pushToast }) {
                 value={enrolledFormateurSearch}
                 onChange={setEnrolledFormateurSearch}
                 options={enrolledFormateurOptions}
-                placeholder="Search by formateur name"
+                placeholder={t('student.courses.searchByFormateur')}
+                allLabel={t('student.select.allFormateurs')}
+                noResultLabel={t('student.select.noFormateurFound')}
               />
               <select
                 className="student-v2-enrolled-filter auth-select-field"
                 value={enrolledTypeFilter}
                 onChange={(event) => setEnrolledTypeFilter(event.target.value)}
               >
-                <option value="ALL">All types</option>
-                <option value="ONLINE">Online only</option>
-                <option value="PRESENTIEL">Presentiel only</option>
+                <option value="ALL">{t('student.courses.allTypes')}</option>
+                <option value="ONLINE">{t('student.courses.onlineOnly')}</option>
+                <option value="PRESENTIEL">{t('student.courses.presentielOnly')}</option>
               </select>
             </div>
             {enrolledPageRows.length === 0 ? (
-              <p className="hint">No enrolled formation matches your search/filter.</p>
+              <p className="hint">{t('student.courses.noMatch')}</p>
             ) : (
               <div className="student-v2-course-grid student-v2-course-grid-paged">
                 {enrolledPageRows.map((entry, index) => {
@@ -895,8 +901,8 @@ export default function StudentPage({ pushToast }) {
                   const progress = getFormationProgress(entry);
                   const completedBadgeLabel = progress.completed
                     ? progress.success === false
-                      ? 'Completed'
-                      : 'Completed'
+                      ? t('student.courses.completed')
+                      : t('student.courses.completed')
                     : null;
 
                   return (
@@ -936,7 +942,7 @@ export default function StudentPage({ pushToast }) {
                             <span className="student-v2-inline-icon">
                               <IconSpark />
                             </span>
-                            <span>Formateur: {formation.formateur.name}</span>
+                            <span>{t('student.courses.formateur')} {formation.formateur.name}</span>
                           </div>
                         )}
 
@@ -944,7 +950,7 @@ export default function StudentPage({ pushToast }) {
                           <span className="student-v2-inline-icon">
                             <IconSpark />
                           </span>
-                          <span>{progress.percent}% overall progress</span>
+                          <span>{progress.percent}% {t('student.courses.overallProgress')}</span>
                         </div>
 
                         {formation?.type === 'ONLINE' && (
@@ -953,7 +959,7 @@ export default function StudentPage({ pushToast }) {
                               <IconRocket />
                             </span>
                             <span>
-                              {progress.finalizedCourses}/{progress.totalCourses} courses finalized
+                              {progress.finalizedCourses}/{progress.totalCourses} {t('student.courses.coursesFinalized')}
                             </span>
                           </div>
                         )}
@@ -963,7 +969,7 @@ export default function StudentPage({ pushToast }) {
                             <span className="student-v2-inline-icon">
                               <IconLocation />
                             </span>
-                            <span>Location: {formation.location}</span>
+                            <span>{t('student.courses.location')} {formation.location}</span>
                           </div>
                         )}
 
@@ -973,7 +979,7 @@ export default function StudentPage({ pushToast }) {
                               <IconCalendar />
                             </span>
                             <span>
-                              Dates: {toDateOnlyLabel(formation?.startDate)} -{' '}
+                              {t('student.courses.dates')} {toDateOnlyLabel(formation?.startDate)} -{' '}
                               {toDateOnlyLabel(formation?.endDate)}
                             </span>
                           </div>
@@ -989,10 +995,10 @@ export default function StudentPage({ pushToast }) {
                               <span className="student-v2-inline-icon">
                                 <IconPlay />
                               </span>
-                              Open Content
+                              {t('student.courses.openContent')}
                             </button>
                           ) : (
-                            <span className="student-v2-soft-pill">On-site Formation</span>
+                            <span className="student-v2-soft-pill">{t('student.courses.onSiteFormation')}</span>
                           )}
                         </div>
                       </div>
@@ -1009,10 +1015,10 @@ export default function StudentPage({ pushToast }) {
                   onClick={() => setEnrolledPage((prev) => Math.max(1, prev - 1))}
                   disabled={enrolledPage === 1}
                 >
-                  Prev
+                  {t('student.pagination.prev')}
                 </button>
                 <span>
-                  Page {enrolledPage} / {enrolledTotalPages}
+                  {t('student.pagination.page')} {enrolledPage} / {enrolledTotalPages}
                 </span>
                 <button
                   type="button"
@@ -1022,7 +1028,7 @@ export default function StudentPage({ pushToast }) {
                   }
                   disabled={enrolledPage === enrolledTotalPages}
                 >
-                  Next
+                  {t('student.pagination.next')}
                 </button>
               </div>
             )}
@@ -1031,14 +1037,14 @@ export default function StudentPage({ pushToast }) {
 
         <div className="student-v2-group student-v2-enrolled-group">
           <div className="student-v2-group-head">
-            <h3>Discover New Formations</h3>
-            <p className="hint">Explore and enroll in newly published formations.</p>
+            <h3>{t('student.courses.discoverTitle')}</h3>
+            <p className="hint">{t('student.courses.discoverHint')}</p>
           </div>
           <div className="student-v2-enrolled-controls">
             <input
               type="text"
               className="student-v2-enrolled-search"
-              placeholder="Search by formation name"
+              placeholder={t('student.courses.searchByFormation')}
               value={discoverSearch}
               onChange={(event) => setDiscoverSearch(event.target.value)}
             />
@@ -1046,20 +1052,22 @@ export default function StudentPage({ pushToast }) {
               value={discoverFormateurSearch}
               onChange={setDiscoverFormateurSearch}
               options={discoverFormateurOptions}
-              placeholder="Search by formateur name"
+              placeholder={t('student.courses.searchByFormateur')}
+              allLabel={t('student.select.allFormateurs')}
+              noResultLabel={t('student.select.noFormateurFound')}
             />
             <select
               className="student-v2-enrolled-filter auth-select-field"
               value={discoverTypeFilter}
               onChange={(event) => setDiscoverTypeFilter(event.target.value)}
             >
-              <option value="ALL">All types</option>
-              <option value="ONLINE">Online only</option>
-              <option value="PRESENTIEL">Presentiel only</option>
+              <option value="ALL">{t('student.courses.allTypes')}</option>
+              <option value="ONLINE">{t('student.courses.onlineOnly')}</option>
+              <option value="PRESENTIEL">{t('student.courses.presentielOnly')}</option>
             </select>
           </div>
           {filteredDiscoverRows.length === 0 ? (
-            <p className="hint">You are already enrolled in all currently published formations.</p>
+            <p className="hint">{t('student.courses.allEnrolled')}</p>
           ) : (
             <>
               <div className="student-v2-course-grid student-v2-course-grid-paged">
@@ -1087,7 +1095,7 @@ export default function StudentPage({ pushToast }) {
 		                        <span className="student-v2-inline-icon">
 		                          <IconSpark />
 		                        </span>
-		                        <span>Formateur: {formation.formateur.name}</span>
+		                        <span>{t('student.courses.formateur')} {formation.formateur.name}</span>
 		                      </div>
 		                    )}
 
@@ -1095,7 +1103,7 @@ export default function StudentPage({ pushToast }) {
 		                      <span className="student-v2-inline-icon">
 		                        <IconCoin />
 		                      </span>
-	                      <span>Price: {formation.price}</span>
+	                      <span>{t('student.courses.price')} {formation.price}</span>
 	                    </div>
 
 		                    {formation.type === 'ONLINE' && (
@@ -1104,7 +1112,7 @@ export default function StudentPage({ pushToast }) {
 	                          <IconSpark />
 	                        </span>
                         <span>
-                          Courses:{' '}
+                          {t('student.courses.coursesCount')}{' '}
                           {Array.isArray(formation.courses)
                             ? formation.courses.length
                             : Number(
@@ -1127,7 +1135,7 @@ export default function StudentPage({ pushToast }) {
                         <span className="student-v2-inline-icon">
                           <IconLocation />
                         </span>
-                        <span>Location: {formation.location}</span>
+                        <span>{t('student.courses.location')} {formation.location}</span>
                       </div>
                     )}
 
@@ -1137,7 +1145,7 @@ export default function StudentPage({ pushToast }) {
                           <IconCalendar />
                         </span>
                         <span>
-                          Dates: {toDateOnlyLabel(formation.startDate)} -{' '}
+                          {t('student.courses.dates')} {toDateOnlyLabel(formation.startDate)} -{' '}
                           {toDateOnlyLabel(formation.endDate)}
                         </span>
                       </div>
@@ -1150,7 +1158,7 @@ export default function StudentPage({ pushToast }) {
 	                        onClick={() => enroll(formation.id)}
 	                        disabled={enrollingFormationId === formation.id}
 	                      >
-                        {enrollingFormationId === formation.id ? 'Enrolling...' : 'Enroll'}
+                        {enrollingFormationId === formation.id ? t('student.courses.enrolling') : t('student.courses.enroll')}
                       </button>
                     </div>
                   </div>
@@ -1165,10 +1173,10 @@ export default function StudentPage({ pushToast }) {
                     onClick={() => setDiscoverPage((prev) => Math.max(1, prev - 1))}
                     disabled={discoverPage === 1}
                   >
-                    Prev
+                    {t('student.pagination.prev')}
                   </button>
                   <span>
-                    Page {discoverPage} / {discoverTotalPages}
+                    {t('student.pagination.page')} {discoverPage} / {discoverTotalPages}
                   </span>
                   <button
                     type="button"
@@ -1178,7 +1186,7 @@ export default function StudentPage({ pushToast }) {
                     }
                     disabled={discoverPage === discoverTotalPages}
                   >
-                    Next
+                    {t('student.pagination.next')}
                   </button>
                 </div>
               )}
@@ -1194,9 +1202,9 @@ export default function StudentPage({ pushToast }) {
       <div className="student-v2-section-stack">
         <div className="student-v2-group">
           <div className="student-v2-group-head">
-            <h3>Certificates and Badges</h3>
+            <h3>{t('student.certificates.title')}</h3>
             <p className="hint">
-              Your achievements are saved and can be downloaded any time.
+              {t('student.certificates.hint')}
             </p>
           </div>
 
@@ -1205,7 +1213,7 @@ export default function StudentPage({ pushToast }) {
               <input
                 type="text"
                 className="student-v2-achievement-search"
-                placeholder="Search by formation name"
+                placeholder={t('student.courses.searchByFormation')}
                 value={achievementSearch}
                 onChange={(event) => setAchievementSearch(event.target.value)}
               />
@@ -1214,16 +1222,16 @@ export default function StudentPage({ pushToast }) {
                 value={achievementSort}
                 onChange={(event) => setAchievementSort(event.target.value)}
               >
-                <option value="MOST_RECENT">Most recent certifs</option>
-                <option value="OLDEST">Oldest certifs</option>
+                <option value="MOST_RECENT">{t('student.certificates.mostRecent')}</option>
+                <option value="OLDEST">{t('student.certificates.oldest')}</option>
               </select>
             </div>
           )}
 
           {achievementRows.length === 0 ? (
-            <p className="hint">No certificates or badges earned yet. Keep going!</p>
+            <p className="hint">{t('student.certificates.emptyMessage')}</p>
           ) : filteredSortedAchievements.length === 0 ? (
-            <p className="hint">No certificate or badge matches your search/filter.</p>
+            <p className="hint">{t('student.certificates.noMatch')}</p>
           ) : (
             <>
               <div className="student-v2-achievement-grid student-v2-achievement-grid-paged">
@@ -1238,7 +1246,7 @@ export default function StudentPage({ pushToast }) {
                           alt=""
                           className="student-v2-achievement-title-icon student-v2-achievement-title-icon-cert"
                         />
-                        <span>Certificate Section</span>
+                        <span>{t('student.certificates.certificateSection')}</span>
                       </p>
                       {row.certificateUrl ? (
                         <a
@@ -1247,11 +1255,11 @@ export default function StudentPage({ pushToast }) {
                           target="_blank"
                           rel="noreferrer"
                         >
-                          Download Certificate
+                          {t('student.certificates.downloadCertificate')}
                         </a>
                       ) : (
                         <span className="student-v2-soft-pill">
-                          No certification
+                          {t('student.certificates.noCertification')}
                         </span>
                       )}
                     </div>
@@ -1261,7 +1269,7 @@ export default function StudentPage({ pushToast }) {
                         <span className="student-v2-achievement-title-emoji" aria-hidden="true">
                           🏆
                         </span>
-                        <span>Badges Earned :</span>
+                        <span>{t('student.certificates.badgesEarned')}</span>
                       </p>
                       {row.badges.length > 0 ? (
                         <>
@@ -1286,7 +1294,7 @@ export default function StudentPage({ pushToast }) {
                                     rel="noreferrer"
                                     title={badge.courseTitle}
                                   >
-                                    Badge
+                                    {t('student.certificates.badge')}
                                   </a>
                                 ))}
                             </div>
@@ -1338,7 +1346,7 @@ export default function StudentPage({ pushToast }) {
                           </div>
                         </>
                       ) : (
-                        <span className="student-v2-soft-pill">No badge earned yet</span>
+                        <span className="student-v2-soft-pill">{t('student.certificates.noBadge')}</span>
                       )}
                     </div>
                   </article>
@@ -1355,7 +1363,7 @@ export default function StudentPage({ pushToast }) {
                     Prev
                   </button>
                   <span>
-                    Page {achievementPage} / {achievementTotalPages}
+                    {t('student.pagination.page')} {achievementPage} / {achievementTotalPages}
                   </span>
                   <button
                     type="button"
@@ -1381,14 +1389,14 @@ export default function StudentPage({ pushToast }) {
       <div className="student-v2-section-stack">
         <div className="student-v2-group">
           <div className="student-v2-group-head">
-            <h3>My Invoices</h3>
-            <p className="hint">Most recent invoices appear first. Download any invoice instantly.</p>
+            <h3>{t('student.payments.title')}</h3>
+            <p className="hint">{t('student.payments.hint')}</p>
           </div>
 
-          {loadingInvoices && <p className="hint">Loading invoices...</p>}
+          {loadingInvoices && <p className="hint">{t('student.payments.loading')}</p>}
 
           {!loadingInvoices && invoices.length === 0 && (
-            <p className="hint">No invoice available yet. It appears after admin approval.</p>
+            <p className="hint">{t('student.payments.emptyMessage')}</p>
           )}
 
           {!loadingInvoices && invoices.length > 0 && (
@@ -1397,7 +1405,7 @@ export default function StudentPage({ pushToast }) {
                 <input
                   type="text"
                   className="student-v2-invoice-search"
-                  placeholder="Search by formation name"
+                  placeholder={t('student.courses.searchByFormation')}
                   value={invoiceSearch}
                   onChange={(event) => setInvoiceSearch(event.target.value)}
                 />
@@ -1406,15 +1414,15 @@ export default function StudentPage({ pushToast }) {
                   value={invoiceSort}
                   onChange={(event) => setInvoiceSort(event.target.value)}
                 >
-                  <option value="MOST_RECENT">Most recent invoice</option>
-                  <option value="OLDEST">Oldest invoice</option>
-                  <option value="HIGHEST_AMOUNT">Highest amount</option>
-                  <option value="LEAST_AMOUNT">Least amount</option>
+                  <option value="MOST_RECENT">{t('student.payments.mostRecent')}</option>
+                  <option value="OLDEST">{t('student.payments.oldest')}</option>
+                  <option value="HIGHEST_AMOUNT">{t('student.payments.highestAmount')}</option>
+                  <option value="LEAST_AMOUNT">{t('student.payments.leastAmount')}</option>
                 </select>
               </div>
 
               {filteredSortedInvoices.length === 0 ? (
-                <p className="hint">No invoice matches your search/filter.</p>
+                <p className="hint">{t('student.payments.noMatch')}</p>
               ) : (
                 <>
                   <div className="student-v2-invoice-grid">
@@ -1426,13 +1434,13 @@ export default function StudentPage({ pushToast }) {
                         </h4>
                         <div className="student-v2-invoice-meta-stack">
                           <div className="student-v2-invoice-meta-row">
-                            <span className="student-v2-invoice-meta-label">Amount</span>
+                            <span className="student-v2-invoice-meta-label">{t('student.payments.amount')}</span>
                             <span className="student-v2-invoice-amount-pill">
                               {Number(invoice.amount || 0).toFixed(2)} TND
                             </span>
                           </div>
                           <div className="student-v2-invoice-meta-row student-v2-invoice-issued-row">
-                            <span className="student-v2-invoice-meta-label">Issued</span>
+                            <span className="student-v2-invoice-meta-label">{t('student.payments.issued')}</span>
                             <span className="student-v2-invoice-issued-value">
                               {toDateLabel(invoice.createdAt)}
                             </span>
@@ -1449,7 +1457,7 @@ export default function StudentPage({ pushToast }) {
                               <span className="student-v2-invoice-btn-icon" aria-hidden="true">
                                 <img src="/images/import.png" alt="" />
                               </span>
-                              <span>Download Invoice</span>
+                              <span>{t('student.payments.downloadInvoice')}</span>
                             </a>
                           ) : (
                             <button
@@ -1460,7 +1468,7 @@ export default function StudentPage({ pushToast }) {
                               <span className="student-v2-invoice-btn-icon" aria-hidden="true">
                                 <img src="/images/import.png" alt="" />
                               </span>
-                              <span>Download Invoice</span>
+                              <span>{t('student.payments.downloadInvoice')}</span>
                             </button>
                           )}
                         </div>
@@ -1475,10 +1483,10 @@ export default function StudentPage({ pushToast }) {
                       onClick={() => setInvoicePage((prev) => Math.max(1, prev - 1))}
                       disabled={invoicePage === 1}
                     >
-                      Prev
+                      {t('student.pagination.prev')}
                     </button>
                     <span>
-                      Page {invoicePage} / {invoiceTotalPages}
+                      {t('student.pagination.page')} {invoicePage} / {invoiceTotalPages}
                     </span>
                     <button
                       type="button"
@@ -1486,7 +1494,7 @@ export default function StudentPage({ pushToast }) {
                       onClick={() => setInvoicePage((prev) => Math.min(invoiceTotalPages, prev + 1))}
                       disabled={invoicePage === invoiceTotalPages}
                     >
-                      Next
+                      {t('student.pagination.next')}
                     </button>
                   </div>
                 </>
@@ -1503,19 +1511,19 @@ export default function StudentPage({ pushToast }) {
       <div className="student-v2-section-stack">
         <div className="student-v2-group">
           <div className="student-v2-group-head">
-            <h3>Pending Enrollment Requests</h3>
-            <p className="hint">These requests are waiting for admin validation.</p>
+            <h3>{t('student.pending.title')}</h3>
+            <p className="hint">{t('student.pending.hint')}</p>
           </div>
 
           {pendingEnrollments.length === 0 ? (
-            <p className="hint">No pending requests right now.</p>
+            <p className="hint">{t('student.pending.emptyMessage')}</p>
           ) : filteredSortedPendingEnrollments.length === 0 ? (
             <>
               <div className="student-v2-pending-controls">
                 <input
                   type="text"
                   className="student-v2-pending-search"
-                  placeholder="Search by formation name"
+                  placeholder={t('student.courses.searchByFormation')}
                   value={pendingSearch}
                   onChange={(event) => setPendingSearch(event.target.value)}
                 />
@@ -1524,11 +1532,11 @@ export default function StudentPage({ pushToast }) {
                   value={pendingSort}
                   onChange={(event) => setPendingSort(event.target.value)}
                 >
-                  <option value="MOST_RECENT">Most recent enrollment request</option>
-                  <option value="OLDEST">Oldest enrollment request</option>
+                  <option value="MOST_RECENT">{t('student.pending.mostRecent')}</option>
+                  <option value="OLDEST">{t('student.pending.oldest')}</option>
                 </select>
               </div>
-              <p className="hint">No pending request matches your search/filter.</p>
+              <p className="hint">{t('student.pending.noMatch')}</p>
             </>
           ) : (
             <>
@@ -1536,7 +1544,7 @@ export default function StudentPage({ pushToast }) {
                 <input
                   type="text"
                   className="student-v2-pending-search"
-                  placeholder="Search by formation name"
+                  placeholder={t('student.courses.searchByFormation')}
                   value={pendingSearch}
                   onChange={(event) => setPendingSearch(event.target.value)}
                 />
@@ -1545,8 +1553,8 @@ export default function StudentPage({ pushToast }) {
                   value={pendingSort}
                   onChange={(event) => setPendingSort(event.target.value)}
                 >
-                  <option value="MOST_RECENT">Most recent enrollment request</option>
-                  <option value="OLDEST">Oldest enrollment request</option>
+                  <option value="MOST_RECENT">{t('student.pending.mostRecent')}</option>
+                  <option value="OLDEST">{t('student.pending.oldest')}</option>
                 </select>
               </div>
               <div className="student-v2-pending-grid student-v2-pending-grid-paged">
@@ -1566,8 +1574,8 @@ export default function StudentPage({ pushToast }) {
                         <h4>{entry.formation?.title || `Formation #${entry.formationId}`}</h4>
                         <StatusBadge label="PENDING" tone="orange" />
                       </div>
-                      <p className="hint">Type: {entry.formation?.type || '-'}</p>
-                      <p className="hint">Requested: {toDateLabel(entry.createdAt)}</p>
+                      <p className="hint">{t('student.pending.type')} {entry.formation?.type || '-'}</p>
+                      <p className="hint">{t('student.pending.requested')} {toDateLabel(entry.createdAt)}</p>
                     </div>
                   </article>
                 ))}
@@ -1580,10 +1588,10 @@ export default function StudentPage({ pushToast }) {
                     onClick={() => setPendingPage((prev) => Math.max(1, prev - 1))}
                     disabled={pendingPage === 1}
                   >
-                    Prev
+                    {t('student.pagination.prev')}
                   </button>
                   <span>
-                    Page {pendingPage} / {pendingTotalPages}
+                    {t('student.pagination.page')} {pendingPage} / {pendingTotalPages}
                   </span>
                   <button
                     type="button"
@@ -1591,7 +1599,7 @@ export default function StudentPage({ pushToast }) {
                     onClick={() => setPendingPage((prev) => Math.min(pendingTotalPages, prev + 1))}
                     disabled={pendingPage === pendingTotalPages}
                   >
-                    Next
+                    {t('student.pagination.next')}
                   </button>
                 </div>
               )}
@@ -1800,19 +1808,19 @@ export default function StudentPage({ pushToast }) {
 
         <div className="student-v2-hero-main">
           <div className="student-v2-hero-text">
-            <h1>Welcome back ! {studentName}</h1>
-            <p>Keep learning. You&apos;re making great progress!</p>
+            <h1>{t('student.hero.welcome')} {studentName}</h1>
+            <p>{t('student.hero.subtitle')}</p>
           </div>
 
           <div
             className={`student-v2-streak ${streakDays >= STREAK_TARGET_DAYS ? 'is-complete' : ''}`}
           >
             <div className="student-v2-streak-head">
-              <strong>{streakDays}/{STREAK_TARGET_DAYS} day streak</strong>
+              <strong>{streakDays}/{STREAK_TARGET_DAYS} {t('student.streak.dayStreak')}</strong>
               <span>
                 {streakDays >= STREAK_TARGET_DAYS
-                  ? "Congrats, you've been on track for 5 days straight!"
-                  : 'Come back tomorrow to move your streak flame forward.'}
+                  ? t('student.streak.complete')
+                  : t('student.streak.continue')}
               </span>
             </div>
 
@@ -1851,7 +1859,7 @@ export default function StudentPage({ pushToast }) {
           >
             <div className="student-v2-progress-inner">
               <strong>{overallProgress}%</strong>
-              <span>Completed</span>
+              <span>{t('student.hero.completed')}</span>
             </div>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
 import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
+import { useTranslation } from 'react-i18next';
 
 const PAGE_SIZE = 6;
 const DETAILS_TABLE_PAGE_SIZE = 4;
@@ -71,6 +72,7 @@ function Modal({ open, title, onClose, children }) {
 }
 
 export default function AdminStudentsPage({ pushToast, embedded = false }) {
+  const { t } = useTranslation();
   const user = getCurrentUser();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -145,7 +147,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
           dateOfBirth: editModel.dateOfBirth || null,
         },
       });
-      pushToast('Student updated successfully.', 'success');
+      pushToast(t('admin.studentsPage.updateSuccess'), 'success');
       setEditModel(null);
       await loadStudents();
       if (details?.id === editModel.id) {
@@ -166,7 +168,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
         method: 'DELETE',
         token: user.token,
       });
-      pushToast('Student deleted successfully.', 'success');
+      pushToast(t('admin.studentsPage.deleteSuccess'), 'success');
       setDeleteTarget(null);
       setDetails((prev) => (prev?.id === deleteTarget.id ? null : prev));
       await loadStudents();
@@ -188,8 +190,8 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
       });
       pushToast(
         action === 'suspend'
-          ? 'Student account suspended.'
-          : 'Student account unsuspended.',
+          ? t('admin.studentsPage.suspendSuccess')
+          : t('admin.studentsPage.unsuspendSuccess'),
         'success',
       );
       setSuspendTarget(null);
@@ -229,18 +231,18 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
       {!embedded && (
       <div className="card panel-head">
         <div>
-          <h1>Student Management</h1>
-          <p className="hint">Paginated searchable list with details, update, and safe deletion.</p>
+          <h1>{t('admin.studentsPage.title')}</h1>
+          <p className="hint">{t('admin.studentsPage.subtitle')}</p>
         </div>
         <div className="row">
           <Link className="link-btn small-btn" to="/admin">
-            Back to Admin
+            {t('admin.formationsPage.backToAdmin')}
           </Link>
           <Link className="link-btn small-btn" to="/admin/formateurs">
-            Formateurs
+            {t('admin.formationsPage.formateursBtn')}
           </Link>
           <Link className="link-btn small-btn" to="/admin/formations">
-            Formations
+            {t('admin.studentsPage.formationsBtn')}
           </Link>
         </div>
       </div>
@@ -248,15 +250,15 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
 
       <div className={embedded ? 'card admin-saas-section' : 'card'}>
         <div className="card-head-row">
-          <h2>Students</h2>
-          <StatusBadge label={`${data.total} total`} tone="blue" />
+          <h2>{t('admin.studentsPage.students')}</h2>
+          <StatusBadge label={t('admin.formationsPage.totalCount', { total: data.total })} tone="blue" />
         </div>
         <div className="table-toolbar">
           <input
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by name or email"
+            placeholder={t('admin.studentsPage.searchStudent')}
           />
         </div>
 
@@ -264,11 +266,11 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
           <table>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone Number</th>
-                <th>Action</th>
+                <th>{t('admin.tables.id')}</th>
+                <th>{t('admin.studentsPage.name')}</th>
+                <th>{t('admin.studentsPage.email')}</th>
+                <th>{t('admin.studentsPage.phoneNumber')}</th>
+                <th>{t('admin.tables.action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -281,7 +283,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                   <td>
                     <div className="row action-btn-group">
                       <button type="button" className="action-btn action-page" onClick={() => openDetails(student.id)}>
-                        Details
+                        {t('admin.formationsPage.detailsBtn')}
                       </button>
                       <button
                         type="button"
@@ -296,7 +298,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                           })
                         }
                       >
-                        Edit
+                        {t('admin.formationsPage.editBtn')}
                       </button>
                       <button
                         type="button"
@@ -313,16 +315,16 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                         disabled={suspendingId === student.id}
                       >
                         {suspendingId === student.id
-                          ? 'Working...'
+                          ? t('admin.studentsPage.working')
                           : student.isSuspended
-                            ? 'Unsuspend'
-                            : 'Suspend'}
+                            ? t('admin.studentsPage.unsuspend')
+                            : t('admin.studentsPage.suspend')}
                       </button>
                       <button
                         type="button"
                         className="action-btn admin-square-trash-btn"
-                        aria-label={`Delete student ${student.name}`}
-                        title="Delete"
+                        aria-label={t('admin.dashboard.deleteContent')}
+                        title={t('admin.dashboard.deleteContent')}
                         onClick={() => setDeleteTarget(student)}
                       >
                         <img src="/images/trash.png" alt="" className="admin-square-trash-icon" />
@@ -333,7 +335,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
               ))}
               {data.items.length === 0 && (
                 <tr>
-                  <td colSpan={5}>{loading ? 'Loading students...' : 'No students found.'}</td>
+                  <td colSpan={5}>{loading ? t('admin.studentsPage.loadingStudents') : t('admin.studentsPage.noStudentsFound')}</td>
                 </tr>
               )}
             </tbody>
@@ -347,10 +349,10 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
             disabled={page <= 1}
             onClick={() => setPage((prev) => Math.max(1, prev - 1))}
           >
-            Prev
+            {t('admin.pagination.prev')}
           </button>
           <span>
-            Page {data.page} / {data.totalPages}
+            {t('admin.pagination.page', { current: data.page, total: data.totalPages })}
           </span>
           <button
             type="button"
@@ -358,12 +360,12 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
             disabled={page >= data.totalPages}
             onClick={() => setPage((prev) => Math.min(data.totalPages, prev + 1))}
           >
-            Next
+            {t('admin.pagination.next')}
           </button>
         </div>
       </div>
 
-      <Modal open={Boolean(details)} title={`Student #${details?.id || ''}`} onClose={() => setDetails(null)}>
+      <Modal open={Boolean(details)} title={t('admin.studentsPage.studentModalTitle', { id: details?.id || '' })} onClose={() => setDetails(null)}>
         {details && (
           <div className="stack">
             <div className="admin-user-detail-identity">
@@ -380,19 +382,19 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
             </div>
             <div className="admin-metric-grid admin-user-detail-cards">
               <article className="admin-metric-card">
-                <p className="hint">Phone Number</p>
+                <p className="hint">{t('admin.studentsPage.phoneNumber')}</p>
                 <strong>{details.phoneNumber || '-'}</strong>
               </article>
               <article className="admin-metric-card">
-                <p className="hint">Date of Birth</p>
+                <p className="hint">{t('admin.studentsPage.dateOfBirth')}</p>
                 <strong>{formatDateOfBirth(details.dateOfBirth)}</strong>
               </article>
               <article className="admin-metric-card">
-                <p className="hint">Total Enrollments</p>
+                <p className="hint">{t('admin.studentsPage.totalEnrollments')}</p>
                 <strong>{details.totalEnrollments}</strong>
               </article>
               <article className="admin-metric-card">
-                <p className="hint">Total Paid</p>
+                <p className="hint">{t('admin.studentsPage.totalPaid')}</p>
                 <strong>{formatMoney(details.totalAmountPaid)}</strong>
               </article>
             </div>
@@ -402,16 +404,16 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                   type="text"
                   value={detailsEnrollmentSearch}
                   onChange={(event) => setDetailsEnrollmentSearch(event.target.value)}
-                  placeholder="Search formation by name"
+                  placeholder={t('admin.studentsPage.searchFormation')}
                 />
               </div>
               <table>
                 <thead>
                   <tr>
-                    <th>Formation</th>
-                    <th>Status</th>
-                    <th>Requested</th>
-                    <th>Invoice</th>
+                    <th>{t('admin.studentsPage.formation')}</th>
+                    <th>{t('admin.studentsPage.status')}</th>
+                    <th>{t('admin.studentsPage.requested')}</th>
+                    <th>{t('admin.studentsPage.invoice')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -427,7 +429,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                   ))}
                   {detailsEnrollmentRows.length === 0 && (
                     <tr>
-                      <td colSpan={4}>No formations found for this search.</td>
+                      <td colSpan={4}>{t('admin.studentsPage.noFormationsFound')}</td>
                     </tr>
                   )}
                 </tbody>
@@ -442,10 +444,10 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                 }
                 disabled={detailsEnrollmentPage === 1}
               >
-                Prev
+                {t('admin.pagination.prev')}
               </button>
               <span>
-                Page {detailsEnrollmentPage} / {detailsEnrollmentTotalPages}
+                {t('admin.pagination.page', { current: detailsEnrollmentPage, total: detailsEnrollmentTotalPages })}
               </span>
               <button
                 type="button"
@@ -457,7 +459,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
                 }
                 disabled={detailsEnrollmentPage === detailsEnrollmentTotalPages}
               >
-                Next
+                {t('admin.pagination.next')}
               </button>
             </div>
           </div>
@@ -466,14 +468,12 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
 
       <Modal
         open={Boolean(suspendTarget)}
-        title={suspendTarget?.isSuspended ? 'Unsuspend Student' : 'Suspend Student'}
+        title={suspendTarget?.isSuspended ? t('admin.studentsPage.unsuspendModalTitle') : t('admin.studentsPage.suspendModalTitle')}
         onClose={() => setSuspendTarget(null)}
       >
         <div className="grid">
           <p>
-            Are you sure you want to{' '}
-            {suspendTarget?.isSuspended ? 'unsuspend' : 'suspend'} this student
-            ?
+            {suspendTarget?.isSuspended ? t('admin.studentsPage.confirmUnsuspend') : t('admin.studentsPage.confirmSuspend')}
           </p>
           <div className="row">
             <button
@@ -483,8 +483,8 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
               disabled={!suspendTarget || suspendingId === suspendTarget.id}
             >
               {suspendTarget && suspendingId === suspendTarget.id
-                ? 'Working...'
-                : 'Confirm'}
+                ? t('admin.studentsPage.working')
+                : t('admin.formationsPage.confirmBtn')}
             </button>
             <button
               type="button"
@@ -492,17 +492,17 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
               onClick={() => setSuspendTarget(null)}
               disabled={suspendTarget && suspendingId === suspendTarget.id}
             >
-              Cancel
+              {t('admin.formationsPage.cancelBtn')}
             </button>
           </div>
         </div>
       </Modal>
 
-      <Modal open={Boolean(editModel)} title={`Edit Student #${editModel?.id || ''}`} onClose={() => setEditModel(null)}>
+      <Modal open={Boolean(editModel)} title={t('admin.studentsPage.editModalTitle', { id: editModel?.id || '' })} onClose={() => setEditModel(null)}>
         {editModel && (
           <form className="grid" onSubmit={onSaveStudent}>
             <label className="grid">
-              <span>Name</span>
+              <span>{t('admin.studentsPage.name')}</span>
               <input
                 type="text"
                 value={editModel.name}
@@ -511,7 +511,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
               />
             </label>
             <label className="grid">
-              <span>Email</span>
+              <span>{t('admin.studentsPage.email')}</span>
               <input
                 type="email"
                 value={editModel.email}
@@ -520,7 +520,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
               />
             </label>
             <label className="grid">
-              <span>Phone Number</span>
+              <span>{t('admin.studentsPage.phoneNumber')}</span>
               <input
                 type="text"
                 value={editModel.phoneNumber || ''}
@@ -530,7 +530,7 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
               />
             </label>
             <label className="grid">
-              <span>Date of Birth</span>
+              <span>{t('admin.studentsPage.dateOfBirth')}</span>
               <input
                 type="date"
                 value={editModel.dateOfBirth || ''}
@@ -541,29 +541,29 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
             </label>
             <div className="row">
               <button type="submit" className="action-btn admin-student-edit-save" disabled={saving}>
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? t('admin.formationsPage.saving') : t('admin.formationsPage.saveBtn')}
               </button>
               <button
                 type="button"
                 className="action-btn admin-student-edit-cancel"
                 onClick={() => setEditModel(null)}
               >
-                Cancel
+                {t('admin.formationsPage.cancelBtn')}
               </button>
             </div>
           </form>
         )}
       </Modal>
 
-      <Modal open={Boolean(deleteTarget)} title="Delete Student" onClose={() => setDeleteTarget(null)}>
+      <Modal open={Boolean(deleteTarget)} title={t('admin.studentsPage.deleteModalTitle')} onClose={() => setDeleteTarget(null)}>
         <div className="grid">
-          <p>Are you sure you want to delete this student? This action cannot be undone.</p>
+          <p>{t('admin.studentsPage.confirmDeleteStudent')}</p>
           <div className="row">
             <button type="button" className="action-btn action-reject" onClick={onConfirmDelete} disabled={saving}>
-              {saving ? 'Deleting...' : 'Confirm'}
+              {saving ? t('admin.formationsPage.deleting') : t('admin.formationsPage.confirmBtn')}
             </button>
             <button type="button" className="action-btn modal-cancel-btn" onClick={() => setDeleteTarget(null)} disabled={saving}>
-              Cancel
+              {t('admin.formationsPage.cancelBtn')}
             </button>
           </div>
         </div>

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { apiRequest } from '../api';
 
 export default function SignupPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '',
@@ -30,7 +32,7 @@ export default function SignupPage() {
         method: 'POST',
         body: form,
       });
-      setMessage('Account created. You can now login.');
+      setMessage(t('signup.successMessage'));
       setTimeout(() => navigate('/login'), 900);
     } catch (err) {
       setError(err.message);
@@ -41,8 +43,8 @@ export default function SignupPage() {
     <section className="auth-page">
       <article className="card auth-card">
         <div className="auth-head">
-          <h1>Create Account</h1>
-          <p className="hint">Join InnovaLearn and start your journey.</p>
+          <h1>{t('signup.title')}</h1>
+          <p className="hint">{t('signup.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="grid auth-form">
@@ -55,7 +57,7 @@ export default function SignupPage() {
             </span>
             <input
               name="name"
-              placeholder="Full name"
+              placeholder={t('signup.namePlaceholder')}
               value={form.name}
               onChange={updateField}
               required
@@ -72,7 +74,7 @@ export default function SignupPage() {
             <input
               name="email"
               type="email"
-              placeholder="Email address"
+              placeholder={t('signup.emailPlaceholder')}
               value={form.email}
               onChange={updateField}
               required
@@ -89,7 +91,7 @@ export default function SignupPage() {
             <input
               name="phoneNumber"
               type="tel"
-              placeholder="Phone number"
+              placeholder={t('signup.phonePlaceholder')}
               value={form.phoneNumber}
               onChange={updateField}
               required
@@ -106,7 +108,7 @@ export default function SignupPage() {
             <input
               name="dateOfBirth"
               type="date"
-              placeholder="Date of birth"
+              placeholder={t('signup.dobPlaceholder')}
               value={form.dateOfBirth}
               onChange={updateField}
               required
@@ -122,9 +124,9 @@ export default function SignupPage() {
               </svg>
             </span>
             <select name="role" value={form.role} onChange={updateField}>
-              <option value="STUDENT">Student</option>
-              <option value="FORMATEUR">Formateur</option>
-              <option value="ADMIN">Admin</option>
+              <option value="STUDENT">{t('signup.roleStudent')}</option>
+              <option value="FORMATEUR">{t('signup.roleFormateur')}</option>
+              <option value="ADMIN">{t('signup.roleAdmin')}</option>
             </select>
           </label>
 
@@ -138,7 +140,7 @@ export default function SignupPage() {
             <input
               name="password"
               type="password"
-              placeholder="Password"
+              placeholder={t('signup.passwordPlaceholder')}
               value={form.password}
               onChange={updateField}
               required
@@ -146,7 +148,7 @@ export default function SignupPage() {
           </label>
 
           <button type="submit" className="auth-submit-btn">
-            Create account
+            {t('signup.submitButton')}
           </button>
         </form>
 
@@ -154,11 +156,11 @@ export default function SignupPage() {
         {error && <p className="error">{error}</p>}
 
         <div className="auth-foot">
-          <p className="hint">Formateur accounts must be approved by admin before login works.</p>
+          <p className="hint">{t('signup.formateurNotice')}</p>
           <p className="hint">
-            Already have an account?{' '}
+            {t('signup.hasAccount')}{' '}
             <Link to="/login" className="auth-inline-link">
-              Login
+              {t('signup.loginLink')}
             </Link>
           </p>
         </div>

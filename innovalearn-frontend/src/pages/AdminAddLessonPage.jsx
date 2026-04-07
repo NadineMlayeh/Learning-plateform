@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminAddLessonPage({ pushToast }) {
+  const { t } = useTranslation();
   const user = getCurrentUser();
   const navigate = useNavigate();
   const { courseId } = useParams();
@@ -23,7 +25,7 @@ export default function AdminAddLessonPage({ pushToast }) {
         token: user.token,
         body: { title, pdfUrl },
       });
-      pushToast('Lesson created.', 'success');
+      pushToast(t('formateur.manage.lessonCreatedSuccess'), 'success');
       navigate(formationId ? `/formateur/formations/${formationId}` : '/formateur');
     } catch (err) {
       pushToast(err.message, 'error');
@@ -46,15 +48,15 @@ export default function AdminAddLessonPage({ pushToast }) {
         }
       >
         <span aria-hidden="true">&lt;</span>
-        <span>Back to Formation</span>
+        <span>{t('formateur.manage.backToFormation')}</span>
       </button>
 
       <section className="card">
-        <h1>Add Lesson</h1>
+        <h1>{t('formateur.manage.addLessonTitle')}</h1>
         <form className="grid" onSubmit={handleSubmit}>
-          <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Lesson title" required />
-          <input value={pdfUrl} onChange={(event) => setPdfUrl(event.target.value)} placeholder="PDF URL" required />
-          <button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating...' : 'Create Lesson'}</button>
+          <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder={t('formateur.manage.lessonTitlePlaceholder')} required />
+          <input value={pdfUrl} onChange={(event) => setPdfUrl(event.target.value)} placeholder={t('formateur.manage.pdfUrlPlaceholder')} required />
+          <button type="submit" disabled={isSubmitting}>{isSubmitting ? t('formateur.manage.creating') : t('formateur.manage.createLesson')}</button>
         </form>
       </section>
     </>
