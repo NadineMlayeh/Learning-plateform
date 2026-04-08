@@ -721,6 +721,7 @@ export default function AdminPage({ pushToast }) {
           </div>
         </div>
 
+        <div className="admin-saas-scrollable">
         {isDashboardSection ? (
           <>
         <div className="card admin-saas-section admin-saas-overview">
@@ -1448,6 +1449,7 @@ export default function AdminPage({ pushToast }) {
             <p className="hint">Section not found.</p>
           </div>
         )}
+        </div>
       </div>
 
       {formateurPreview && (

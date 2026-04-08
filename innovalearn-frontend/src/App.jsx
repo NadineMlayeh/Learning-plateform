@@ -96,7 +96,7 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${isAdminAreaPage ? ' app-shell-admin' : ''}`}>
       {!isLandingPage && <NavBar />}
       <main
         className={
@@ -106,10 +106,10 @@ export default function App() {
               ? 'contact-main'
             : isAuthPage
               ? 'auth-main'
-              : isStudentFormationDetailsPage
-                ? 'container container-wide'
-                : isAdminAreaPage
+                : isStudentFormationDetailsPage
                   ? 'container container-wide'
+                : isAdminAreaPage
+                  ? 'container container-wide admin-layout-main'
                 : isFormateurFormationViewPage
                   ? 'container formation-manage-container'
                 : 'container'
