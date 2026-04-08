@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
 import { useTranslation } from 'react-i18next';
+import { getErrorTranslationKey } from '../errorTranslations';
 
 export default function AdminAddQuizPage({ pushToast }) {
   const { t } = useTranslation();
@@ -86,7 +87,8 @@ export default function AdminAddQuizPage({ pushToast }) {
       pushToast(t('formateur.manage.quizCreatedSuccess'), 'success');
       navigate(formationId ? `/formateur/formations/${formationId}` : '/formateur');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setIsSubmitting(false);
     }

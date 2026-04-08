@@ -5,6 +5,7 @@ import { getCurrentUser } from '../auth';
 import StatusBadge from '../components/StatusBadge';
 import LoadingButton from '../components/LoadingButton';
 import { useTranslation } from 'react-i18next';
+import { getErrorTranslationKey } from '../errorTranslations';
 
 const FORMATION_PUBLISH_TS_KEY = 'formateur_published_at_map_v1';
 
@@ -175,7 +176,8 @@ export default function AdminFormationPage({ pushToast }) {
       }));
       pushToast(t('formateur.manage.formationPublishedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setPublishingFormation(false);
     }
@@ -198,7 +200,8 @@ export default function AdminFormationPage({ pushToast }) {
       }));
       pushToast(t('formateur.manage.coursePublishedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setPublishingCourseId(null);
     }
@@ -218,7 +221,8 @@ export default function AdminFormationPage({ pushToast }) {
         'success',
       );
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setDeletingCourseId(null);
     }
@@ -293,7 +297,8 @@ export default function AdminFormationPage({ pushToast }) {
       setThumbnailName(file.name || 'thumbnail');
       pushToast(t('formateur.manage.thumbnailUpdatedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setThumbnailUploading(false);
       event.target.value = '';
@@ -350,7 +355,8 @@ export default function AdminFormationPage({ pushToast }) {
       setFormationFieldValue('');
       pushToast(t('formateur.manage.formationUpdatedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setSavingFormationField(false);
     }
@@ -392,7 +398,8 @@ export default function AdminFormationPage({ pushToast }) {
       closeAddCourseModal();
       pushToast(t('formateur.manage.courseCreatedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setCreatingCourse(false);
     }
@@ -432,7 +439,8 @@ export default function AdminFormationPage({ pushToast }) {
       closeAddLessonModal();
       pushToast(t('formateur.manage.lessonCreatedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setCreatingLesson(false);
     }
@@ -531,7 +539,8 @@ export default function AdminFormationPage({ pushToast }) {
       closeAddQuizModal();
       pushToast(t('formateur.manage.quizCreatedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setCreatingQuiz(false);
     }
@@ -580,7 +589,8 @@ export default function AdminFormationPage({ pushToast }) {
       setEditingLessonId(null);
       pushToast(t('formateur.manage.lessonUpdatedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setSavingLessonId(null);
     }
@@ -600,7 +610,8 @@ export default function AdminFormationPage({ pushToast }) {
       setConfirmDeleteLessonId(null);
       pushToast(response?.message || t('formateur.manage.lessonDeletedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setDeletingLessonId(null);
     }
@@ -726,7 +737,8 @@ export default function AdminFormationPage({ pushToast }) {
       setEditingQuizId(null);
       pushToast(t('formateur.manage.quizUpdatedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setSavingQuizId(null);
     }
@@ -746,7 +758,8 @@ export default function AdminFormationPage({ pushToast }) {
       setConfirmDeleteQuizId(null);
       pushToast(response?.message || t('formateur.manage.quizDeletedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setDeletingQuizId(null);
     }
@@ -853,7 +866,8 @@ export default function AdminFormationPage({ pushToast }) {
       setFormation((prev) => ({ ...prev, ...updated }));
       pushToast(t('formateur.manage.formationUpdatedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setSavingFormationDraft(false);
     }

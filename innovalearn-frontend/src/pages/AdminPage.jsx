@@ -4,6 +4,7 @@ import { apiRequest, resolveApiAssetUrl } from '../api';
 import { getCurrentUser } from '../auth';
 import StatusBadge from '../components/StatusBadge';
 import { useTranslation } from 'react-i18next';
+import { getErrorTranslationKey } from '../errorTranslations';
 import AdminStudentsPage from './AdminStudentsPage';
 import AdminFormateursPage from './AdminFormateursPage';
 import AdminFormationsPage from './AdminFormationsPage';
@@ -100,7 +101,8 @@ export default function AdminPage({ pushToast }) {
       const users = await apiRequest('/users', { token: user.token });
       setFormateurs(users.filter((entry) => entry.role === 'FORMATEUR'));
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     }
   }
 
@@ -111,7 +113,8 @@ export default function AdminPage({ pushToast }) {
       });
       setEnrollments(data);
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     }
   }
 
@@ -122,7 +125,8 @@ export default function AdminPage({ pushToast }) {
       });
       setAdminInvoices(data);
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     }
   }
 
@@ -143,7 +147,8 @@ export default function AdminPage({ pushToast }) {
       setReviewsTotal(Number(data?.total || 0));
       setReviewsTotalPages(Math.max(1, Number(data?.totalPages || 1)));
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setLoadingReviews(false);
     }
@@ -165,7 +170,8 @@ export default function AdminPage({ pushToast }) {
       const current = await apiRequest('/users/me', { token: user.token });
       setAdminSettingsEmail(current?.email || '');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     }
   }
 
@@ -215,7 +221,8 @@ export default function AdminPage({ pushToast }) {
       await loadFormateurs();
       await loadOverview();
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setProcessingFormateurId(null);
     }
@@ -233,7 +240,8 @@ export default function AdminPage({ pushToast }) {
       await loadFormateurs();
       await loadOverview();
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setProcessingFormateurId(null);
     }
@@ -257,7 +265,8 @@ export default function AdminPage({ pushToast }) {
       await loadFormateurs();
       await loadOverview();
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setProcessingFormateurId(null);
     }
@@ -275,7 +284,8 @@ export default function AdminPage({ pushToast }) {
       await loadFormateurs();
       await loadOverview();
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setProcessingFormateurId(null);
     }
@@ -303,7 +313,8 @@ export default function AdminPage({ pushToast }) {
       await loadAdminInvoices();
       await loadOverview();
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setProcessingEnrollmentId(null);
     }
@@ -1256,9 +1267,9 @@ export default function AdminPage({ pushToast }) {
         ) : currentAdminPath === '/admin/reviews' ? (
           <div className="card admin-saas-section">
             <div className="card-head-row">
-              <h2>Reviews</h2>
+              <h2>{t('admin.adminPage.reviews.title')}</h2>
               <StatusBadge
-                label={`${reviewsTotal} reviews`}
+                label={t('admin.adminPage.reviews.reviewsCount', { count: reviewsTotal })}
                 tone={reviewsTotal > 0 ? 'blue' : 'gray'}
               />
             </div>
@@ -1268,7 +1279,7 @@ export default function AdminPage({ pushToast }) {
                 type="text"
                 value={reviewsSearch}
                 onChange={(event) => setReviewsSearch(event.target.value)}
-                placeholder="Search by email"
+                placeholder={t('admin.adminPage.reviews.searchPlaceholder')}
               />
             </div>
 
@@ -1276,10 +1287,10 @@ export default function AdminPage({ pushToast }) {
               <table>
                 <thead>
                   <tr>
-                    <th>Email</th>
-                    <th>Note Description</th>
-                    <th>Stars</th>
-                    <th>Created</th>
+                    <th>{t('admin.adminPage.reviews.emailCol')}</th>
+                    <th>{t('admin.adminPage.reviews.noteCol')}</th>
+                    <th>{t('admin.adminPage.reviews.starsCol')}</th>
+                    <th>{t('admin.adminPage.reviews.createdCol')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1298,12 +1309,12 @@ export default function AdminPage({ pushToast }) {
                   ))}
                   {!loadingReviews && adminReviews.length === 0 && (
                     <tr>
-                      <td colSpan={4}>No reviews match your search.</td>
+                      <td colSpan={4}>{t('admin.adminPage.reviews.noReviews')}</td>
                     </tr>
                   )}
                   {loadingReviews && (
                     <tr>
-                      <td colSpan={4}>Loading reviews...</td>
+                      <td colSpan={4}>{t('admin.adminPage.reviews.loading')}</td>
                     </tr>
                   )}
                 </tbody>
@@ -1337,10 +1348,10 @@ export default function AdminPage({ pushToast }) {
         ) : currentAdminPath === '/admin/settings' ? (
           <div className="card admin-saas-section admin-settings-section">
             
-            <h2> Password Settings</h2>
+            <h2>{t('admin.adminPage.settings.title')}</h2>
             <form className="admin-settings-password-form" onSubmit={saveAdminPassword}>
               <label className="profile-edit-field">
-                <span>Email</span>
+                <span>{t('admin.adminPage.settings.email')}</span>
                 <input
                   type="email"
                   value={adminSettingsEmail}
@@ -1350,7 +1361,7 @@ export default function AdminPage({ pushToast }) {
               </label>
 
               <label className="profile-edit-field">
-                <span>Old password</span>
+                <span>{t('admin.adminPage.settings.oldPassword')}</span>
                 <input
                   type="password"
                   value={adminPasswordForm.oldPassword}
@@ -1365,7 +1376,7 @@ export default function AdminPage({ pushToast }) {
               </label>
 
               <label className="profile-edit-field">
-                <span>New password</span>
+                <span>{t('admin.adminPage.settings.newPassword')}</span>
                 <input
                   type="password"
                   value={adminPasswordForm.newPassword}
@@ -1380,7 +1391,7 @@ export default function AdminPage({ pushToast }) {
               </label>
 
               <label className="profile-edit-field">
-                <span>Confirm password</span>
+                <span>{t('admin.adminPage.settings.confirmPassword')}</span>
                 <input
                   type="password"
                   value={adminPasswordForm.confirmNewPassword}
@@ -1396,12 +1407,12 @@ export default function AdminPage({ pushToast }) {
 
               {adminPasswordError && (
                 <article className="auth-error-box" role="alert" aria-live="assertive">
-                  <p className="auth-error-title">⚠ Password Reset Failed</p>
+                  <p className="auth-error-title">{t('admin.adminPage.settings.errorTitle')}</p>
                   <p className="auth-error-body">{adminPasswordError}</p>
                 </article>
               )}
               {adminPasswordSuccess && (
-                <p className="hint admin-password-success">{adminPasswordSuccess}</p>
+                <p className="hint admin-password-success">{t('admin.adminPage.settings.updateSuccess')}</p>
               )}
 
               <div className="admin-settings-password-actions">
@@ -1410,7 +1421,7 @@ export default function AdminPage({ pushToast }) {
                   className="profile-save-btn"
                   disabled={savingAdminPassword}
                 >
-                  {savingAdminPassword ? 'Saving...' : 'Save'}
+                  {savingAdminPassword ? t('admin.adminPage.settings.savingBtn') : t('admin.adminPage.settings.saveBtn')}
                 </button>
                 <button
                   type="button"
@@ -1427,7 +1438,7 @@ export default function AdminPage({ pushToast }) {
                   }}
                   disabled={savingAdminPassword}
                 >
-                  Cancel
+                  {t('admin.adminPage.settings.cancelBtn')}
                 </button>
               </div>
             </form>
@@ -1449,7 +1460,7 @@ export default function AdminPage({ pushToast }) {
           />
           <article className="admin-modal-card admin-formateur-preview-card">
             <div className="admin-modal-head">
-              <h2>Formateur Preview</h2>
+              <h2>{t('admin.adminPage.formateurApprovals.previewTitle')}</h2>
               <button
                 type="button"
                 className="admin-modal-close"
@@ -1469,7 +1480,7 @@ export default function AdminPage({ pushToast }) {
                 </div>
                 <div className="admin-formateur-preview-main">
                   <h3>{formateurPreview.name || '-'}</h3>
-                  <p>Formateur</p>
+                  <p>{t('admin.adminPage.formateurApprovals.previewRole')}</p>
                   <StatusBadge
                     label={formateurPreview.formateurStatus || 'PENDING'}
                     tone={statusTone(formateurPreview.formateurStatus || 'PENDING')}
@@ -1479,15 +1490,15 @@ export default function AdminPage({ pushToast }) {
 
               <div className="admin-metric-grid admin-user-detail-cards">
                 <article className="admin-metric-card">
-                  <p className="hint">Email</p>
+                  <p className="hint">{t('admin.formateursPage.email')}</p>
                   <strong>{formateurPreview.email || '-'}</strong>
                 </article>
                 <article className="admin-metric-card">
-                  <p className="hint">Phone Number</p>
+                  <p className="hint">{t('admin.formateursPage.phoneNumber')}</p>
                   <strong>{formateurPreview.phoneNumber || '-'}</strong>
                 </article>
                 <article className="admin-metric-card">
-                  <p className="hint">Date of Birth</p>
+                  <p className="hint">{t('admin.formateursPage.dateOfBirth')}</p>
                   <strong>
                     {formateurPreview.dateOfBirth
                       ? new Date(formateurPreview.dateOfBirth).toLocaleDateString()
@@ -1495,7 +1506,7 @@ export default function AdminPage({ pushToast }) {
                   </strong>
                 </article>
                 <article className="admin-metric-card">
-                  <p className="hint">Member Since</p>
+                  <p className="hint">{t('admin.adminPage.formateurApprovals.memberSince')}</p>
                   <strong>
                     {formateurPreview.createdAt
                       ? new Date(formateurPreview.createdAt).toLocaleDateString()
@@ -1503,7 +1514,7 @@ export default function AdminPage({ pushToast }) {
                   </strong>
                 </article>
                 <article className="admin-metric-card admin-formateur-preview-bio-card">
-                  <p className="hint">Bio</p>
+                  <p className="hint">{t('admin.adminPage.formateurApprovals.bio')}</p>
                   <strong>{formateurPreview.bio?.trim() || '-'}</strong>
                 </article>
               </div>
@@ -1523,7 +1534,7 @@ export default function AdminPage({ pushToast }) {
           />
           <article className="admin-modal-card confirm-delete-modal">
             <div className="admin-modal-head">
-              <h2>Reject Student</h2>
+              <h2>{t('admin.adminPage.enrollments.rejectModalTitle')}</h2>
               <button
                 type="button"
                 className="admin-modal-close"
@@ -1536,11 +1547,9 @@ export default function AdminPage({ pushToast }) {
             </div>
             <div className="admin-modal-body">
               <p>
-                Are you sure you want to reject this student
-                {confirmRejectEnrollment?.student?.name
-                  ? ` "${confirmRejectEnrollment.student.name}"`
-                  : ''}
-                ?
+                {t('admin.adminPage.enrollments.rejectConfirm', {
+                  name: confirmRejectEnrollment?.student?.name || ''
+                })}
               </p>
               <div className="row confirm-delete-actions">
                 <button
@@ -1549,7 +1558,7 @@ export default function AdminPage({ pushToast }) {
                   onClick={() => setConfirmRejectEnrollment(null)}
                   disabled={Boolean(processingEnrollmentId)}
                 >
-                  Cancel
+                  {t('admin.formationsPage.cancelBtn')}
                 </button>
                 <button
                   type="button"
@@ -1560,8 +1569,8 @@ export default function AdminPage({ pushToast }) {
                   disabled={processingEnrollmentId === confirmRejectEnrollment.id}
                 >
                   {processingEnrollmentId === confirmRejectEnrollment.id
-                    ? 'Rejecting...'
-                    : 'Reject'}
+                    ? t('admin.adminPage.enrollments.working')
+                    : t('admin.adminPage.enrollments.rejectBtn')}
                 </button>
               </div>
             </div>
@@ -1580,7 +1589,7 @@ export default function AdminPage({ pushToast }) {
           />
           <article className="admin-modal-card confirm-delete-modal">
             <div className="admin-modal-head">
-              <h2>Reject Formateur</h2>
+              <h2>{t('admin.adminPage.formateurApprovals.rejectModalTitle')}</h2>
               <button
                 type="button"
                 className="admin-modal-close"
@@ -1593,11 +1602,9 @@ export default function AdminPage({ pushToast }) {
             </div>
             <div className="admin-modal-body">
               <p>
-                Are you sure you want to reject this formateur
-                {confirmRejectFormateur?.name
-                  ? ` "${confirmRejectFormateur.name}"`
-                  : ''}
-                ?
+                {t('admin.adminPage.formateurApprovals.rejectConfirm', {
+                  name: confirmRejectFormateur?.name || ''
+                })}
               </p>
               <div className="row confirm-delete-actions">
                 <button
@@ -1606,7 +1613,7 @@ export default function AdminPage({ pushToast }) {
                   onClick={() => setConfirmRejectFormateur(null)}
                   disabled={Boolean(processingFormateurId)}
                 >
-                  Cancel
+                  {t('admin.formationsPage.cancelBtn')}
                 </button>
                 <button
                   type="button"
@@ -1615,8 +1622,8 @@ export default function AdminPage({ pushToast }) {
                   disabled={processingFormateurId === confirmRejectFormateur.id}
                 >
                   {processingFormateurId === confirmRejectFormateur.id
-                    ? 'Rejecting...'
-                    : 'Reject'}
+                    ? t('admin.adminPage.enrollments.working')
+                    : t('admin.adminPage.enrollments.rejectBtn')}
                 </button>
               </div>
             </div>
@@ -1635,7 +1642,7 @@ export default function AdminPage({ pushToast }) {
           />
           <article className="admin-modal-card confirm-delete-modal">
             <div className="admin-modal-head">
-              <h2>Approve Rejected Formateur</h2>
+              <h2>{t('admin.adminPage.formateurApprovals.approveRejectedTitle')}</h2>
               <button
                 type="button"
                 className="admin-modal-close"
@@ -1648,12 +1655,9 @@ export default function AdminPage({ pushToast }) {
             </div>
             <div className="admin-modal-body">
               <p>
-                Choose how you want to approve this previously rejected
-                formateur
-                {confirmResolveFormateur?.entry?.name
-                  ? ` "${confirmResolveFormateur.entry.name}"`
-                  : ''}
-                .
+                {t('admin.adminPage.formateurApprovals.approveRejectedConfirm', {
+                  name: confirmResolveFormateur?.entry?.name || ''
+                })}
               </p>
               <div className="admin-approve-role-options">
                 <label
@@ -1678,7 +1682,7 @@ export default function AdminPage({ pushToast }) {
                     disabled={Boolean(processingFormateurId)}
                   />
                   <span className="admin-approve-role-radio" aria-hidden="true" />
-                  <span>Approve as formateur</span>
+                  <span>{t('admin.adminPage.formateurApprovals.approveAsFormateur')}</span>
                 </label>
                 <label
                   className={`admin-approve-role-option${
@@ -1700,7 +1704,7 @@ export default function AdminPage({ pushToast }) {
                     disabled={Boolean(processingFormateurId)}
                   />
                   <span className="admin-approve-role-radio" aria-hidden="true" />
-                  <span>Approve as student</span>
+                  <span>{t('admin.adminPage.formateurApprovals.approveAsStudent')}</span>
                 </label>
               </div>
               <div className="row confirm-delete-actions">
@@ -1710,7 +1714,7 @@ export default function AdminPage({ pushToast }) {
                   onClick={() => setConfirmResolveFormateur(null)}
                   disabled={Boolean(processingFormateurId)}
                 >
-                  Cancel
+                  {t('admin.formationsPage.cancelBtn')}
                 </button>
                 <button
                   type="button"
@@ -1726,8 +1730,8 @@ export default function AdminPage({ pushToast }) {
                   }
                 >
                   {processingFormateurId === confirmResolveFormateur.entry.id
-                    ? 'Approving...'
-                    : 'Confirm'}
+                    ? t('admin.adminPage.formateurApprovals.working')
+                    : t('admin.formationsPage.confirmBtn')}
                 </button>
               </div>
             </div>
@@ -1746,7 +1750,7 @@ export default function AdminPage({ pushToast }) {
           />
           <article className="admin-modal-card confirm-delete-modal">
             <div className="admin-modal-head">
-              <h2>Delete Rejected Formateur</h2>
+              <h2>{t('admin.adminPage.formateurApprovals.deleteRejectedTitle')}</h2>
               <button
                 type="button"
                 className="admin-modal-close"
@@ -1759,15 +1763,11 @@ export default function AdminPage({ pushToast }) {
             </div>
             <div className="admin-modal-body">
               <p>
-                Are you sure you want to delete the rejected instructor
-                {confirmDeleteRejectedFormateur?.name
-                  ? ` ${confirmDeleteRejectedFormateur.name}`
-                  : ''}
-                ?
+                {t('admin.adminPage.formateurApprovals.deleteRejectedConfirm1', {
+                  name: confirmDeleteRejectedFormateur?.name || ''
+                })}
                 <br />
-                Deleting this instructor will remove the email restriction,
-                allowing them to submit a new request for a Formateur account
-                through the signup form.
+                {t('admin.adminPage.formateurApprovals.deleteRejectedConfirm2')}
               </p>
               <div className="row confirm-delete-actions">
                 <button
@@ -1776,7 +1776,7 @@ export default function AdminPage({ pushToast }) {
                   onClick={() => setConfirmDeleteRejectedFormateur(null)}
                   disabled={Boolean(processingFormateurId)}
                 >
-                  Cancel
+                  {t('admin.formationsPage.cancelBtn')}
                 </button>
                 <button
                   type="button"
@@ -1789,8 +1789,8 @@ export default function AdminPage({ pushToast }) {
                   }
                 >
                   {processingFormateurId === confirmDeleteRejectedFormateur.id
-                    ? 'Deleting...'
-                    : 'Delete'}
+                    ? t('admin.dashboard.deleting')
+                    : t('admin.dashboard.deleteContent')}
                 </button>
               </div>
             </div>

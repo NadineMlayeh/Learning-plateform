@@ -5,6 +5,7 @@ import { getCurrentUser } from '../auth';
 import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 import { useTranslation } from 'react-i18next';
+import { getErrorTranslationKey } from '../errorTranslations';
 
 const PAGE_SIZE = 6;
 const DETAILS_TABLE_PAGE_SIZE = 4;
@@ -96,7 +97,8 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
       );
       setData(response);
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -109,7 +111,8 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
       setDetailsEnrollmentPage(1);
       setDetails(response);
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     }
   }
 
@@ -154,7 +157,8 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
         await openDetails(editModel.id);
       }
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setSaving(false);
     }
@@ -173,7 +177,8 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
       setDetails((prev) => (prev?.id === deleteTarget.id ? null : prev));
       await loadStudents();
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setSaving(false);
     }
@@ -200,7 +205,8 @@ export default function AdminStudentsPage({ pushToast, embedded = false }) {
         await openDetails(target.id);
       }
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setSuspendingId((prev) => (prev === target.id ? null : prev));
     }

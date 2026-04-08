@@ -165,6 +165,22 @@
       "copyright": "© 2026 InnovaLearn. Tous droits reserves."
     }
   },
+  "contact": {
+    "title": "Partagez votre avis",
+    "subtitle": "Partagez vos commentaires avec notre équipe. Nous lisons chaque message.",
+    "email": "Email",
+    "emailPlaceholder": "vous@exemple.com",
+    "noteDescription": "Votre avis",
+    "notePlaceholder": "Écrivez votre avis...",
+    "rateUs": "Évaluez-nous",
+    "submitButton": "Envoyer",
+    "submittingButton": "Envoi en cours...",
+    "successMessage": "Merci pour vos commentaires. Nous avons bien reçu votre avis.",
+    "emailRequired": "L'email est requis.",
+    "noteRequired": "La description de l'avis est requise.",
+    "ratingRequired": "Veuillez choisir une note entre 1 et 5 étoiles.",
+    "submitError": "Impossible d'envoyer votre note pour le moment."
+  },
   "login": {
     "title": "Bon retour",
     "subtitle": "Connectez-vous pour accéder à votre tableau de bord.",
@@ -489,7 +505,23 @@
       "correctAnswerSuffix": " (Bonne réponse)",
       "noCourseYetForFormation": "Aucun cours pour cette formation pour le moment.",
       "online": "EN LIGNE",
-      "presentiel": "PRESENTIEL"
+      "presentiel": "PRESENTIEL",
+      "errors": {
+        "allCoursesMustBePublished": "Tous les cours doivent être publiés avant de publier la formation",
+        "courseMustHaveAtLeastOneLesson": "Le cours doit avoir au moins 1 leçon",
+        "courseMustHaveAtLeastThreeQuizzes": "Le cours doit avoir au moins 3 quiz",
+        "publishedFormationCannotBeAltered": "La formation publiée ne peut pas être modifiée",
+        "presentielFormationCannotContainOnlineCourses": "La formation présentielle ne peut pas contenir de cours en ligne",
+        "onlyPendingCoursesCanBeDeleted": "Seuls les cours en attente (brouillon) peuvent être supprimés",
+        "titleCannotBeEmpty": "Le titre ne peut pas être vide",
+        "descriptionCannotBeEmpty": "La description ne peut pas être vide",
+        "priceMustBeValidNonNegativeNumber": "Le prix doit être un nombre valide positif ou nul",
+        "invalidFormationType": "Type de formation invalide",
+        "invalidStartDate": "Date de début invalide",
+        "invalidEndDate": "Date de fin invalide",
+        "courseTitleCannotBeEmpty": "Le titre du cours ne peut pas être vide",
+        "atLeastOneEditableFieldRequired": "Au moins un champ modifiable est requis"
+      }
     }
   },
   "admin": {
@@ -616,7 +648,7 @@
         "studentsEnrollments": "Inscriptions étudiants",
         "formateurs": "Formateurs",
         "formateursManagement": "Gestion des formateurs",
-        "formateurApprovals": "Approbations formateurs",
+        "formateurApprovals": "validation des formateurs",
         "formations": "Formations",
         "revenue": "Revenus",
         "reviews": "Avis",
@@ -624,8 +656,8 @@
         "settings": "Paramètres"
       },
       "header": {
-        "title": "Tableau de bord Administrateur",
-        "subtitle": "Gérez les approbations et utilisez des sections dédiées pour tous les utilisateurs."
+        "title": "Tableau de bord Admin",
+        "subtitle": "Gérez les validations et utilisez des sections dédiées pour tous les utilisateurs."
       },
       "overview": {
         "title": "Aperçu global",
@@ -660,7 +692,7 @@
         "actionSuccess": "L'inscription #{{id}} a été {{action}} avec succès."
       },
       "formateurApprovals": {
-        "title": "Approbations des formateurs",
+        "title": "Validation des formateurs",
         "searchPlaceholder": "Rechercher par nom de formateur",
         "sortRefused": "Refusé uniquement",
         "viewBtn": "Aperçu",
@@ -712,7 +744,7 @@
         "reviewsCount": "{{count}} avis",
         "searchPlaceholder": "Rechercher par email",
         "emailCol": "Email",
-        "noteCol": "Description de la note",
+        "noteCol": "Votre avis",
         "starsCol": "Étoiles",
         "createdCol": "Créé le",
         "noReviews": "Aucun avis ne correspond à votre recherche.",
@@ -734,7 +766,7 @@
     },
     "formateursPage": {
       "title": "Gestion des formateurs",
-      "subtitle": "Gérez les formateurs, les approbations, les mises à jour de profil, les analyses et la suppression contrôlée.",
+      "subtitle": "Gérez les formateurs, les validations, les mises à jour de profil, les analyses et la suppression contrôlée.",
       "studentsBtn": "Étudiants",
       "formationsBtn": "Formations",
       "formateurs": "Formateurs",
@@ -827,6 +859,28 @@
       "yes": "Oui",
       "no": "Non",
       "searchStudent": "Rechercher l'étudiant par nom"
+    },
+    "revenuePage": {
+      "title": "Tableau de bord des revenus",
+      "subtitle": "Suivez les revenus totaux, les performances des formations et les analyses financières.",
+      "totalRevenue": "Revenus totaux",
+      "totalRevenueAllTime": "Revenus totaux (tout le temps)",
+      "revenueThisMonth": "Revenus ce mois-ci",
+      "monthlyRevenueTrend": "Tendance des revenus mensuels ({{year}})",
+      "revenuePerFormation": "Revenus par formation",
+      "topPerformingFormations": "Formations les plus performantes",
+      "formation": "Formation",
+      "instructor": "Formateur",
+      "revenue": "Revenus",
+      "enrollments": "Inscriptions",
+      "averagePrice": "Prix moyen",
+      "searchByFormationName": "Rechercher par nom de formation",
+      "highestRevenue": "Revenus les plus élevés",
+      "leastRevenue": "Revenus les moins élevés",
+      "noData": "Aucune donnée de revenus disponible pour le moment.",
+      "loading": "Chargement des données de revenus...",
+      "refresh": "Actualiser les données",
+      "export": "Exporter le rapport"
     },
     "pagination": {
       "prev": "Précédent",

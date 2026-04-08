@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
 import { useTranslation } from 'react-i18next';
+import { getErrorTranslationKey } from '../errorTranslations';
 
 export default function AdminAddFormationPage({ pushToast }) {
   const { t } = useTranslation();
@@ -66,7 +67,8 @@ export default function AdminAddFormationPage({ pushToast }) {
       pushToast(t('formateur.manage.formationCreatedSuccess'), 'success');
       navigate(`/formateur/formations/${created.id}`);
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -89,7 +91,8 @@ export default function AdminAddFormationPage({ pushToast }) {
       setThumbnailName(file.name || 'thumbnail');
       pushToast(t('formateur.manage.thumbnailUploadedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setThumbnailUploading(false);
       event.target.value = '';

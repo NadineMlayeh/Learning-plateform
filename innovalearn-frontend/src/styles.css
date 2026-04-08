@@ -3932,31 +3932,31 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
 }
 
 .admin-modal-close {
-  min-width: 30px;
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
-  color: #6b7280;
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: 1;
-  box-shadow: none;
-  transition: background-color 160ms ease, color 160ms ease, opacity 160ms ease;
+  min-width: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: #9ca3af !important;
+  font-size: 1.1rem !important;
+  font-weight: 300 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease !important;
   transform: none !important;
   filter: none !important;
 }
 
 .admin-modal-close:hover,
 .admin-modal-close:focus-visible {
-  background: rgba(107, 114, 128, 0.14);
-  color: #374151;
-  border-radius: 999px;
+  background: rgba(156, 163, 175, 0.08) !important;
+  color: #6b7280 !important;
+  border-radius: 6px !important;
   transform: none !important;
   filter: none !important;
 }
@@ -4332,31 +4332,31 @@ mask-image: linear-gradient(to bottom, black 70%, rgba(0,0,0,0.15) 100%);
 }
 
 .formateur-analytics-modal-close {
-  min-width: 30px;
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
-  color: #6b7280;
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: 1;
-  box-shadow: none;
-  transition: background-color 160ms ease, color 160ms ease, opacity 160ms ease;
+  min-width: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: #9ca3af !important;
+  font-size: 1.1rem !important;
+  font-weight: 300 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease !important;
   transform: none !important;
   filter: none !important;
 }
 
 .formateur-analytics-modal-close:hover,
 .formateur-analytics-modal-close:focus-visible {
-  background: rgba(107, 114, 128, 0.14);
-  color: #374151;
-  border-radius: 999px;
+  background: rgba(156, 163, 175, 0.08) !important;
+  color: #6b7280 !important;
+  border-radius: 6px !important;
   transform: none !important;
   filter: none !important;
 }
@@ -5105,38 +5105,38 @@ code {
 }
 
 .profile-drawer-close {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  padding: 0;
-  background: transparent;
-  color: #6b7280;
-  border: none;
-  box-shadow: none;
-  font-size: 1.15rem;
-  font-weight: 500;
-  line-height: 1;
-  transition: background-color 160ms ease, color 160ms ease;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #9ca3af !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 1.1rem !important;
+  font-weight: 300 !important;
+  line-height: 1 !important;
+  transition: background-color 200ms ease, color 200ms ease !important;
   transform: none !important;
   filter: none !important;
 }
 
 .profile-drawer-close:hover {
-  background: rgba(107, 114, 128, 0.14);
-  color: #374151;
-  border-radius: 999px;
+  background: rgba(156, 163, 175, 0.08) !important;
+  color: #6b7280 !important;
+  border-radius: 6px !important;
   transform: none !important;
   filter: none !important;
 }
 
 .profile-drawer-close:focus-visible {
-  background: rgba(107, 114, 128, 0.14);
-  color: #374151;
-  border-radius: 999px;
+  background: rgba(156, 163, 175, 0.08) !important;
+  color: #6b7280 !important;
+  border-radius: 6px !important;
   transform: none !important;
   filter: none !important;
 }

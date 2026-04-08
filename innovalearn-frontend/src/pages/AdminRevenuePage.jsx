@@ -4,6 +4,8 @@ import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
 import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
+import { useTranslation } from 'react-i18next';
+import { getErrorTranslationKey } from '../errorTranslations';
 
 function money(value) {
   return `${Number(value || 0).toFixed(2)} TND`;
@@ -34,6 +36,7 @@ function MonthlyRevenueChart({ rows }) {
 }
 
 export default function AdminRevenuePage({ pushToast, embedded = false }) {
+  const { t } = useTranslation();
   const user = getCurrentUser();
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
@@ -82,7 +85,8 @@ export default function AdminRevenuePage({ pushToast, embedded = false }) {
       });
       setData(response);
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -109,8 +113,8 @@ export default function AdminRevenuePage({ pushToast, embedded = false }) {
       {!embedded && (
       <div className="card panel-head">
         <div>
-          <h1>Revenue Overview</h1>
-          <p className="hint">All-time revenue, current month revenue, annual monthly trend, and revenue per formation.</p>
+          <h1>{t('admin.revenuePage.title')}</h1>
+          <p className="hint">{t('admin.revenuePage.subtitle')}</p>
         </div>
         <div className="row">
           <Link className="link-btn small-btn" to="/admin">
@@ -131,7 +135,7 @@ export default function AdminRevenuePage({ pushToast, embedded = false }) {
 
       <div className={embedded ? 'card admin-saas-section' : 'card'}>
         <div className="card-head-row">
-          <h2>Revenue Dashboard</h2>
+          <h2>{t('admin.revenuePage.title')}</h2>
           <div className="row">
             <StatusBadge label={`Year ${data.year}`} tone="blue" />
             <select value={year} onChange={(event) => setYear(Number(event.target.value))}>
@@ -146,44 +150,44 @@ export default function AdminRevenuePage({ pushToast, embedded = false }) {
 
         <div className="admin-metric-grid">
           <article className="admin-metric-card">
-            <p className="hint">Total Revenue (All Time)</p>
+            <p className="hint">{t('admin.revenuePage.totalRevenueAllTime')}</p>
             <strong>{money(data.totalRevenue)}</strong>
           </article>
           <article className="admin-metric-card">
-            <p className="hint">Revenue This Month</p>
+            <p className="hint">{t('admin.revenuePage.revenueThisMonth')}</p>
             <strong>{money(data.revenueThisMonth)}</strong>
           </article>
         </div>
 
         <article className="admin-analytics-card">
-          <h3>Monthly Revenue Trend ({data.year})</h3>
+          <h3>{t('admin.revenuePage.monthlyRevenueTrend', { year: data.year })}</h3>
           {loading ? <p className="hint">Loading chart...</p> : <MonthlyRevenueChart rows={data.monthlyRevenue} />}
         </article>
 
         <article className="admin-analytics-card">
-          <h3>Revenue Per Formation</h3>
+          <h3>{t('admin.revenuePage.revenuePerFormation')}</h3>
           <div className="table-toolbar">
             <input
               type="text"
               value={revenueSearch}
               onChange={(event) => setRevenueSearch(event.target.value)}
-              placeholder="Search by formation name"
+              placeholder={t('admin.revenuePage.searchByFormationName')}
             />
             <select
               value={revenueSort}
               onChange={(event) => setRevenueSort(event.target.value)}
             >
-              <option value="highest">Highest Revenue</option>
-              <option value="least">Least Revenue</option>
+              <option value="highest">{t('admin.revenuePage.highestRevenue')}</option>
+              <option value="least">{t('admin.revenuePage.leastRevenue')}</option>
             </select>
           </div>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Formation</th>
-                  <th>Formateur</th>
-                  <th>Revenue</th>
+                  <th>{t('admin.revenuePage.formation')}</th>
+                  <th>{t('admin.revenuePage.instructor')}</th>
+                  <th>{t('admin.revenuePage.revenue')}</th>
                 </tr>
               </thead>
               <tbody>

@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiRequest } from '../api';
 
 const STAR_VALUES = [1, 2, 3, 4, 5];
 
 export default function ContactPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [noteDescription, setNoteDescription] = useState('');
   const [rating, setRating] = useState(0);
@@ -17,15 +19,15 @@ export default function ContactPage() {
     setSuccess('');
 
     if (!email.trim()) {
-      setError('Email is required.');
+      setError(t('contact.emailRequired'));
       return;
     }
     if (!noteDescription.trim()) {
-      setError('Note description is required.');
+      setError(t('contact.noteRequired'));
       return;
     }
     if (rating < 1 || rating > 5) {
-      setError('Please choose a rating between 1 and 5 stars.');
+      setError(t('contact.ratingRequired'));
       return;
     }
 
@@ -39,11 +41,11 @@ export default function ContactPage() {
           rating,
         },
       });
-      setSuccess('Thanks for your feedback. We received your note successfully.');
+      setSuccess(t('contact.successMessage'));
       setNoteDescription('');
       setRating(0);
     } catch (err) {
-      setError(err.message || 'Unable to submit your note right now.');
+      setError(t('contact.submitError'));
     } finally {
       setSubmitting(false);
     }
@@ -61,9 +63,9 @@ export default function ContactPage() {
                 aria-hidden="true"
                 className="contact-heading-icon"
               />
-              <span>Send us your note</span>
+              <span>{t('contact.title')}</span>
             </h1>
-            <p>Share your feedback with our team. We read every message.</p>
+            <p>{t('contact.subtitle')}</p>
           </div>
 
           <form className="contact-form-grid" onSubmit={onSubmit}>
@@ -75,11 +77,11 @@ export default function ContactPage() {
                   aria-hidden="true"
                   className="contact-field-label-icon"
                 />
-                <span>Email</span>
+                <span>{t('contact.email')}</span>
               </span>
               <input
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t('contact.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
@@ -94,10 +96,10 @@ export default function ContactPage() {
                   aria-hidden="true"
                   className="contact-field-label-icon"
                 />
-                <span>Note description</span>
+                <span>{t('contact.noteDescription')}</span>
               </span>
               <textarea
-                placeholder="Write your note..."
+                placeholder={t('contact.notePlaceholder')}
                 value={noteDescription}
                 onChange={(e) => setNoteDescription(e.target.value)}
                 rows={5}
@@ -112,7 +114,7 @@ export default function ContactPage() {
                   aria-hidden="true"
                   className="contact-field-label-icon"
                 />
-                <span>Rate us</span>
+                <span>{t('contact.rateUs')}</span>
               </span>
               <div className="contact-rating" role="radiogroup" aria-label="Rate us">
                 {STAR_VALUES.map((value) => {
@@ -137,7 +139,7 @@ export default function ContactPage() {
 
             <div className="contact-form-actions">
               <button type="submit" className="contact-submit-btn" disabled={submitting}>
-                {submitting ? 'Sending...' : 'Send note'}
+                {submitting ? t('contact.submittingButton') : t('contact.submitButton')}
               </button>
             </div>
           </form>

@@ -6,6 +6,7 @@ import ProfileSidebar from '../components/ProfileSidebar';
 import StatusBadge from '../components/StatusBadge';
 import LoadingButton from '../components/LoadingButton';
 import { useTranslation } from 'react-i18next';
+import { getErrorTranslationKey } from '../errorTranslations';
 import {
   hasLocalTourDone,
   markTourSeen,
@@ -310,7 +311,8 @@ export default function AdminDashboardPage({ pushToast }) {
       await loadAnalytics();
       pushToast(t('formateur.manage.formationPublishedSuccess'), 'success');
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setPublishingId(null);
     }

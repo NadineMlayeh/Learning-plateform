@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { apiRequest } from '../api';
 import { getCurrentUser } from '../auth';
 import { useTranslation } from 'react-i18next';
+import { getErrorTranslationKey } from '../errorTranslations';
 
 export default function AdminAddCoursePage({ pushToast }) {
   const { t } = useTranslation();
@@ -25,7 +26,8 @@ export default function AdminAddCoursePage({ pushToast }) {
       pushToast(t('formateur.manage.courseCreatedSuccess'), 'success');
       navigate(`/formateur/formations/${formationId}`);
     } catch (err) {
-      pushToast(err.message, 'error');
+      const errorKey = getErrorTranslationKey(err.message);
+      pushToast(errorKey ? t(`formateur.manage.errors.${errorKey}`) : err.message, 'error');
     } finally {
       setIsSubmitting(false);
     }
