@@ -11191,7 +11191,7 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page .confir
   display: block;
   flex: 1 1 0;
   min-height: 0;
-  height: 100%;
+  height: calc(100vh - var(--topbar-height));
   overflow: hidden;
   max-width: none;
   width: 100%;
@@ -11290,7 +11290,7 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page {
   margin-left: 270px;
   padding: 0 18px;
   background: #f0f5fc !important;
-  height: 100%;
+  height: calc(100vh - var(--topbar-height));
   overflow: hidden;
 }
 
@@ -11305,13 +11305,16 @@ body.backoffice-palette-active .formateur-dashboard-page.admin-skin-page {
   flex: 1 1 0;
   min-height: 0;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;
   display: grid;
   gap: 18px;
   align-content: start;
   padding: 18px 0 24px 0;
   scrollbar-width: thin;
   scrollbar-color: rgba(140, 180, 230, 0.35) transparent;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-saas-profile {
@@ -11716,6 +11719,9 @@ body.backoffice-palette-active .container .admin-saas-quick-actions .link-btn:fo
   display: grid;
   gap: 12px;
   background: var(--admin-surface-bg) !important;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 body.backoffice-palette-active .admin-skin-page .admin-saas-sidebar,
@@ -13817,6 +13823,87 @@ body .notebook-modal-panel .notebook-checkbox::after {
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
+  }
+}
+
+/* ==========================================================================
+   Admin fixed shell hard-lock (desktop)
+   Keeps navbar + sidebar + admin header fixed and only data area scrollable
+   ========================================================================== */
+@media (min-width: 1181px) {
+  .app-shell-admin {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .app-shell-admin > main {
+    overflow: hidden;
+  }
+
+  .app-shell-admin > main.admin-layout-main {
+    margin: var(--topbar-height) 0 0 0 !important;
+    height: calc(100vh - var(--topbar-height)) !important;
+    max-height: calc(100vh - var(--topbar-height)) !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+  }
+
+  .app-shell-admin .admin-saas-page {
+    display: flex !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .app-shell-admin .admin-saas-sidebar {
+    position: fixed !important;
+    top: calc(var(--topbar-height) + 10px) !important;
+    bottom: 10px !important;
+  }
+
+  .app-shell-admin .admin-saas-main {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .app-shell-admin .admin-saas-top-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 8 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .app-shell-admin .admin-saas-scrollable {
+    display: block !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .app-shell-admin .admin-saas-scrollable > * + * {
+    margin-top: 18px;
+  }
+
+  .app-shell-admin .admin-saas-section,
+  .app-shell-admin .admin-saas-scrollable .admin-saas-section.card {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  .app-shell-admin .admin-saas-section > * + * {
+    margin-top: 12px;
   }
 }
 
