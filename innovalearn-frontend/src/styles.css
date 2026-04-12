@@ -13870,6 +13870,7 @@ body .notebook-modal-panel .notebook-checkbox::after {
     max-height: 100% !important;
     min-height: 0 !important;
     overflow: hidden !important;
+    padding-bottom: 10px !important;
   }
 
   .app-shell-admin .admin-saas-top-header {
@@ -13877,17 +13878,27 @@ body .notebook-modal-panel .notebook-checkbox::after {
     top: 0 !important;
     z-index: 8 !important;
     flex-shrink: 0 !important;
+    box-shadow: 0 10px 18px -16px rgba(19, 47, 88, 0.42) !important;
   }
 
-  .app-shell-admin .admin-saas-scrollable {
-    display: block !important;
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-  }
+.app-shell-admin .admin-saas-scrollable {
+  display: block !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  margin-top: 20px !important;
+  background: transparent; 
+  border-top: 1px solid rgba(177, 197, 223, 0.46) !important;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  padding-top: 20px !important;
+  padding-bottom: 10px !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
 
   .app-shell-admin .admin-saas-scrollable > * + * {
     margin-top: 18px;

@@ -70,9 +70,7 @@ function normalizeCourseResultFromFinalize(result) {
 
 function ResultPopup({ result, onClose }) {
   const { t } = useTranslation();
-  if (!result) return null;
-
-  const passed = Boolean(result.passed);
+  const passed = Boolean(result?.passed);
 
   useEffect(() => {
     if (!passed || !result) return undefined;
@@ -139,6 +137,8 @@ function ResultPopup({ result, onClose }) {
       canvas.remove();
     };
   }, [passed, result]);
+
+  if (!result) return null;
 
   return (
     <div className="result-modal-backdrop" onClick={onClose}>
