@@ -4,18 +4,20 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 
 async function bootstrap() {
-  // 👇 Tell Nest this is an Express-based app
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // 🔹 Enable CORS so React frontend can call backend
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5173',
+  ].filter((origin): origin is string => Boolean(origin));
+
   app.enableCors({
-    origin: 'http://localhost:5173', // your React dev server URL
-    credentials: true,               // allow cookies (optional)
+    origin: allowedOrigins,
+    credentials: true,
   });
 
-  // 🔹 Serve uploads folder statically
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads', // optional: access via /uploads/filename
+    prefix: '/uploads',
   });
 
   await app.listen(process.env.PORT ?? 3000);

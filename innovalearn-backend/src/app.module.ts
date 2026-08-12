@@ -55,7 +55,7 @@ import { ContactModule } from './contact/contact.module';
     NotebookModule,
     ContactModule,
   ],
-  controllers: [TestController],
+  controllers: [AppController, TestController],
   providers: [AppService],
 })
 export class AppModule {}
