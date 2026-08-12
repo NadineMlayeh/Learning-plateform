@@ -64,6 +64,10 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
+    if (dto.role === Role.ADMIN) {
+      throw new BadRequestException('Admin accounts cannot be created from signup');
+    }
+
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const hasDateOfBirth = Boolean(dto.dateOfBirth);
 

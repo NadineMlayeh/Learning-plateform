@@ -126,7 +126,6 @@ export default function SignupPage() {
             <select name="role" value={form.role} onChange={updateField}>
               <option value="STUDENT">{t('signup.roleStudent')}</option>
               <option value="FORMATEUR">{t('signup.roleFormateur')}</option>
-              <option value="ADMIN">{t('signup.roleAdmin')}</option>
             </select>
           </label>
 
