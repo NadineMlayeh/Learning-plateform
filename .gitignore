@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.env.*
+innovalearn-backend/node_modules
+innovalearn-backend/dist
+innovalearn-backend/uploads
+innovalearn-backend/.env
+
+innovalearn-frontend/node_modules
+innovalearn-frontend/dist
+innovalearn-frontend/.env
