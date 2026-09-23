@@ -1,106 +1,276 @@
 # 🚀 Innova Learn Platform
 
-A full-stack educational platform for teaching kids robotics, soft skills, and development through interactive courses and bootcamps.
+> A full-stack educational platform for interactive learning, course management, and student progress tracking.
 
-📚 Overview
+### 🌐 [View Live Platform](https://learning-plateform-nu.vercel.app/)
 
-Innova Learn Platform provides an interactive and organized learning experience for children of different ages.
-Formateurs (teachers) can create and manage courses, while students learn, complete exercises, and earn badges and certificates.
-Admins oversee the system, validate payments, and monitor progress.
+---
 
-✨ Features
-🧑‍🎓 Student
+## 📚 About the Project
 
-Enroll in formations and courses
+**Innova Learn** is a full-stack educational platform designed to help children learn **robotics, development, and soft skills** through structured courses and bootcamps.
 
-Access lesson content (videos, PDFs)
+The platform provides dedicated experiences for **students, formateurs, and administrators**, covering the complete learning journey — from enrollment and lesson delivery to exercises, progress tracking, badges, and certificates.
 
-Complete QCM exercises and unlock roadmap levels
+### Learning Journey
 
-Earn badges 🏅 and certificates 🎓
+**Enroll → Learn → Practice → Progress → Earn Badges → Get Certified**
 
-👩‍🏫 Formateur
+---
 
-Create & manage formations and courses
+## ✨ Features
 
-Upload lesson content (video/PDF)
+### 🧑‍🎓 Student
 
-Add QCM exercises
+Students can:
 
-Track student progress 📊
+- Browse and enroll in available formations
+- Access structured courses and lessons
+- Watch educational videos and access PDF resources
+- Complete QCM exercises
+- Progress through roadmap levels
+- Track their learning progress
+- Earn badges for achievements
+- Receive certificates after completing formations
 
-🛠️ Admin
+### 👩‍🏫 Formateur
 
-Manage users (students & formateurs)
+Formateurs can:
 
-Validate payments 💰
+- Create and manage formations
+- Create courses and organize lessons
+- Upload educational content such as videos and PDFs
+- Create and manage QCM exercises
+- Track student progress and performance
 
-View platform statistics 📈
+### 🛠️ Admin
 
-👥 Users & Roles
-Role	Permissions
-Admin	Full access to manage users, validate payments, monitor stats
-Formateur	Create/manage courses, upload content, add exercises
-Student	Enroll in courses, complete lessons & exercises, earn badges & certificates
-🖥️ Tech Stack
+Administrators can:
 
-Frontend: React (Vite) ⚛️
+- Manage students and formateurs
+- Monitor formations and platform activity
+- Validate student payments
+- Access platform statistics
+- Supervise the overall learning ecosystem
 
-Backend: NestJS 🏗️
+---
 
-Database: PostgreSQL / MySQL 🗄️
+## 👥 Roles & Permissions
 
-Authentication: JWT 🔒
+| Role | Main Permissions |
+|------|------------------|
+| **Admin** | Manage users, validate payments, supervise formations, monitor statistics |
+| **Formateur** | Create and manage formations, courses, lessons and exercises; monitor students |
+| **Student** | Enroll in formations, access lessons, complete exercises, track progress, earn badges and certificates |
 
-Deployment: Vercel (frontend) + Render (backend) 🌐
+---
 
-CI/CD: GitHub Actions 🤖
+## 🖥️ Tech Stack
 
-Optional: Docker 🐳
+### Frontend
 
-📂 Project Structure
+- **React**
+- **Vite**
+- JavaScript / TypeScript
+- Responsive web interface
+
+### Backend
+
+- **NestJS**
+- REST API
+- JWT authentication
+- Role-based access control
+
+### Database
+
+- **PostgreSQL / MySQL**
+- **Prisma ORM**
+
+### Deployment & DevOps
+
+- **Vercel** — Frontend deployment
+- **Render** — Backend deployment
+- **GitHub Actions** — CI/CD
+- **Docker** — Optional containerization
+
+---
+
+## 🗂️ Main Domain Entities
+
+The platform is built around the following core entities:
+
+- Users
+- Formations
+- Courses
+- Lessons
+- QCM Exercises
+- Payments
+- Badges
+- Certificates
+- Student Progress
+
+### Platform Flow
+
+```text
+Student
+   │
+   ▼
+Enrollment
+   │
+   ▼
+Formation
+   │
+   ├── Courses
+   │      └── Lessons
+   │             ├── Videos / PDFs
+   │             └── QCM Exercises
+   │
+   ▼
+Progress Tracking
+   │
+   ├── Badges
+   └── Certificates
+```
+
+---
+
+## 📂 Project Structure
+
+```text
 innova/
-├─ frontend/           # React application
-├─ innovabackend/      # NestJS backend with API endpoints
-├─ prisma/             # Database schema & migrations
-├─ scripts/            # Utility scripts
-└─ README.md
+│
+├── frontend/          # React + Vite frontend application
+├── innovabackend/     # NestJS backend and REST API
+├── prisma/            # Database schema and migrations
+├── scripts/           # Utility scripts
+└── README.md
+```
 
+---
 
-Roles: Admin, Formateur, Student
+## ⚡ Getting Started
 
-Entities: Users, Formations, Courses, Lessons, QCM Exercises, Payments, Badges, Certificates
+### 1. Clone the Repository
 
-Flow: Students enroll → complete courses → progress tracked → badges/certificates awarded
-
-⚡ Getting Started
-1️⃣ Clone the repo
+```bash
 git clone https://github.com/NadineMlayeh/Learning-plateform.git
 cd Learning-plateform
+```
 
-2️⃣ Backend setup
+### 2. Backend Setup
+
+```bash
 cd innovabackend
 npm install
-# configure .env for DB connection
-npm run start:dev
+```
 
-3️⃣ Frontend setup
+Configure the required environment variables in your `.env` file, including the database connection and JWT configuration.
+
+Then start the development server:
+
+```bash
+npm run start:dev
+```
+
+Backend API:
+
+```text
+http://localhost:3000
+```
+
+### 3. Frontend Setup
+
+From the project root:
+
+```bash
 cd frontend
 npm install
 npm run dev
+```
 
-4️⃣ Access platform
+Frontend:
 
-Frontend: http://localhost:5173
+```text
+http://localhost:5173
+```
 
-Backend API: http://localhost:3000
+---
 
-🚀 Future Improvements
+## 🔐 Authentication & Authorization
 
-Integrate online payment gateway for automatic validation 💳
+Authentication is handled using **JWT (JSON Web Tokens)**.
 
-Add analytics dashboards for admin & formateurs 📊
+The platform implements **role-based access control**, with functionality available according to the authenticated user's role.
 
-Implement attendance tracking & notifications 🔔
+```text
+Admin
+├── User management
+├── Payment validation
+└── Platform monitoring
 
-Add more gamification elements for students 🎮
+Formateur
+├── Formation management
+├── Course & lesson management
+├── QCM management
+└── Student progress tracking
+
+Student
+├── Course enrollment
+├── Lesson access
+├── QCM completion
+├── Progress tracking
+└── Badges & certificates
+```
+
+---
+
+## 🚀 Deployment
+
+The application follows a separated frontend/backend architecture:
+
+```text
+React Frontend
+      │
+      │ REST API
+      ▼
+NestJS Backend
+      │
+      ▼
+   Database
+```
+
+- **Frontend:** Vercel
+- **Backend:** Render
+- **CI/CD:** GitHub Actions
+
+### 🌐 Live Application
+
+**[https://learning-plateform-nu.vercel.app/](https://learning-plateform-nu.vercel.app/)**
+
+---
+
+## 🔮 Future Improvements
+
+- Integrate an online payment gateway
+- Add advanced analytics dashboards for admins and formateurs
+- Implement attendance tracking
+- Add email and in-app notifications
+- Expand student gamification
+- Introduce additional badges and achievement levels
+- Improve reporting and progress analytics
+- Enhance course and student management tools
+
+---
+
+## 🎯 Project Goal
+
+**Innova Learn** aims to combine **education, progress tracking, and gamification** in a single platform.
+
+The goal is to provide students with a clear and engaging learning journey while giving formateurs and administrators the tools they need to efficiently manage educational content and monitor student progress.
+
+---
+
+## 🔗 Links
+
+- **Live Platform:** [Innova Learn](https://learning-plateform-nu.vercel.app/)
+- **GitHub Repository:** [Learning-plateform](https://github.com/NadineMlayeh/Learning-plateform)
